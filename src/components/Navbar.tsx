@@ -4,7 +4,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ModeToggle } from './mode-toggle'
 
 const navigation = [
-  { name: 'Início', href: '#' },
+  { name: 'Incio', href: '#' },
   { name: 'Sobre', href: '#' },
   { name: 'Projetos', href: '#' },
   { name: 'Contato', href: '#' },
