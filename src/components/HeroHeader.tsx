@@ -6,7 +6,7 @@ export default function HeroHeader() {
 
   return (
 
-    <div className="relative isolate px-6 pt-14 lg:px-8">
+    <div className="relative isolate px-6 pt-32 lg:px-8">
 
       <div
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -24,10 +24,10 @@ export default function HeroHeader() {
 
         <div className="text-center md:text-left ">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            Frontend Dev
+            Front-End Dev
           </h1>
           <p className="mt-6 text-lg leading-8 ">
-            Olá, eu sou o Matheus. Um dev apaixonado por frontend e por UI/UX.<br />
+            Olá, eu sou o Matheus. Um dev apaixonado por Front-End e por UI/UX.<br />
             Pode me encontrar por aí em SP - Brasil.
           </p>
           <div className="mt-10 flex items-center md:justify-start justify-center gap-x-6">
