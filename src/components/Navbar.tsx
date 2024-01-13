@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ModeToggle } from './mode-toggle'
@@ -12,14 +12,28 @@ const navigation = [
 
 export default function Example() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
     <div>
       <header className="absolute inset-x-0 top-0 z-50">
-        <nav className="flex items-center justify-between p-2 lg:px-8 fixed w-full top-0 left-0 bg-white dark:bg-slate-900 drop-shadow-md" aria-label="Global">
+        <nav className={`${isScrolled ? 'bg-white dark:bg-slate-900' : 'bg-transparent'} flex items-center justify-between p-2 lg:px-8 fixed w-full top-0 left-0 transition-colors duration-300 ease-in-out`}  aria-label="Global">
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5">
-              <h1 className="font-bold text-xl">dinamous.<span className='text-sky-500'>dev</span>
+              <h1 className="font-bold text-xl">dinamous.<span className='text-emerald-500'>dev</span>
               </h1>
             </a>
           </div>
@@ -37,7 +51,7 @@ export default function Example() {
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
             {navigation.map((item) => (
-              <a key={item.name} href={item.href} className="text-sm font-semibold leading-6">
+              <a key={item.name} href={item.href} className="text-sm mx-2 font-semibold leading-6 text-shadow hover:shadow-emerald-300 ">
                 {item.name}
               </a>
             ))}
