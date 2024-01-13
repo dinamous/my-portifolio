@@ -1,15 +1,15 @@
-
-import './App.css'
+import { ThemeProvider } from "@/components/theme-provider"
+import { Button } from "./components/ui/button"
+import { ModeToggle } from "./components/mode-toggle"
 
 function App() {
-  
   return (
-    <>
-      <div>
-      olá
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <div className="container mx-auto">
+      <ModeToggle></ModeToggle>
       </div>
-    
-    </>
+      
+    </ThemeProvider>
   )
 }
 
