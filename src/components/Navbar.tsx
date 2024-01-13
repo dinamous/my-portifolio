@@ -4,7 +4,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ModeToggle } from './mode-toggle'
 
 const navigation = [
-  { name: 'Incio', href: '#' },
+  { name: 'Início', href: '#' },
   { name: 'Sobre', href: '#' },
   { name: 'Projetos', href: '#' },
   { name: 'Contato', href: '#' },
@@ -16,7 +16,7 @@ export default function Example() {
   return (
     <div>
       <header className="absolute inset-x-0 top-0 z-50">
-        <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+        <nav className="flex items-center justify-between p-2 lg:px-8 fixed w-full top-0 left-0 bg-white dark:bg-slate-900 drop-shadow-md" aria-label="Global">
           <div className="flex lg:flex-1">
             <a href="#" className="-m-1.5 p-1.5">
               <h1 className="font-bold text-xl">dinamous.<span className='text-sky-500'>dev</span>

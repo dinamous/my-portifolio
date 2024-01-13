@@ -18,8 +18,9 @@ export default function HeroHeader() {
         />
       </div>
       <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56 flex flex-1  flex-col justify-around md:flex-row md:gap-8">
-        <div className="flex justify-center">
+        <div className="flex justify-around flex-col items-center ">
           <img src={Avatar} alt="dinamous avatar" className="w-28 h-28 md:w-44 md:h-44" />
+          <p className="font-bold text-shadow shadow-emerald-300"> @dinamous</p>
         </div>
 
         <div className="text-center md:text-left ">
