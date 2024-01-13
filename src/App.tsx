@@ -1,13 +1,12 @@
 import { ThemeProvider } from "@/components/theme-provider"
-import { Button } from "./components/ui/button"
-import { ModeToggle } from "./components/mode-toggle"
+import Navbar from "./components/Navbar"
+import HeroHeader from "./components/HeroHeader"
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div className="container mx-auto">
-      <ModeToggle></ModeToggle>
-      </div>
+      <Navbar></Navbar>
+      
       
     </ThemeProvider>
   )
