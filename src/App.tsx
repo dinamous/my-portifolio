@@ -4,6 +4,7 @@ import HeroHeader from "./components/HeroHeader"
 import AboutMe from "./components/AboutMe"
 import Footer from "./components/Footer"
 import Contact from "./components/Contact"
+import MyStack from "./components/MyStack"
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Navbar></Navbar>
       <HeroHeader></HeroHeader>
+      <MyStack></MyStack>
       <AboutMe></AboutMe>
 
       <Contact></Contact>
