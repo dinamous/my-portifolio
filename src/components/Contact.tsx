@@ -9,7 +9,7 @@ export default function Contact() {
       </div>
         
       <div className="mx-auto max-w-4xl flex items-center flex-col md:flex-row justify-between gap-4 md:px-12 mt-8">   
-        <div className="flex items-center justify-around gap-4 p-4 outline-2 outline-double rounded-md outline-gray-700 dark:bg-slate-800 bg-slate-300">
+        <div className="flex items-center justify-around gap-4 p-4 outline-1 outline-double rounded-md outline-gray-300 dark:outline-none dark:bg-slate-800 bg-slate-200">
             <div className="flex items-center justify-center rounded-full ">
               <HomeIcon height={24} width={24}></HomeIcon>
             </div>
@@ -18,7 +18,7 @@ export default function Contact() {
               <p className="text-sm">SP - Brasil</p>
             </div>
         </div>
-        <div className="flex items-center justify-around gap-4 p-4 outline-2 outline-double rounded-md outline-gray-700 dark:bg-slate-800 bg-slate-300">
+        <div className="flex items-center justify-around gap-4 p-4 outline-1 outline-double rounded-md outline-gray-300 dark:outline-none dark:bg-slate-800 bg-slate-200">
             <div className="flex items-center justify-center rounded-full ">
               <EnvelopeClosedIcon height={24} width={24}></EnvelopeClosedIcon>
             </div>

@@ -91,8 +91,8 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "blob-top": "blob-top 10s infinite ease-out",
-        "blob-bottom": "blob-bottom 10s infinite ease-out",
+        "blob-top": "blob-top 5s infinite ease-out",
+        "blob-bottom": "blob-bottom 5s infinite ease-out",
       },
     },
   },
