@@ -2,6 +2,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "./components/Navbar"
 import HeroHeader from "./components/HeroHeader"
 import AboutMe from "./components/AboutMe"
+import Footer from "./components/Footer"
 
 function App() {
   return (
@@ -10,6 +11,8 @@ function App() {
       <Navbar></Navbar>
       <HeroHeader></HeroHeader>
       <AboutMe></AboutMe>
+
+      <Footer></Footer>
     </ThemeProvider>
    </div>
   )

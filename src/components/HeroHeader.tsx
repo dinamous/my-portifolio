@@ -33,7 +33,6 @@ export default function HeroHeader() {
           </p>
           <div className="mt-10 flex items-center md:justify-start justify-center gap-x-6">
             <Button variant={"secondary"} >
-
               <a href="https://www.linkedin.com/in/dinamous/" target="_blank">
                 <LinkedInLogoIcon />
               </a>
