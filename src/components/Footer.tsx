@@ -4,10 +4,10 @@ import { Button } from "./ui/button";
 export default function Footer() {
 
   return (
-    <div className="relative py-16 z-auto bg-slate-900">
-       <div className="mx-auto max-w-4xl flex flex-1 items-center flex-col justify-around md:flex-row gap-8">
-        <p className="text-sm font-bold text-white dark:text-white">Copyright © 2024. All rights are reserved</p>
-        <div className="flex  gap-10">
+    <div className="relative py-16 z-auto dark:bg-slate-700 bg-gray-300">
+       <div className="mx-auto max-w-4xl flex flex-1 items-center flex-col justify-between md:flex-row gap-8 md:px-12">
+        <p className="text-sm font-bold  dark:text-white">Copyright © 2024. All rights are reserved</p>
+        <div className="flex gap-10">
             <Button variant={"secondary"} >
               <a href="https://www.linkedin.com/in/dinamous/" target="_blank">
                 <LinkedInLogoIcon />
