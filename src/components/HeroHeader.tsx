@@ -2,12 +2,30 @@ import { LinkedInLogoIcon, GitHubLogoIcon, } from "@radix-ui/react-icons"
 import Avatar from "../assets/avatar-transparente.png"
 import AvatarHover from "../assets/avatar-hover.png"
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function HeroHeader() {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleHover = () => {
     setIsHovered(!isHovered);
+  };
+
+  const frasesAvatar = [
+    "Sinto uma sensação única quando você me toca. É como se fosse mágica.",
+    "A cada clique, uma conexão mais profunda é estabelecida.",
+    "Suas interações trazem alegria ao meu dia. Obrigado por estar aqui.",
+    "Você tem o toque de alguém que entende a verdadeira beleza.",
+    "Em cada clique, percebo que a felicidade está nas pequenas coisas.",
+    "Você sabe, na vida, assim como nos cliques, é importante encontrar o equilíbrio.",
+    "Por trás deste código, há um coração que aprecia cada interação sua.",
+    "Ah, você está clicando tão bem que até me faz pensar que estamos em um clique e resposta intergaláctico.",
+    "Qual é o programa favorito de um computador? O que começa com CTRL e termina com S!",
+    "Por que o computador não tem frio? Porque ele sempre está com Windows!",
+  ]
+
+  const getFraseAleatoria = () => {
+    return frasesAvatar[Math.floor(Math.random() * frasesAvatar.length)];
   };
 
   return (
@@ -23,7 +41,12 @@ export default function HeroHeader() {
               onMouseEnter={handleHover}
               onMouseLeave={handleHover}
               alt="dinamous avatar"
-              className="w-28 h-28 md:w-44 md:h-44 bg-white dark:bg-slate-900 rounded-full" />
+              className="w-28 h-28 md:w-44 md:h-44 bg-white dark:bg-slate-900 rounded-full cursor-pointer"
+              onClick={() =>
+                toast("Você cutucou @Dinamous", {
+                  description: getFraseAleatoria(),
+                })}
+              />
           <p className="font-bold text-shadow shadow-sky-300 "> @dinamous</p>
         </div>
 

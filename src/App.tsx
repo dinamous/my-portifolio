@@ -5,6 +5,7 @@ import AboutMe from "./components/AboutMe"
 import Footer from "./components/Footer"
 import Contact from "./components/Contact"
 import MyStack from "./components/MyStack"
+import { Toaster } from "./components/ui/sonner"
 
 function App() {
   return (
@@ -17,6 +18,8 @@ function App() {
 
       <Contact></Contact>
       <Footer></Footer>
+      <Toaster />
+
     </ThemeProvider>
    </div>
   )
