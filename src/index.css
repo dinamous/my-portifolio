@@ -33,6 +33,12 @@
     --ring: 222.2 84% 4.9%;
  
     --radius: 0.5rem;
+    --selection: #C9C6F8
+
+    --scroll-bg: #1f2937;
+    --scroll-track: #111827;
+    --scroll-thumb: #1e293b;
+    --scroll-thumb-hover:#334155
   }
  
   .dark {
@@ -63,6 +69,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
   }
 }
  
@@ -73,4 +80,66 @@
   body {
     @apply bg-background text-foreground;
   }
+
+
+}
+
+@layer utilities{
+
+  ::selection {
+    background: #cbd5e1;
+    color:black
+  }
+
+  .animation-delay-2000{
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000{
+    animation-delay: 4s;
+  }
+
+  * {
+  scrollbar-width: thin;
+}
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+  height: 5px;
+  width: 10px;
+}
+*::-webkit-scrollbar-track {
+  border-radius: 3px;
+  background-color: var(--scroll-bg);
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+*::-webkit-scrollbar-track:hover {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-track:active {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background-color: var(--scroll-thumb);
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-thumb-hover);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color:  var(--scroll-thumb-hover);
+}
+
 }

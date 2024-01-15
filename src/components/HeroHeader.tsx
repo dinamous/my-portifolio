@@ -1,26 +1,30 @@
 import { LinkedInLogoIcon, GitHubLogoIcon, } from "@radix-ui/react-icons"
-import Avatar from "../assets/Cute Avatar.png"
-import { Button } from "./ui/button"
+import Avatar from "../assets/avatar-transparente.png"
+import AvatarHover from "../assets/avatar-hover.png"
+import { useState } from "react";
 
 export default function HeroHeader() {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleHover = () => {
+    setIsHovered(!isHovered);
+  };
 
   return (
-
-    <div className="relative isolate px-6 pt-32 lg:px-8">
-
-      <div
-        className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
-        aria-hidden="true"
-      >
-        <div
-          className="animate-blob-top relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr dark:from-[#f292ff] dark:to-[#89fcfc] from-[#8084ff] to-[#0ce74a] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-
-        />
-      </div>
+    <div className="isolate px-6 sm:pt-32 lg:px-8">
+      <div className="absolute -z-10 inset-x-0 overflow-hidden animate-blob  mix-blend-multiply filter blur-3xl opacity-70 top-[10vh] left-[5vw]  w-[14rem] sm:w-[36rem] aspect-[1/1] bg-[#ff80b5] rounded-full rotate-45"></div>
+      <div className="absolute -z-10 inset-x-0 overflow-hidden animate-blob  mix-blend-multiply filter blur-3xl opacity-70 top-[0vh] left-[10vw]  w-[14rem] sm:w-[20rem] aspect-[1/1] bg-[#dbff80] rounded-full animation-delay-4000 rotate-45"></div>
+      <div className="absolute -z-10 inset-x-0 overflow-hidden animate-blob  mix-blend-multiply filter blur-3xl opacity-70 top-[5vh] left-[25vw]  w-[10rem] sm:w-[28rem] aspect-[1/1] bg-[#9089fc] rounded-full animation-delay-2000 "></div>
+      <div className="absolute -z-10 inset-x-0 overflow-hidden animate-blob  mix-blend-multiply filter blur-3xl opacity-70 top-[30vh] left-[25vw]  w-[15rem] sm:w-[34rem] aspect-[1/1] bg-[#89fcfc] rounded-full animation-delay-4000 rotate-90"></div>
+          
       <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56 flex flex-1  flex-col justify-around md:flex-row md:gap-8">
-        <div className="flex justify-around flex-col items-center ">
-          <img src={Avatar} alt="dinamous avatar" className="w-28 h-28 md:w-44 md:h-44" />
-          <p className="font-bold text-shadow shadow-emerald-300"> @dinamous</p>
+        <div className="flex justify-around flex-col items-center py-4 ">
+          <img src={ isHovered ? AvatarHover : Avatar }
+              onMouseEnter={handleHover}
+              onMouseLeave={handleHover}
+              alt="dinamous avatar"
+              className="w-28 h-28 md:w-44 md:h-44 bg-white dark:bg-slate-900 rounded-full" />
+          <p className="font-bold text-shadow shadow-sky-300 "> @dinamous</p>
         </div>
 
         <div className="text-center md:text-left ">
@@ -32,29 +36,15 @@ export default function HeroHeader() {
             Pode me encontrar por aí em SP - Brasil.
           </p>
           <div className="mt-10 flex items-center md:justify-start justify-center gap-x-6">
-            <Button variant={"secondary"} >
-              <a href="https://www.linkedin.com/in/dinamous/" target="_blank">
+            
+              <a href="https://www.linkedin.com/in/dinamous/" target="_blank" className="px-4 py-3 bg-white dark:bg-slate-900 rounded-lg shadow drop-shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
                 <LinkedInLogoIcon height={24} width={24}/>
               </a>
-            </Button>
-            <Button variant={"secondary"}>
-              <a href="https://github.com/dinamous" target="_blank">
+              <a href="https://github.com/dinamous" target="_blank" className="px-4 py-3 bg-white dark:bg-slate-900 rounded-lg shadow drop-shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
                 <GitHubLogoIcon height={24} width={24}/>
               </a>
-            </Button>
           </div>
         </div>
-      </div>
-
-
-      <div
-        className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
-        aria-hidden="true"
-      >
-        <div
-          className="animate-blob-bottom relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#b780ff] to-[#0ce74a] dark:from-[#ff80b5] dark:to-[#9089fc] dark:opacity-30 opacity-60 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-
-        />
       </div>
     </div>
 
