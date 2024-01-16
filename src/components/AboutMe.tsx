@@ -13,7 +13,7 @@ export default function AboutMe() {
 
   return (
 
-    <div className="relative mx-auto  py-32 sm:py-48 lg:py-56 flex flex-1  justify-around  z-auto">
+    <section id="sobre" className="relative mx-auto  py-32 sm:py-48 lg:py-56 flex flex-1  justify-around  z-auto">
       <Card className="bg-white dark:bg-slate-900">
         <CardHeader>
           <CardTitle>Sobre mim</CardTitle>
@@ -32,7 +32,7 @@ export default function AboutMe() {
         </CardContent>
         
       </Card>
-    </div>
+    </section>
    
 
   )

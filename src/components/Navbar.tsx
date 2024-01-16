@@ -4,15 +4,19 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { ModeToggle } from './mode-toggle'
 
 const navigation = [
-  { name: 'Início', href: '#' },
-  { name: 'Sobre', href: '#' },
-  { name: 'Projetos', href: '#' },
-  { name: 'Contato', href: '#' },
+  { name: 'Início', href: '#inicio' },
+  { name: 'Sobre', href: '#sobre' },
+  { name: 'Projetos', href: '#projetos' },
+  { name: 'Contato', href: '#contato' },
 ]
 
 export default function Example() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const pageUp = () => {
+    window.scrollTo({ top: (0), behavior: "smooth" });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,15 +34,13 @@ export default function Example() {
   return (
     <div>
       <header className="absolute inset-x-0 top-0 z-50">
-        <nav className={`${isScrolled ? 'bg-white shadow dark:bg-slate-900' : 'bg-transparent'} flex items-center justify-between p-2 lg:px-8 fixed w-full top-0 left-0 transition-colors duration-300 ease-in-out`}  aria-label="Global">
+        <nav className={`${isScrolled ? 'bg-white shadow dark:bg-slate-900' : 'bg-transparent'} flex items-center justify-between p-2 lg:px-8 fixed w-full top-0 left-0 transition-colors duration-300 ease-in-out`} aria-label="Global">
           <div className="flex lg:flex-1">
-            <a href="#" className="-m-1.5 p-1.5">
-              <h1 className="font-bold text-xl">dinamous.<span className='text-sky-500'>dev</span>
-              </h1>
-            </a>
+            <h1 className="font-bold text-xl cursor-pointer" onClick={pageUp}>dinamous.<span className='text-sky-500'>dev</span>
+            </h1>
           </div>
 
-           {/* navbar mobile */}
+          {/* navbar mobile */}
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -51,24 +53,26 @@ export default function Example() {
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
             {navigation.map((item) => (
-              <a key={item.name} href={item.href} className="text-md mx-2 font-semibold leading-6 text-shadow hover:shadow-emerald-300 ">
+
+              <a key={item.name} href={item.href} className="text-md mx-2 font-semibold leading-6 text-shadow hover:shadow-emerald-300 " >
                 {item.name}
               </a>
+
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <ModeToggle></ModeToggle>
           </div>
-           {/* fim navbar mobile */}
+          {/* fim navbar mobile */}
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
           <div className="fixed inset-0 z-50" />
           <Dialog.Panel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
             <div className="flex items-center justify-between">
-            <a href="#" className="-m-1.5 p-1.5 lg:hidden md:hidden">
-              <h1 className="font-bold text-xl">dinamous.<span className='text-sky-500'>dev</span>
-              </h1>
-            </a>
+              <a href="#" className="-m-1.5 p-1.5 lg:hidden md:hidden">
+                <h1 className="font-bold text-xl">dinamous.<span className='text-sky-500'>dev</span>
+                </h1>
+              </a>
               <button
                 type="button"
                 className="-m-2.5 rounded-md p-2.5 "
@@ -82,17 +86,20 @@ export default function Example() {
               <div className="-my-6 divide-y divide-gray-500/10">
                 <div className="space-y-2 py-6">
                   {navigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-gray-50 dark:hover:bg-gray-950"
-                    >
-                      {item.name}
-                    </a>
+                    <button type="button" key={item.name} className='-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-gray-50 dark:hover:bg-gray-950'>
+                      <a
+                        onClick={() => setMobileMenuOpen(false)}
+                        href={item.href}
+
+                      >
+                        {item.name}
+                      </a>
+                    </button>
+
                   ))}
                 </div>
                 <div className="py-6">
-                <ModeToggle></ModeToggle>
+                  <ModeToggle></ModeToggle>
                 </div>
               </div>
             </div>
@@ -100,7 +107,7 @@ export default function Example() {
         </Dialog>
       </header>
 
-      
+
     </div>
   )
 }

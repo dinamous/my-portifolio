@@ -86,6 +86,8 @@
 
 @layer utilities{
 
+  html { scroll-behavior: smooth; }
+
   ::selection {
     background: #cbd5e1;
     color:black
