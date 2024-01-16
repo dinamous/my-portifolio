@@ -5,11 +5,7 @@ import {
 } from "@/components/ui/alert"
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card
 } from "@/components/ui/card"
 import Jornada from "../assets/projects/jornada.png"
 
@@ -18,7 +14,7 @@ import { Separator } from "@/components/ui/separator"
 import { Terminal, ArrowUpRight } from "lucide-react"
 
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GitHubLogoIcon } from "@radix-ui/react-icons"
 
 
