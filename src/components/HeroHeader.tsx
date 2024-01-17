@@ -42,7 +42,7 @@ export default function HeroHeader() {
       <div className="absolute -z-10 inset-x-0 overflow-hidden animate-blob  mix-blend-multiply filter blur-3xl opacity-70 top-[5vh] left-[25vw]  w-[10rem] sm:w-[28rem] aspect-[1/1] bg-[#9089fc] rounded-full animation-delay-2000 "></div>
       <div className="absolute -z-10 inset-x-0 overflow-hidden animate-blob  mix-blend-multiply filter blur-3xl opacity-70 top-[30vh] left-[25vw] w-[15rem] sm:w-[34rem] aspect-[1/1] bg-[#89fcfc] rounded-full animation-delay-4000 rotate-90"></div>
 
-      <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56 flex flex-1  flex-col justify-around md:flex-row md:gap-8 md:flex-row-reverse">
+      <div className="mx-auto max-w-6xl py-32 sm:py-48 lg:py-56 flex flex-1  flex-col justify-around md:flex-row md:gap-8 md:flex-row-reverse">
         <div className="flex justify-around flex-col items-center py-4 ">
 
           <TooltipProvider>

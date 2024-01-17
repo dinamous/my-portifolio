@@ -10,7 +10,7 @@ import Projects from "./components/Projects"
 
 function App() {
   return (
-    <div className="flex flex-col justify-between gap-40">
+    <div>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Navbar></Navbar>
         <div className="flex flex-col justify-between gap-40">
