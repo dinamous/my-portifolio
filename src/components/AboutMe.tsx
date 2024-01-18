@@ -22,10 +22,10 @@ export default function AboutMe() {
         </CardHeader>
         <CardContent>
           <div className="flex lg:gap-8">
-            <div className="hidden lg:block w-2/6">
+            <div className="hidden lg:block lg:w-2/6">
               <img src={Office} alt="office" className="object-cover h-80 w-full rounded-md " />
             </div>
-            <div className="flex justify-around flex-col w-4/6">
+            <div className="flex justify-around flex-col lg:w-4/6">
               <p className="leading-loose  text-sm lg:text-lg">Como um Programador Front-End Junior, Eu possuo um vasto conhecimento em HTML, CSS, JavaScript, React, Tailwind, and SCSS. Possuo experiência em design de interfaces e na construção de websites responsivos a fim de oferecer uma usabilidade fluida ao usuário.</p>
               <p className="leading-loose  text-sm lg:text-lg"> Minha expertise está no desenvolvimento sempre voltado ao usuário final, tratando as interfaces com muito cuidade, levando em consideração os paradigmas do UI/UX. E além disso, sempre estou disposto a colaborar em projetos em que possa agregar meus conhecimentos e gerar resultados.</p>
             </div>
