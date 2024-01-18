@@ -19,7 +19,7 @@ import { GitHubLogoIcon } from "@radix-ui/react-icons"
 
 import AutismVogais from "../assets/projects/AutismVogais.png"
 import Vizionar from "../assets/projects/Vizionar.png"
-import Jornada from "../assets/projects/Jornada.png"
+// import Jornada from "../assets/projects/Jornada.png"
 
 export default function Projects() {
 
@@ -43,15 +43,15 @@ export default function Projects() {
       categoria: "UI/UX",
     },
 
-    {
-      titulo: "A 13° Jornada Científica e Técnológica",
-      img: Jornada,
-      descricao: "Evento científico interdisciplinar de nível nacional com expansão internacional , atuando na área de comunicação científica e tecnológica.",
-      techs: ["HTML", "CSS", "Bootstrap"],
-      repo: "https://github.com/dinamous/Jornada-Cientifica/",
-      demo: "https://dinamous.github.io/Jornada-Cientifica/",
-      categoria: "Front-End",
-    }
+    // {
+    //   titulo: "A 13° Jornada Científica e Técnológica",
+    //   img: Jornada,
+    //   descricao: "Evento científico interdisciplinar de nível nacional com expansão internacional , atuando na área de comunicação científica e tecnológica.",
+    //   techs: ["HTML", "CSS", "Bootstrap"],
+    //   repo: "https://github.com/dinamous/Jornada-Cientifica/",
+    //   demo: "https://dinamous.github.io/Jornada-Cientifica/",
+    //   categoria: "Front-End",
+    // }
   ]
 
   return (
