@@ -17,10 +17,9 @@ import { Terminal, ArrowUpRight } from "lucide-react"
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GitHubLogoIcon } from "@radix-ui/react-icons"
 
-import Jornada from "../assets/projects/Jornada.png"
 import AutismVogais from "../assets/projects/AutismVogais.png"
 import Vizionar from "../assets/projects/Vizionar.png"
-
+import Jornada from "../assets/projects/Jornada.png"
 
 export default function Projects() {
 

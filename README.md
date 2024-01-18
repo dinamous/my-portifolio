@@ -1,30 +1,47 @@
-# React + TypeScript + Vite
+<h1 align="center">
+  💻<br>Portifolio - Dinamous
+</h1>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Resultado final do projeto](src/assets/preview.png)
 
-Currently, two official plugins are available:
+<h4 align="center"><a href="dinamousdev.vercel.app">Clique para visitar o projeto</a></h4>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📚 Seções
 
-## Expanding the ESLint configuration
+O site é composto por seis seções:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Início:** Nele temos uma breve apresentação;
+- **Sobre:** Nessa seção tenho uma descrição dizendo um pouco sobre quem sou;
+<!-- - **Experiências:** Abordo algumas empresas da qual prestei meus serviços na área de desenvolvimento e design; -->
+- **Projetos:** Apresenta alguns projetos desenvolvidos e com link direto para os respectivos códigos no GitHub;
+<!-- - **Serviços:** Exibe através de cards os diferentes serviços em que possuo conhecimentos; -->
+<!-- - **Conhecimentos:** Nele apresentamos meus conhecimentos em algumas linguagens como o foco no front-end; -->
+- **Contato:** Meus meus meios de contato caso precise me encontrar;
+---
 
-- Configure the top-level `parserOptions` property like this:
+## 💼 Tecnologias utilizadas
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+Para o desenvolvimento deste site utilizei as seguintes tecnologias:
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- React.js;
+- Tailwind;
+- TypeScript;
+- Radix/ui;
+- Shadcn;
+
+---
+
+<h2>👾 Autor</h2>
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/dinamous">
+        <img src="https://github.com/dinamous.png" width="100px;" alt="Foto do Dinamous no GitHub"/><br>
+        <sub>
+          <b>Matheus Simões</b>
+        </sub>
+      </a>
+    </td>
+  </tr>
+</table>
