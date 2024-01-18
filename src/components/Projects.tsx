@@ -19,11 +19,43 @@ import { GitHubLogoIcon } from "@radix-ui/react-icons"
 
 import AutismVogais from "../assets/projects/AutismVogais.png"
 import Vizionar from "../assets/projects/Vizionar.png"
-// import Jornada from "../assets/projects/Jornada.png"
+import TextToSpeech from "../assets/projects/TextToSpeech.png"
+import Jornada from "../assets/projects/Jornada.png"
+import Nubank from "../assets/projects/Nubank.png"
+import EasyLearn from "../assets/projects/EasyLearn.png"
+import Autismalg from "../assets/projects/autismalg.png"
 
 export default function Projects() {
 
   const projetos = [
+
+    {
+      titulo: "EasyLearn",
+      img: EasyLearn,
+      descricao: "Protipação de uma plataforma web de Ensino à distância, incentivado pela pandemia da COVID-21. Esta aplicação fez uso de inspiração das ferramentas do Google Classroom e Meet.",
+      techs: ["Figma", "Undraw", "Adobe Illustrator"],
+      repo: false,
+      demo: "https://www.figma.com/proto/yoTImyT9jVIU8ndAp5zrZ6/IHC?type=design&node-id=17-2&t=G2PRsKH4Bh2o6pdY-1&scaling=min-zoom&page-id=2%3A2&starting-point-node-id=161%3A3026&mode=design",
+      categoria: ["UI/UX"],
+    },
+    {
+      titulo: "Clone Nubank",
+      img: Nubank,
+      descricao: "Um clone da antiga versão do app do Banco Nubank, em react native. Utilizando o framework Expo e styled componentes, de modo a replicar a interface de forma inteiramente através do CSS",
+      techs: ["React Native", "Expo", "styled-components"],
+      repo: "https://github.com/dinamous/clone-nubank-expo",
+      demo: false,
+      categoria: ["Front-End","Mobile"],
+    },
+    {
+      titulo: "TextToSpeech IBM",
+      img: TextToSpeech,
+      descricao: "Uma aplicação desenvolvida, a fim de  explorar a utilização da I.A do IBM de modo a realizar a conversar do input do usuário em 'text to speech'.",
+      techs: ["Node", "SQL", "React", "Sequelize ORM",],
+      repo: "https://github.com/dinamous/text-to-speech/tree/master",
+      demo: false,
+      categoria: ["Front-End","Back-End"],
+    },
     {
       titulo: "Vizionar RA (Fictícia)",
       img: Vizionar,
@@ -31,7 +63,7 @@ export default function Projects() {
       techs: ["HTML", "CSS", "Bootstrap"],
       repo: "https://github.com/dinamous/vizionar",
       demo: "https://dinamous.github.io/vizionar/index.html",
-      categoria: "Front-End",
+      categoria: ["Front-End"],
     },
     {
       titulo: "AutismVogais",
@@ -40,18 +72,27 @@ export default function Projects() {
       techs: ["Figma", " Adobe Illustrator"],
       repo: false,
       demo: "https://www.figma.com/proto/78kN9WNYqMmahdnCOZ8WNh/AustimVogais?type=design&node-id=1-247&t=UOjnXN9ryUtW62oq-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=1%3A98&mode=design",
-      categoria: "UI/UX",
+      categoria: ["UI/UX"],
     },
 
-    // {
-    //   titulo: "A 13° Jornada Científica e Técnológica",
-    //   img: Jornada,
-    //   descricao: "Evento científico interdisciplinar de nível nacional com expansão internacional , atuando na área de comunicação científica e tecnológica.",
-    //   techs: ["HTML", "CSS", "Bootstrap"],
-    //   repo: "https://github.com/dinamous/Jornada-Cientifica/",
-    //   demo: "https://dinamous.github.io/Jornada-Cientifica/",
-    //   categoria: "Front-End",
-    // }
+    {
+      titulo: "A 13° Jornada Científica e Tecnológica",
+      img: Jornada,
+      descricao: "Evento científico interdisciplinar de nível nacional com expansão internacional , atuando na área de comunicação científica e tecnológica.",
+      techs: ["HTML", "CSS", "Bootstrap"],
+      repo: "https://github.com/dinamous/Jornada-Cientifica/",
+      demo: "https://dinamous.github.io/Jornada-Cientifica/",
+      categoria: ["Front-End"],
+    },
+    {
+      titulo: "AUTISMALG",
+      img: Autismalg,
+      descricao: "Prototipação de app mobile para Auxiliar no Ensino da Identificação de Algarismos para Crianças com Transtorno do Espectro Autista.",
+      techs: ["Figma"],
+      repo: "https://github.com/dinamous/Jornada-Cientifica/",
+      demo: "https://dinamous.github.io/Jornada-Cientifica/",
+      categoria: ["UI/UX"],
+    }
   ]
 
   return (
@@ -84,11 +125,18 @@ export default function Projects() {
           <Card className="bg-gray-50 dark:bg-slate-900 mx-8 sm:mx-0 sm:w-full" key={index} >
             <div className="flex lg:gap-8 flex-col sm:flex-row p-4 items-center" >
 
-              <div className=" flex items-center justify-center rounded-md w-[50%] ">
+              <div className=" flex items-center justify-center rounded-md w-[50%]  min-w-[65vw] sm:min-w-[40vw] md:min-w-[20vw]">
                 <img src={projeto.img} alt="" className="object-contain rounded-lg shadow drop-shadow-sm hover:scale-[1.02] transition-all" />
               </div>
               <div className="flex justify-around flex-col p-6 ">
                 <div className="space-y-1">
+                  
+                  <div className="flex gap-2">
+                  {projeto.categoria.map((cat,index)=> (
+                    <p className=" text-gray-400 dark:text-slate-00" key={index}> #{cat}</p>
+                    ))}
+                  </div>
+
                   <h4 className="text-xl font-medium ">{projeto.titulo}</h4>
                   <p className="text-lg text-muted-foreground">
                     {projeto.descricao}
@@ -96,7 +144,7 @@ export default function Projects() {
                 </div>
 
 
-                <Separator className="mt-4" />
+                <Separator className="my-4" />
 
                 <div className="flex justify-between flex-wrap sm:flex-nowrap">
 
@@ -120,18 +168,24 @@ export default function Projects() {
                             <GitHubLogoIcon height={20} width={20} />
                           </a>
                         </div>
-                        
+
                       </>
                     )
 
                       : null}
 
-                    <div>
-                      <a href={projeto.demo} target="_blank" className="flex gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow drop-shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
-                        <p>Link</p>
-                        <ArrowUpRight height={20} width={20} />
-                      </a>
-                    </div>
+                    {typeof projeto.demo === 'string' ? (
+
+                      <>
+                        <div>
+                          <a href={projeto.demo} target="_blank" className="flex gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-lg shadow drop-shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+                            <p>Link</p>
+                            <ArrowUpRight height={20} width={20} />
+                          </a>
+                        </div>
+                      </>
+
+                    ) : null}
                   </div>
                 </div>
               </div>
