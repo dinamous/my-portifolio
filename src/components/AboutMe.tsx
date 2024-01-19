@@ -13,8 +13,8 @@ export default function AboutMe() {
 
   return (
 
-    <section id="sobre">
-      <div  className="mx-auto max-w-6xl flex flex-1 items-center flex-col justify-between md:flex-row gap-8 md:px-12">
+    <section id="sobre" >
+      <div  className="mx-auto max-w-6xl flex flex-1 items-center flex-col justify-between md:flex-row gap-8 md:px-12" data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="500" data-aos-duration="800" data-aos-offset="0">
       <Card className="bg-gray-50 dark:bg-slate-900 mx-8 sm:mx-0 sm:w-full">
         <CardHeader>
           <CardTitle className="text-lg font-bold tracking-tight sm:text-2xl w-[40%] ">Sobre mim</CardTitle>

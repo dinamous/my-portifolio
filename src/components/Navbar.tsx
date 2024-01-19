@@ -31,6 +31,7 @@ export default function Example() {
     };
   }, []);
 
+
   return (
     <div>
       <header className="absolute inset-x-0 top-0 z-50">
@@ -54,7 +55,12 @@ export default function Example() {
           <div className="hidden lg:flex lg:gap-x-12">
             {navigation.map((item) => (
 
-              <a key={item.name} href={item.href} className="text-md mx-2 font-semibold leading-6 text-shadow hover:shadow-emerald-300 " >
+              <a key={item.name} 
+              href={item.href} 
+              className="text-md mx-2 font-semibold leading-6 text-shadow hover:shadow-emerald-300 " 
+              
+              >
+
                 {item.name}
               </a>
 

@@ -28,7 +28,15 @@ import Autismalg from "../assets/projects/autismalg.png"
 export default function Projects() {
 
   const projetos = [
-
+    {
+      titulo: "AutismVogais",
+      img: AutismVogais,
+      descricao: "Prototipação de uma Ferramenta digital com o intuito de auxiliar o aprendizado de vogais e alfabetização de crianças no espectro autista.",
+      techs: ["Figma", " Adobe Illustrator"],
+      repo: false,
+      demo: "https://www.figma.com/proto/78kN9WNYqMmahdnCOZ8WNh/AustimVogais?type=design&node-id=1-247&t=UOjnXN9ryUtW62oq-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=1%3A98&mode=design",
+      categoria: ["UI/UX"],
+    },
     {
       titulo: "EasyLearn",
       img: EasyLearn,
@@ -45,7 +53,7 @@ export default function Projects() {
       techs: ["React Native", "Expo", "styled-components"],
       repo: "https://github.com/dinamous/clone-nubank-expo",
       demo: false,
-      categoria: ["Front-End","Mobile"],
+      categoria: ["Front-End", "Mobile"],
     },
     {
       titulo: "TextToSpeech IBM",
@@ -54,7 +62,7 @@ export default function Projects() {
       techs: ["Node", "SQL", "React", "Sequelize ORM",],
       repo: "https://github.com/dinamous/text-to-speech/tree/master",
       demo: false,
-      categoria: ["Front-End","Back-End"],
+      categoria: ["Front-End", "Back-End"],
     },
     {
       titulo: "Vizionar RA (Fictícia)",
@@ -65,15 +73,7 @@ export default function Projects() {
       demo: "https://dinamous.github.io/vizionar/index.html",
       categoria: ["Front-End"],
     },
-    {
-      titulo: "AutismVogais",
-      img: AutismVogais,
-      descricao: "Prototipação de uma Ferramenta digital com o intuito de auxiliar o aprendizado de vogais e alfabetização de crianças no espectro autista.",
-      techs: ["Figma", " Adobe Illustrator"],
-      repo: false,
-      demo: "https://www.figma.com/proto/78kN9WNYqMmahdnCOZ8WNh/AustimVogais?type=design&node-id=1-247&t=UOjnXN9ryUtW62oq-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=1%3A98&mode=design",
-      categoria: ["UI/UX"],
-    },
+
 
     {
       titulo: "A 13° Jornada Científica e Tecnológica",
@@ -99,14 +99,15 @@ export default function Projects() {
     <section id="projetos" className="">
       <div className="mx-auto max-w-6xl flex flex-1 items-center flex-col justify-between gap-8 md:px-12">
 
-        <Alert className="bg-gray-50 dark:bg-slate-900 mx-8">
+      <div className="w-full" data-aos="fade-up">
+        <Alert className="bg-gray-50 dark:bg-slate-900">
           <Terminal className="h-5 w-5 mt-2" />
           <AlertTitle className="text-lg font-bold tracking-tight sm:text-2xl w-[50%]">Meus Projetos</AlertTitle>
           <AlertDescription>
             Uma pequena coleção dos meus melhores trabalhos.
           </AlertDescription>
         </Alert>
-
+        </div>
         {/* <Tabs defaultValue="Front" className="">
           <TabsList className="min-w-[20vw] bg-gray-50 dark:bg-slate-900">
             <TabsTrigger value="Front">Front-End</TabsTrigger>
@@ -122,18 +123,21 @@ export default function Projects() {
 
         {projetos.map((projeto, index) => (
 
-          <Card className="bg-gray-50 dark:bg-slate-900 mx-8 sm:mx-0 sm:w-full" key={index} >
-            <div className="flex lg:gap-8 flex-col sm:flex-row p-4 items-center" >
-
-              <div className=" flex items-center justify-center rounded-md w-[50%]  min-w-[65vw] sm:min-w-[40vw] md:min-w-[20vw]">
-                <img src={projeto.img} alt="" className="object-contain rounded-lg shadow drop-shadow-sm hover:scale-[1.02] transition-all" />
+          <div data-aos="fade-up-right" key={index}>
+            <Card className="bg-gray-50 dark:bg-slate-900 mx-8 sm:mx-0 sm:w-full "  >
+            <div className="flex flex-col sm:flex-row" >
+              {/* flex items-center justify-center rounded-md sm:min-w-[40vw] md:min-w-[20vw] w-[1/3] */}
+              {/* rounded-lg shadow drop-shadow-sm hover:scale-[1.02] transition-all */}
+              <div className="w-full sm:w-2/5 flex items-center justify-center p-4 ">
+                <img src={projeto.img} alt="" className="w-full h-auto rounded-lg hover:scale-[1.02] transition-all" />
               </div>
-              <div className="flex justify-around flex-col p-6 ">
+
+              <div className="w-full sm:w-3/5 flex justify-around flex-col p-6">
                 <div className="space-y-1">
-                  
+
                   <div className="flex gap-2">
-                  {projeto.categoria.map((cat,index)=> (
-                    <p className=" text-gray-400 dark:text-slate-00" key={index}> #{cat}</p>
+                    {projeto.categoria.map((cat, index) => (
+                      <p className=" text-gray-400 dark:text-slate-00" key={index}> #{cat}</p>
                     ))}
                   </div>
 
@@ -193,6 +197,7 @@ export default function Projects() {
 
 
           </Card>
+          </div>
         ))}
 
 
