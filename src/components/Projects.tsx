@@ -24,10 +24,31 @@ import Jornada from "../assets/projects/IFSUL.png"
 import Nubank from "../assets/projects/Nubank.png"
 import EasyLearn from "../assets/projects/EasyLearn.png"
 import Autismalg from "../assets/projects/autismalg.png"
+import Pizzashop from "../assets/projects/pizzashop.png"
+
 
 export default function Projects() {
 
   const projetos = [
+    {
+      titulo: "pizza.shop",
+      img: Pizzashop ,
+      descricao: "Uma aplicação simulando um dashbaord de vendas, inspirado na plataforma Ifood. ",
+      techs: ["Vue", "Vite", "Vuelidate","shadcn/ui"],
+      repo: false,
+      demo: "",
+      categoria: ["Front-end"],
+      actions: [
+        {
+          label: "Repo",
+          link: "https://github.com/dinamous/pizza-shop/tree/main"
+        },
+        {
+          label: "Link",
+          link: "https://pizza-shop-web.vercel.app"
+        }
+      ]
+    },
     {
       titulo: "AutismVogais",
       img: AutismVogais,
