@@ -416,7 +416,7 @@ const lastName = "Simões".split("");
       )
       .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
       .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
-      .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" })
+      .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
       .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
       .call(() => startTextType(heroType, heroTypePhrases))
       .to(bar, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power3.inOut" }, "+=0.15")

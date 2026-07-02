@@ -17,6 +17,7 @@ uniform float uNoise;
 uniform float uScan;
 uniform float uScanFreq;
 uniform float uWarp;
+uniform vec2 uMouse;
 #define iTime uTime
 #define iResolution uResolution
 
@@ -60,6 +61,8 @@ void mainImage(out vec4 fragColor,in vec2 fragCoord){
     vec2 uv=fragCoord/uResolution.xy*2.-1.;
     uv.y*=-1.;
     uv+=uWarp*vec2(sin(uv.y*6.283+uTime*0.5),cos(uv.x*6.283+uTime*0.5))*0.05;
+    vec2 toMouse=uv-uMouse;
+    uv+=normalize(toMouse)*exp(-length(toMouse)*3.0)*0.15;
     fragColor=cppn_fn(uv,0.1*sin(0.3*uTime),0.1*sin(0.69*uTime),0.1*sin(0.44*uTime));
 }
 
@@ -100,6 +103,7 @@ export function createDarkVeil(container, options = {}) {
     uScan: { value: scanlineIntensity },
     uScanFreq: { value: scanlineFrequency },
     uWarp: { value: warpAmount },
+    uMouse: { value: [0, 0] },
   };
 
   const program = new Program(gl, { vertex, fragment, uniforms });
@@ -115,17 +119,31 @@ export function createDarkVeil(container, options = {}) {
   const ro = new ResizeObserver(resize);
   ro.observe(container);
 
+  // ponytail: mouse target lerped toward each frame for a trailing feel, no easing lib needed
+  let targetMouseX = 0;
+  let targetMouseY = 0;
+  const onPointerMove = (e) => {
+    const rect = container.getBoundingClientRect();
+    targetMouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    targetMouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+  };
+  window.addEventListener("pointermove", onPointerMove);
+
   const start = performance.now();
   let rafId;
   const loop = () => {
     rafId = requestAnimationFrame(loop);
     uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
+    const mouse = uniforms.uMouse.value;
+    mouse[0] += (targetMouseX - mouse[0]) * 0.05;
+    mouse[1] += (targetMouseY - mouse[1]) * 0.05;
     renderer.render({ scene: mesh });
   };
   rafId = requestAnimationFrame(loop);
 
   return function destroy() {
     cancelAnimationFrame(rafId);
+    window.removeEventListener("pointermove", onPointerMove);
     ro.disconnect();
     if (canvas.parentElement === container) container.removeChild(canvas);
     program.remove?.();
