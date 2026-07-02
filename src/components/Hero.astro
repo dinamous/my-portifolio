@@ -8,6 +8,8 @@ const lastName = "Simões".split("");
 
   <div class="hero__scan" id="hero-scan" aria-hidden="true"></div>
 
+  <div class="hero__type" id="hero-type" aria-hidden="true"></div>
+
   <div class="hero__bottom">
     <h1 class="hero__row" id="hero-row">
       <span class="hero__word hero__word--first" id="hero-word-1">
@@ -59,6 +61,48 @@ const lastName = "Simões".split("");
     pointer-events: none;
     z-index: 2;
     transform: translateY(100vh);
+  }
+
+  .hero__type {
+    position: absolute;
+    top: 6vh;
+    left: 5vw;
+    z-index: 1;
+    max-width: 34ch;
+    min-height: 3.1em;
+    color: #d1d5db;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+    line-height: 1.55;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  :global(.hero__type-em) {
+    font-family: "Cormorant Infant", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.2em;
+    color: #fff;
+  }
+
+  :global(.hero__type-cursor) {
+    display: inline-block;
+    margin-left: 1px;
+    animation: hero-type-blink 0.9s steps(1) infinite;
+  }
+
+  @keyframes hero-type-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.hero__type-cursor) {
+      animation: none;
+    }
   }
 
   .hero__aurora {
@@ -204,8 +248,8 @@ const lastName = "Simões".split("");
     color: #6b7280;
     text-transform: uppercase;
     text-decoration: none;
-    font-size: clamp(0.6rem, 1vw, 0.68rem);
-    font-weight: 500;
+    font-size: clamp(0.75rem, 1.3vw, 0.9rem);
+    font-weight: 700;
     letter-spacing: 0.16em;
     transition: color 0.25s ease;
   }
@@ -232,6 +276,12 @@ const lastName = "Simões".split("");
   }
 
   @media (max-width: 640px) {
+    .hero__type {
+      max-width: 70vw;
+      min-height: 4.65em;
+      top: 4vh;
+    }
+
     .hero__bottom {
       inset: auto 0 3vh 0;
     }
@@ -264,6 +314,14 @@ const lastName = "Simões".split("");
 <script>
   import gsap from "gsap";
   import { createDarkVeil } from "./dark-veil";
+  import { getSmoother } from "../lib/smoother";
+  import { startTextType } from "../lib/textType";
+
+  const heroTypePhrases = [
+    "Dev de poucas palavras, interfaces que falam por si. Vida em cada *transição*.",
+    "Criador silencioso no *front* das ideias, dando vida com movimento e suavidade.",
+    "Calmo por fora, *keyframes* por dentro. Detalhes que ninguém nota, mas todo mundo sente.",
+  ];
 
   const heroSection = document.getElementById("hero-section")!;
   const row = document.getElementById("hero-row")!;
@@ -274,6 +332,7 @@ const lastName = "Simões".split("");
   const scan = document.getElementById("hero-scan")!;
   const bar = document.getElementById("hero-bar")!;
   const aurora = document.getElementById("hero-aurora")!;
+  const heroType = document.getElementById("hero-type")!;
   createDarkVeil(aurora, {
     hueShift: 50,
     noiseIntensity: 0.09,
@@ -286,11 +345,13 @@ const lastName = "Simões".split("");
     document.querySelectorAll<HTMLElement>("#hero-nav li"),
   );
 
-  // ponytail: scroll stays locked until the nav finishes revealing; overflow
-  // hidden alone blocks wheel/touch/keyboard scroll, no listeners needed.
-  document.body.style.overflow = "hidden";
+  // ponytail: scroll stays locked until the nav finishes revealing, via the
+  // shared ScrollSmoother instance rather than body overflow (which the
+  // smoother already manages).
+  const smoother = getSmoother();
+  smoother.paused(true);
   const unlockScroll = () => {
-    document.body.style.overflow = "";
+    smoother.paused(false);
   };
 
   const word1Letters = Array.from(
@@ -311,6 +372,8 @@ const lastName = "Simões".split("");
     gsap.set(bar, { scaleX: 1, opacity: 1 });
     gsap.set(navItems, { y: 0, opacity: 1 });
     gsap.set(aurora, { autoAlpha: 1 });
+    gsap.set(heroType, { autoAlpha: 1 });
+    startTextType(heroType, heroTypePhrases);
     unlockScroll();
   } else {
     const isColumn = getComputedStyle(row).flexDirection === "column";
@@ -354,6 +417,8 @@ const lastName = "Simões".split("");
       .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
       .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
       .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" })
+      .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
+      .call(() => startTextType(heroType, heroTypePhrases))
       .to(bar, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power3.inOut" }, "+=0.15")
       .to(navItems, { y: 0, opacity: 1, duration: 0.6, stagger: 0.22, ease: "power3.out" }, "+=0.1")
       .call(unlockScroll);
