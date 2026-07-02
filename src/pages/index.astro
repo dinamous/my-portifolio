@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import projects from "../../projects.json";
+---
+
+<BaseLayout title="dinamous.dev">
+  <main class="mx-auto max-w-3xl p-8">
+    <h1 class="text-3xl font-bold">dinamous.dev</h1>
+    <ul class="mt-8 grid gap-4">
+      {
+        projects.map((project) => (
+          <li class="rounded border p-4">
+            <h2 class="font-semibold">{project.titulo}</h2>
+            <p class="text-sm text-gray-600">{project.descricao}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</BaseLayout>
