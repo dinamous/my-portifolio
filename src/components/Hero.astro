@@ -3,19 +3,41 @@ const firstName = "Matheus".split("");
 const lastName = "Simões".split("");
 ---
 
-<section class="hero">
-  <h1 class="hero__row" id="hero-row">
-    <span class="hero__word hero__word--first" id="hero-word-1">
-      {firstName.map((ch) => (
-        <span class="hero__letter-wrap"><span class="hero__letter">{ch}</span></span>
-      ))}
-    </span>
-    <span class="hero__word hero__word--last" id="hero-word-2">
-      {lastName.map((ch) => (
-        <span class="hero__letter-wrap"><span class="hero__letter">{ch}</span></span>
-      ))}<span class="hero__semi" id="hero-semi">;</span>
-    </span>
-  </h1>
+<section class="hero" id="hero-section">
+  <div class="hero__aurora" id="hero-aurora" aria-hidden="true"></div>
+
+  <div class="hero__scan" id="hero-scan" aria-hidden="true"></div>
+
+  <div class="hero__bottom">
+    <h1 class="hero__row" id="hero-row">
+      <span class="hero__word hero__word--first" id="hero-word-1">
+        {firstName.map((ch) => (
+          <span class="hero__letter-wrap"><span class="hero__letter">{ch}</span></span>
+        ))}
+      </span>
+      <span class="hero__word hero__word--last" id="hero-word-2">
+        {lastName.map((ch) => (
+          <span class="hero__letter-wrap"><span class="hero__letter">{ch}</span></span>
+        ))}<span class="hero__semi" id="hero-semi">;</span>
+      </span>
+    </h1>
+
+    <div class="hero__bar" id="hero-bar" aria-hidden="true"></div>
+
+    <!-- ponytail: LinkedIn/GitHub hrefs are placeholders, swap in real profile URLs -->
+    <nav class="hero__nav" id="hero-nav" aria-label="Navegação principal">
+      <ul class="hero__nav-social">
+        <li><a href="#" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="#" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="mailto:dinamous.dev@gmail.com">Email</a></li>
+      </ul>
+      <ul class="hero__nav-pages">
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#trabalhos">Trabalhos</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+    </nav>
+  </div>
 </section>
 
 <style>
@@ -26,9 +48,40 @@ const lastName = "Simões".split("");
     overflow: hidden;
   }
 
-  .hero__row {
+  .hero__scan {
     position: absolute;
-    inset: auto 0 6vh 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: #fff;
+    mix-blend-mode: difference;
+    pointer-events: none;
+    z-index: 2;
+    transform: translateY(100vh);
+  }
+
+  .hero__aurora {
+    position: absolute;
+    top: -10%;
+    left: 0;
+    right: 0;
+    height: 120%;
+    z-index: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .hero__bottom {
+    position: absolute;
+    inset: auto 0 4vh 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero__row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
@@ -83,24 +136,162 @@ const lastName = "Simões".split("");
     will-change: transform, opacity;
   }
 
+  .hero__bar {
+    width: calc(100% - 10vw);
+    height: 3px;
+    margin: 80px auto 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4) 25%,
+      rgba(255, 255, 255, 0.4) 75%,
+      transparent
+    );
+    transform: scaleX(0);
+    transform-origin: center;
+    opacity: 0;
+  }
+
+  .hero__nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+    padding-inline: 5vw;
+    margin-top: 1.1rem;
+    gap: 0.75rem;
+  }
+
+  .hero__nav-social {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .hero__nav-pages {
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  .hero__nav-social,
+  .hero__nav-pages {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero__nav-social li,
+  .hero__nav-pages li {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .hero__nav-social li:not(:first-child)::before,
+  .hero__nav-pages li:not(:first-child)::before {
+    content: "/";
+    display: inline-block;
+    margin-right: 1rem;
+    color: #4b5563;
+    font-weight: 400;
+  }
+
+  .hero__nav a {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 1px;
+    color: #6b7280;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: clamp(0.6rem, 1vw, 0.68rem);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    transition: color 0.25s ease;
+  }
+
+  .hero__nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background: #d1d5db;
+    transition: width 0.3s ease;
+  }
+
+  .hero__nav a:hover,
+  .hero__nav a:focus-visible {
+    color: #e5e7eb;
+  }
+
+  .hero__nav a:hover::after,
+  .hero__nav a:focus-visible::after {
+    width: 100%;
+  }
+
   @media (max-width: 640px) {
+    .hero__bottom {
+      inset: auto 0 3vh 0;
+    }
+
     .hero__row {
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
-      inset: auto 0 4vh 0;
+    }
+
+    .hero__bar {
+      margin-top: 48px;
+    }
+
+    .hero__nav {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 0.9rem;
+      margin-top: 0.9rem;
+    }
+
+    .hero__nav-social,
+    .hero__nav-pages {
+      grid-column: 1;
+      justify-self: center;
     }
   }
 </style>
 
 <script>
   import gsap from "gsap";
+  import { createDarkVeil } from "./dark-veil";
 
+  const heroSection = document.getElementById("hero-section")!;
   const row = document.getElementById("hero-row")!;
   const word1 = document.getElementById("hero-word-1")!;
   const word2 = document.getElementById("hero-word-2")!;
   const words = [word1, word2];
   const semi = document.getElementById("hero-semi")!;
+  const scan = document.getElementById("hero-scan")!;
+  const bar = document.getElementById("hero-bar")!;
+  const aurora = document.getElementById("hero-aurora")!;
+  createDarkVeil(aurora, {
+    hueShift: 50,
+    noiseIntensity: 0.09,
+    scanlineIntensity: 0.43,
+    speed: 0.8,
+    scanlineFrequency: 1.3,
+    warpAmount: 0.3,
+  });
+  const navItems = Array.from(
+    document.querySelectorAll<HTMLElement>("#hero-nav li"),
+  );
+
+  // ponytail: scroll stays locked until the nav finishes revealing; overflow
+  // hidden alone blocks wheel/touch/keyboard scroll, no listeners needed.
+  document.body.style.overflow = "hidden";
+  const unlockScroll = () => {
+    document.body.style.overflow = "";
+  };
 
   const word1Letters = Array.from(
     document.querySelectorAll<HTMLElement>("#hero-word-1 .hero__letter"),
@@ -116,6 +307,11 @@ const lastName = "Simões".split("");
   if (reduceMotion) {
     gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
     gsap.set(semi, { opacity: 1, scale: 1 });
+    gsap.set(scan, { autoAlpha: 0 });
+    gsap.set(bar, { scaleX: 1, opacity: 1 });
+    gsap.set(navItems, { y: 0, opacity: 1 });
+    gsap.set(aurora, { autoAlpha: 1 });
+    unlockScroll();
   } else {
     const isColumn = getComputedStyle(row).flexDirection === "column";
     const mainAxis = isColumn ? "y" : "x";
@@ -142,6 +338,9 @@ const lastName = "Simões".split("");
       gsap.set(w, { [mainAxis]: wordDeltas[i], scale: 0.8 }),
     );
 
+    const scanHeight = scan.offsetHeight;
+    gsap.set(scan, { y: heroSection.offsetHeight });
+
     gsap
       .timeline({ defaults: { ease: "power3.out" } })
       .to(word1Letters, { y: "0%", opacity: 1, duration: 1.1, stagger: 0.09 }, 0)
@@ -152,6 +351,11 @@ const lastName = "Simões".split("");
         { x: 0, y: 0, scale: 1, duration: 1.1, stagger: 0.12, ease: "power3.inOut" },
         "+=0.3",
       )
-      .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<");
+      .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
+      .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
+      .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" })
+      .to(bar, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power3.inOut" }, "+=0.15")
+      .to(navItems, { y: 0, opacity: 1, duration: 0.6, stagger: 0.22, ease: "power3.out" }, "+=0.1")
+      .call(unlockScroll);
   }
 </script>
