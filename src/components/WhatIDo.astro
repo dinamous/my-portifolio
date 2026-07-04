@@ -2,7 +2,7 @@
 ---
 
 {/* ponytail: placeholder copy, swap in real content */}
-<section class="whatido" id="whatido-section">
+<section class="whatido fixed inset-0 h-screen w-screen" id="whatido-section" data-stack>
   <div class="whatido__inner">
     <h2 class="whatido__title">O que eu faço</h2>
     <p class="whatido__text">
@@ -11,16 +11,29 @@
       ao usuário.
     </p>
   </div>
+
+  <div class="whatido__bar" id="whatido-bar" aria-hidden="true"></div>
 </section>
 
 <style>
   .whatido {
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
     background: #fff;
     display: flex;
     align-items: center;
+    clip-path: inset(0% 0% 0% 0%);
+    will-change: clip-path;
+  }
+
+  /* ponytail: width must match FINAL_WIDTH_VW in src/lib/sectionStack.ts —
+     same rectangle the hero's mask shrinks down to, ready to animate next */
+  .whatido__bar {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 5vw;
+    height: 100%;
+    background: #000;
+    transform: translateX(-50%);
   }
 
   .whatido__inner {
@@ -53,20 +66,3 @@
     color: #111;
   }
 </style>
-
-<script>
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
-  import "../lib/smoother";
-
-  const heroSection = document.getElementById("hero-section")!;
-
-  // ponytail: pin + pinSpacing:false makes this section slide up and
-  // cover the hero as the user scrolls, instead of the hero scrolling away
-  ScrollTrigger.create({
-    trigger: heroSection,
-    start: "top top",
-    end: "bottom top",
-    pin: true,
-    pinSpacing: false,
-  });
-</script>

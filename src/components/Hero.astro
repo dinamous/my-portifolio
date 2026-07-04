@@ -5,7 +5,7 @@ const firstName = "Matheus".split("");
 const lastName = "Simões".split("");
 ---
 
-<section class="hero" id="hero-section">
+<section class="hero fixed inset-0 h-screen w-screen" id="hero-section" data-stack>
   <div class="hero__aurora" id="hero-aurora" aria-hidden="true"></div>
 
   <div class="hero__scan" id="hero-scan" aria-hidden="true"></div>
@@ -34,10 +34,10 @@ const lastName = "Simões".split("");
 
 <style>
   .hero {
-    position: relative;
-    height: 100vh;
     background: #000;
     overflow: hidden;
+    clip-path: inset(0% 0% 0% 0%);
+    will-change: clip-path;
   }
 
   .hero__scan {
@@ -212,7 +212,7 @@ const lastName = "Simões".split("");
 <script>
   import gsap from "gsap";
   import { createDarkVeil } from "./dark-veil";
-  import { getSmoother } from "../lib/smoother";
+  import { enableSectionStack } from "../lib/sectionStack";
   import { startTextType } from "../lib/textType";
 
   const heroTypePhrases = [
@@ -243,15 +243,6 @@ const lastName = "Simões".split("");
     document.querySelectorAll<HTMLElement>("#hero-nav li, .hero__brand"),
   );
 
-  // ponytail: scroll stays locked until the nav finishes revealing, via the
-  // shared ScrollSmoother instance rather than body overflow (which the
-  // smoother already manages).
-  const smoother = getSmoother();
-  smoother.paused(true);
-  const unlockScroll = () => {
-    smoother.paused(false);
-  };
-
   const word1Letters = Array.from(
     document.querySelectorAll<HTMLElement>("#hero-word-1 .hero__letter"),
   ).reverse();
@@ -272,7 +263,7 @@ const lastName = "Simões".split("");
     gsap.set(aurora, { autoAlpha: 1 });
     gsap.set(heroType, { autoAlpha: 1 });
     startTextType(heroType, heroTypePhrases);
-    unlockScroll();
+    enableSectionStack();
   } else {
     const isColumn = getComputedStyle(row).flexDirection === "column";
     const mainAxis = isColumn ? "y" : "x";
@@ -319,6 +310,6 @@ const lastName = "Simões".split("");
       .call(() => startTextType(heroType, heroTypePhrases))
       .to(bar, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power3.inOut" }, "+=0.15")
       .to(navItems, { y: 0, opacity: 1, duration: 0.6, stagger: 0.22, ease: "power3.out" }, "+=0.1")
-      .call(unlockScroll);
+      .call(enableSectionStack);
   }
 </script>

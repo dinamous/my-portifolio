@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
-/* ponytail: ScrollSmoother still drives real scroll, this only hides the native bar */
-html {
-  scrollbar-width: none;
-}
-html::-webkit-scrollbar {
-  display: none;
+/* ponytail: sections are fixed full-screen panels, page itself never scrolls */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
