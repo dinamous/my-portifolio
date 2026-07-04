@@ -125,7 +125,7 @@ export function createDarkVeil(container, options = {}) {
   const onPointerMove = (e) => {
     const rect = container.getBoundingClientRect();
     targetMouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    targetMouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+    targetMouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
   };
   window.addEventListener("pointermove", onPointerMove);
 

@@ -1,0 +1,72 @@
+---
+---
+
+{/* ponytail: placeholder copy, swap in real content */}
+<section class="whatido" id="whatido-section">
+  <div class="whatido__inner">
+    <h2 class="whatido__title">O que eu faço</h2>
+    <p class="whatido__text">
+      Construo interfaces com atenção a <em>detalhe</em> e movimento,
+      unindo código e animação para criar experiências que respondem
+      ao usuário.
+    </p>
+  </div>
+</section>
+
+<style>
+  .whatido {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    background: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  .whatido__inner {
+    width: 100%;
+    padding: 8vh 5vw;
+  }
+
+  .whatido__title {
+    margin: 0 0 1.5rem;
+    color: #111;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: -0.01em;
+  }
+
+  .whatido__text {
+    max-width: 60ch;
+    margin: 0;
+    color: #374151;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    line-height: 1.6;
+  }
+
+  .whatido__text em {
+    font-family: "Cormorant Infant", serif;
+    font-style: italic;
+    color: #111;
+  }
+</style>
+
+<script>
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  import "../lib/smoother";
+
+  const heroSection = document.getElementById("hero-section")!;
+
+  // ponytail: pin + pinSpacing:false makes this section slide up and
+  // cover the hero as the user scrolls, instead of the hero scrolling away
+  ScrollTrigger.create({
+    trigger: heroSection,
+    start: "top top",
+    end: "bottom top",
+    pin: true,
+    pinSpacing: false,
+  });
+</script>
