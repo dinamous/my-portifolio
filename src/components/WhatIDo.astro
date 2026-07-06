@@ -1,67 +1,267 @@
 ---
+const leftTitle = "Arquitetura".split("");
+const rightTitle = "Experiência".split("");
+---
 
 {/* ponytail: placeholder copy, swap in real content */}
-<section class="whatido fixed inset-0 h-screen w-screen" id="whatido-section" data-stack>
+<section
+  class="whatido fixed inset-0 h-screen w-screen"
+  id="whatido-section"
+  data-stack
+>
   <div class="whatido__inner">
-    <h2 class="whatido__title">O que eu faço</h2>
-    <p class="whatido__text">
-      Construo interfaces com atenção a <em>detalhe</em> e movimento,
-      unindo código e animação para criar experiências que respondem
-      ao usuário.
-    </p>
-  </div>
+    <div class="whatido__col whatido__col--left" id="whatido-col-left">
+      <div class="whatido__tilt" id="whatido-tilt-left">
+        <div class="whatido__meta">
+          <span>Conceito</span>
+          <span>01 / Estrutura</span>
+        </div>
+        <h2 class="whatido__title">
+          {leftTitle.map((ch) => (
+            <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
+          ))}
+        </h2>
+        <div class="whatido__divider" aria-hidden="true"></div>
+        <p class="whatido__text">
+          Desenvolvimento modular, limpo e de alta performance. Layouts
+          responsivos com foco na acessibilidade e semântica web. Codificação
+          robusta para experiências estáveis.
+        </p>
+      </div>
+    </div>
 
-  <div class="whatido__bar" id="whatido-bar" aria-hidden="true"></div>
+    <div class="whatido__col whatido__col--right" id="whatido-col-right">
+      <div class="whatido__tilt" id="whatido-tilt-right">
+        <div class="whatido__meta">
+          <span>Execução</span>
+          <span>02 / Movimento</span>
+        </div>
+        <h2 class="whatido__title">
+          {rightTitle.map((ch) => (
+            <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
+          ))}
+        </h2>
+        <div class="whatido__divider" aria-hidden="true"></div>
+        <p class="whatido__text">
+          Transições fluidas e micro-interações elegantes que dão vida à
+          interface. Criação de experiências imersivas e jornadas do usuário
+          cativantes através do movimento.
+        </p>
+      </div>
+    </div>
+  </div>
 </section>
 
 <style>
   .whatido {
-    background: #fff;
+    background: #f6f6f6;
     display: flex;
     align-items: center;
     clip-path: inset(0% 0% 0% 0%);
     will-change: clip-path;
   }
 
-  /* ponytail: width must match FINAL_WIDTH_VW in src/lib/sectionStack.ts —
-     same rectangle the hero's mask shrinks down to, ready to animate next */
-  .whatido__bar {
+  /* ponytail: SVG feTurbulence noise instead of a texture asset, swap for a PNG if art direction wants grain to feel less uniform */
+  .whatido::before {
+    content: "";
     position: absolute;
-    top: 0;
-    left: 50%;
-    width: 5vw;
-    height: 100%;
-    background: #000;
-    transform: translateX(-50%);
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
 
   .whatido__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4vw;
     width: 100%;
-    padding: 8vh 5vw;
+    padding: 0 6vw;
+  }
+
+  .whatido__col {
+    max-width: 26vw;
+    will-change: transform, opacity, filter;
+  }
+
+  .whatido__tilt {
+    will-change: transform;
+  }
+
+  .whatido__col--right {
+    text-align: right;
+  }
+
+  .whatido__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: clamp(0.65rem, 0.9vw, 0.75rem);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   .whatido__title {
     margin: 0 0 1.5rem;
     color: #111;
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 700;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    letter-spacing: -0.01em;
+    font-family: "Cormorant Infant", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.6rem, 5.2vw, 5.5rem);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .whatido__letter-wrap {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1;
+  }
+
+  .whatido__letter {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  .whatido__divider {
+    height: 1px;
+    margin-bottom: 1.5rem;
+    background: #d1d5db;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .whatido__col--right .whatido__divider {
+    transform-origin: right center;
   }
 
   .whatido__text {
-    max-width: 60ch;
+    max-width: 42ch;
     margin: 0;
+    margin-left: auto;
     color: #374151;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 500;
-    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
     line-height: 1.6;
   }
 
-  .whatido__text em {
-    font-family: "Cormorant Infant", serif;
-    font-style: italic;
-    color: #111;
+  .whatido__col--left .whatido__text {
+    margin-left: 0;
+  }
+
+  @media (max-width: 900px) {
+    .whatido__col {
+      max-width: 40vw;
+    }
+
+    .whatido__title {
+      font-size: clamp(2rem, 6vw, 3rem);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .whatido {
+      align-items: flex-start;
+      padding: 10vh 0;
+      overflow-y: auto;
+    }
+
+    .whatido__inner {
+      flex-direction: column;
+      gap: 8vh;
+      padding: 0 8vw;
+    }
+
+    .whatido__col,
+    .whatido__col--right {
+      max-width: 100%;
+      text-align: left;
+    }
+
+    .whatido__title {
+      white-space: normal;
+    }
+
+    .whatido__text,
+    .whatido__col--left .whatido__text {
+      margin-left: 0;
+    }
   }
 </style>
+
+<script>
+  import gsap from "gsap";
+
+  const section = document.getElementById("whatido-section")!;
+  const colLeft = document.getElementById("whatido-col-left")!;
+  const colRight = document.getElementById("whatido-col-right")!;
+  const cols = [colLeft, colRight];
+  const tiltLeft = document.getElementById("whatido-tilt-left")!;
+  const tiltRight = document.getElementById("whatido-tilt-right")!;
+  const dividers = section.querySelectorAll<HTMLElement>(".whatido__divider");
+  const leftLetters = colLeft.querySelectorAll<HTMLElement>(".whatido__letter");
+  const rightLetters = colRight.querySelectorAll<HTMLElement>(".whatido__letter");
+
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  if (reduceMotion) {
+    gsap.set(cols, { x: 0, opacity: 1, filter: "none" });
+    gsap.set([...leftLetters, ...rightLetters], { y: "0%", opacity: 1 });
+    gsap.set(dividers, { scaleX: 1 });
+  } else {
+    gsap.set(colLeft, { x: "-3vw", opacity: 0, filter: "blur(8px)" });
+    gsap.set(colRight, { x: "3vw", opacity: 0, filter: "blur(8px)" });
+    gsap.set([...leftLetters, ...rightLetters], { y: "110%", opacity: 0 });
+
+    // one-shot reveal once the intro is over and the user can actually scroll here
+    window.addEventListener(
+      "navbar:revealed",
+      () => {
+        gsap
+          .timeline({ defaults: { ease: "power3.out" } })
+          .to(colLeft, { x: "-4vw", opacity: 1, filter: "blur(0px)", duration: 1 }, 0.15)
+          .to(colRight, { x: "4vw", opacity: 1, filter: "blur(0px)", duration: 1 }, 0.15)
+          .to(leftLetters, { y: "0%", opacity: 1, duration: 0.7, stagger: 0.02 }, 0.3)
+          .to(rightLetters, { y: "0%", opacity: 1, duration: 0.7, stagger: 0.02 }, 0.3)
+          .to(dividers, { scaleX: 1, duration: 0.8, ease: "power4.inOut" }, 0.6);
+      },
+      { once: true },
+    );
+
+    // subtle mouse-tilt parallax once revealed — lives on an inner wrapper so it
+    // doesn't fight the scroll-driven "x" set on the column itself below
+    section.addEventListener("mousemove", (e) => {
+      const x = e.clientX / window.innerWidth - 0.5;
+      const y = e.clientY / window.innerHeight - 0.5;
+      gsap.to(tiltLeft, { x: x * 10, y: y * 10, duration: 1.2, ease: "power2.out", overwrite: "auto" });
+      gsap.to(tiltRight, { x: x * -10, y: y * -10, duration: 1.2, ease: "power2.out", overwrite: "auto" });
+    });
+
+    section.addEventListener("mouseleave", () => {
+      gsap.to(tiltLeft, { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
+      gsap.to(tiltRight, { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
+    });
+
+    // columns rest near the border and get pulled inward as the hero bar shrinks —
+    // driven by the same progress from scroll-start (see Hero.astro's "stack:progress")
+    window.addEventListener("hero:bar-shrink", ((e: CustomEvent<{ progress: number }>) => {
+      const t = e.detail.progress;
+      gsap.set(colLeft, { x: gsap.utils.interpolate("-4vw", "8vw", t) });
+      gsap.set(colRight, { x: gsap.utils.interpolate("4vw", "-8vw", t) });
+    }) as EventListener);
+  }
+</script>

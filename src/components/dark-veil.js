@@ -130,7 +130,7 @@ export function createDarkVeil(container, options = {}) {
   window.addEventListener("pointermove", onPointerMove);
 
   const start = performance.now();
-  let rafId;
+  let rafId = 0;
   const loop = () => {
     rafId = requestAnimationFrame(loop);
     uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
@@ -141,14 +141,27 @@ export function createDarkVeil(container, options = {}) {
   };
   rafId = requestAnimationFrame(loop);
 
-  return function destroy() {
-    cancelAnimationFrame(rafId);
-    window.removeEventListener("pointermove", onPointerMove);
-    ro.disconnect();
-    if (canvas.parentElement === container) container.removeChild(canvas);
-    program.remove?.();
-    geometry.remove?.();
-    mesh.remove?.();
-    renderer.destroy?.();
+  return {
+    // ponytail: this shader keeps costing a full-res render every frame even while
+    // clipped down to a sliver — pause it during the scroll-close transition so it's
+    // not competing with clip-path/transform compositing for GPU time
+    pause() {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    },
+    resume() {
+      if (rafId) return;
+      rafId = requestAnimationFrame(loop);
+    },
+    destroy() {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("pointermove", onPointerMove);
+      ro.disconnect();
+      if (canvas.parentElement === container) container.removeChild(canvas);
+      program.remove?.();
+      geometry.remove?.();
+      mesh.remove?.();
+      renderer.destroy?.();
+    },
   };
 }

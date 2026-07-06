@@ -11,23 +11,28 @@ let max = 0;
 let enabled = false;
 let moveTo: (value: number) => void;
 
-const DISTANCE = 900; // px of wheel/touch travel to fully close one section into the next
+const DISTANCE = 1800; // px of wheel/touch travel to fully close one section into the next — higher means each wheel notch moves a smaller fraction, so steps between notches read as smooth glide instead of a jump
 export const FINAL_WIDTH_VW = 5; // width (in vw) left uncovered when a section finishes closing
 const MAX_INSET = (100 - FINAL_WIDTH_VW) / 2; // vw per side to shrink down to FINAL_WIDTH_VW
 const FADE_START = 0.25; // fraction of the transition where the black overlay starts appearing
+// ponytail: clip finishes closing before local hits 1, holding at FINAL_WIDTH_VW so the
+// remaining range is free for the section's own finale (e.g. Hero's bar spin) before it hides
+export const CLIP_CLOSE_T = 0.7;
 
 function applyState() {
   sections.forEach((el, i) => {
     if (i === sections.length - 1) return; // last section never closes
     const local = gsap.utils.clamp(0, 1, state.value - i);
-    const inset = local * MAX_INSET;
-    gsap.set(el, {
-      clipPath: `inset(0 ${inset}vw 0 ${inset}vw)`,
-      // fully closed reversibly hides the section instead of leaving a dead
-      // sliver behind; scrolling back up (local < 1) restores it next update
-      visibility: local >= 1 ? "hidden" : "visible",
-    });
-    const fadeT = gsap.utils.clamp(0, 1, (local - FADE_START) / (1 - FADE_START));
+    const clipT = gsap.utils.clamp(0, 1, local / CLIP_CLOSE_T);
+    const inset = clipT * MAX_INSET;
+    // ponytail: no hard visibility toggle here — that boolean flip right at the local===1
+    // boundary is what caused the flicker (state settles/overshoots near the edge). The
+    // section is expected to collapse itself away (e.g. Hero scales its bar down to 0)
+    // by the time local reaches 1, so there's nothing left to hide by then anyway.
+    gsap.set(el, { clipPath: `inset(0 ${inset}vw 0 ${inset}vw)` });
+    // tied to clipT (not local) so the overlay is already fully opaque by the time
+    // clipT finishes closing, instead of still ramping up during the finale that follows
+    const fadeT = gsap.utils.clamp(0, 1, (clipT - FADE_START) / (1 - FADE_START));
     gsap.set(overlays[i], { opacity: Math.pow(fadeT, 0.6) }); // ponytail: exponent <1 front-loads the ramp so it reads dark sooner
     // lets each section react to its own closing progress (e.g. parallax content away)
     // without this generic module reaching into section-specific DOM
@@ -67,8 +72,8 @@ export function initSectionStack(selector = "[data-stack]") {
   // restart-from-zero-velocity kink each time (and without the lag a longer
   // one-off gsap.to would add)
   moveTo = gsap.quickTo(state, "value", {
-    duration: reduceMotion ? 0 : 0.45,
-    ease: "power3",
+    duration: reduceMotion ? 0 : 0.75,
+    ease: "power2.out",
     onUpdate: applyState,
   });
 

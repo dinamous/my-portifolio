@@ -1,4 +1,6 @@
 ---
+import Navbar from "./Navbar.astro";
+
 const firstName = "Matheus".split("");
 const lastName = "Simões".split("");
 ---
@@ -24,6 +26,8 @@ const lastName = "Simões".split("");
       </span>
     </h1>
   </div>
+
+  <Navbar />
 </section>
 
 <style>
@@ -186,7 +190,7 @@ const lastName = "Simões".split("");
 <script>
   import gsap from "gsap";
   import { createDarkVeil } from "./dark-veil";
-  import { enableSectionStack } from "../lib/sectionStack";
+  import { enableSectionStack, CLIP_CLOSE_T } from "../lib/sectionStack";
   import { startTextType } from "../lib/textType";
 
   const heroTypePhrases = [
@@ -204,7 +208,7 @@ const lastName = "Simões".split("");
   const scan = document.getElementById("hero-scan")!;
   const aurora = document.getElementById("hero-aurora")!;
   const heroType = document.getElementById("hero-type")!;
-  createDarkVeil(aurora, {
+  const darkVeil = createDarkVeil(aurora, {
     hueShift: 50,
     noiseIntensity: 0.09,
     scanlineIntensity: 0.43,
@@ -286,5 +290,27 @@ const lastName = "Simões".split("");
     const p = e.detail.progress;
     gsap.set(aurora, { yPercent: -p * 35, opacity: 1 - p * 0.5 });
     gsap.set(row, { y: -p * 50, scale: 1 - p * 0.15, opacity: 1 - p * 0.6 });
+
+    // clip-path finishes closing (and the overlay is already fully black) by CLIP_CLOSE_T,
+    // leaving the rest of the range for a subtle spin of that already-clipped bar — transform
+    // is applied after clip-path in CSS, so rotating the whole section rotates the thin
+    // clipped rectangle as a rigid shape instead of re-clipping it mid-spin
+    const spinT = gsap.utils.clamp(0, 1, (p - CLIP_CLOSE_T) / (1 - CLIP_CLOSE_T));
+
+    // bar shrinks away gradually across the whole spin (rather than snapping to 0
+    // right at the end) so it disappears in step with the same scroll that pulls
+    // WhatIDo's columns toward center
+    const baseScaleX = 1 - spinT * 0.2;
+    const baseScaleY = 1 - spinT * 0.12;
+
+    gsap.set(heroSection, {
+      rotation: spinT * 90,
+      scaleX: baseScaleX * (1 - spinT),
+      scaleY: baseScaleY * (1 - spinT),
+      backgroundColor: gsap.utils.interpolate("#000000", "#0891b2", spinT),
+    });
+    // fires from the first scroll tick (p>0), as soon as the clip-path starts shrinking
+    // the bar — WhatIDo listens on window to pull its own columns in from the border
+    window.dispatchEvent(new CustomEvent("hero:bar-shrink", { detail: { progress: p } }));
   }) as EventListener);
 </script>
