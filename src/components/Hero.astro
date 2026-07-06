@@ -1,6 +1,4 @@
 ---
-import Navbar from "./Navbar.astro";
-
 const firstName = "Matheus".split("");
 const lastName = "Simões".split("");
 ---
@@ -25,10 +23,6 @@ const lastName = "Simões".split("");
         ))}<span class="hero__semi" id="hero-semi">;</span>
       </span>
     </h1>
-
-    <div class="hero__bar" id="hero-bar" aria-hidden="true"></div>
-
-    <Navbar />
   </div>
 </section>
 
@@ -109,7 +103,7 @@ const lastName = "Simões".split("");
 
   .hero__bottom {
     position: absolute;
-    inset: auto 0 4vh 0;
+    inset: auto 0 10vh 0;
     z-index: 1;
     display: flex;
     flex-direction: column;
@@ -125,7 +119,7 @@ const lastName = "Simões".split("");
   }
 
   .hero__word {
-    --hero-size: clamp(3rem, 13vw, 11rem);
+    --hero-size: clamp(3rem, 11vw, 30rem);
     display: inline-flex;
     color: #fff;
     line-height: 1;
@@ -170,22 +164,6 @@ const lastName = "Simões".split("");
     will-change: transform, opacity;
   }
 
-  .hero__bar {
-    width: calc(100% - 10vw);
-    height: 3px;
-    margin: 80px auto 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4) 25%,
-      rgba(255, 255, 255, 0.4) 75%,
-      transparent
-    );
-    transform: scaleX(0);
-    transform-origin: center;
-    opacity: 0;
-  }
-
   @media (max-width: 640px) {
     .hero__type {
       max-width: 70vw;
@@ -201,10 +179,6 @@ const lastName = "Simões".split("");
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
-    }
-
-    .hero__bar {
-      margin-top: 48px;
     }
   }
 </style>
@@ -228,7 +202,6 @@ const lastName = "Simões".split("");
   const words = [word1, word2];
   const semi = document.getElementById("hero-semi")!;
   const scan = document.getElementById("hero-scan")!;
-  const bar = document.getElementById("hero-bar")!;
   const aurora = document.getElementById("hero-aurora")!;
   const heroType = document.getElementById("hero-type")!;
   createDarkVeil(aurora, {
@@ -239,9 +212,6 @@ const lastName = "Simões".split("");
     scanlineFrequency: 1.3,
     warpAmount: 0.3,
   });
-  const navItems = Array.from(
-    document.querySelectorAll<HTMLElement>("#hero-nav li, .hero__brand"),
-  );
 
   const word1Letters = Array.from(
     document.querySelectorAll<HTMLElement>("#hero-word-1 .hero__letter"),
@@ -258,8 +228,6 @@ const lastName = "Simões".split("");
     gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
     gsap.set(semi, { opacity: 1, scale: 1 });
     gsap.set(scan, { autoAlpha: 0 });
-    gsap.set(bar, { scaleX: 1, opacity: 1 });
-    gsap.set(navItems, { y: 0, opacity: 1 });
     gsap.set(aurora, { autoAlpha: 1 });
     gsap.set(heroType, { autoAlpha: 1 });
     startTextType(heroType, heroTypePhrases);
@@ -308,8 +276,15 @@ const lastName = "Simões".split("");
       .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
       .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
       .call(() => startTextType(heroType, heroTypePhrases))
-      .to(bar, { scaleX: 1, opacity: 1, duration: 0.7, ease: "power3.inOut" }, "+=0.15")
-      .to(navItems, { y: 0, opacity: 1, duration: 0.6, stagger: 0.22, ease: "power3.out" }, "+=0.1")
-      .call(enableSectionStack);
+      .call(() => window.dispatchEvent(new CustomEvent("hero:reveal-nav")), [], "+=0.15");
+
+    window.addEventListener("navbar:revealed", enableSectionStack, { once: true });
   }
+
+  // scroll-close parallax: darkveil drifts up and out, the name recedes with a slight scale-down
+  heroSection.addEventListener("stack:progress", ((e: CustomEvent<{ progress: number }>) => {
+    const p = e.detail.progress;
+    gsap.set(aurora, { yPercent: -p * 35, opacity: 1 - p * 0.5 });
+    gsap.set(row, { y: -p * 50, scale: 1 - p * 0.15, opacity: 1 - p * 0.6 });
+  }) as EventListener);
 </script>

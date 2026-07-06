@@ -14,7 +14,7 @@ let moveTo: (value: number) => void;
 const DISTANCE = 900; // px of wheel/touch travel to fully close one section into the next
 export const FINAL_WIDTH_VW = 5; // width (in vw) left uncovered when a section finishes closing
 const MAX_INSET = (100 - FINAL_WIDTH_VW) / 2; // vw per side to shrink down to FINAL_WIDTH_VW
-const FADE_START = 0.5; // fraction of the transition where the black overlay starts appearing
+const FADE_START = 0.25; // fraction of the transition where the black overlay starts appearing
 
 function applyState() {
   sections.forEach((el, i) => {
@@ -27,9 +27,11 @@ function applyState() {
       // sliver behind; scrolling back up (local < 1) restores it next update
       visibility: local >= 1 ? "hidden" : "visible",
     });
-    gsap.set(overlays[i], {
-      opacity: gsap.utils.clamp(0, 1, (local - FADE_START) / (1 - FADE_START)),
-    });
+    const fadeT = gsap.utils.clamp(0, 1, (local - FADE_START) / (1 - FADE_START));
+    gsap.set(overlays[i], { opacity: Math.pow(fadeT, 0.6) }); // ponytail: exponent <1 front-loads the ramp so it reads dark sooner
+    // lets each section react to its own closing progress (e.g. parallax content away)
+    // without this generic module reaching into section-specific DOM
+    el.dispatchEvent(new CustomEvent("stack:progress", { detail: { progress: local } }));
   });
 }
 
