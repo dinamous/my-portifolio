@@ -23,17 +23,24 @@ function applyState() {
   sections.forEach((el, i) => {
     if (i === sections.length - 1) return; // last section never closes
     const local = gsap.utils.clamp(0, 1, state.value - i);
-    const clipT = gsap.utils.clamp(0, 1, local / CLIP_CLOSE_T);
-    const inset = clipT * MAX_INSET;
-    // ponytail: no hard visibility toggle here — that boolean flip right at the local===1
-    // boundary is what caused the flicker (state settles/overshoots near the edge). The
-    // section is expected to collapse itself away (e.g. Hero scales its bar down to 0)
-    // by the time local reaches 1, so there's nothing left to hide by then anyway.
-    gsap.set(el, { clipPath: `inset(0 ${inset}vw 0 ${inset}vw)` });
-    // tied to clipT (not local) so the overlay is already fully opaque by the time
-    // clipT finishes closing, instead of still ramping up during the finale that follows
-    const fadeT = gsap.utils.clamp(0, 1, (clipT - FADE_START) / (1 - FADE_START));
-    gsap.set(overlays[i], { opacity: Math.pow(fadeT, 0.6) }); // ponytail: exponent <1 front-loads the ramp so it reads dark sooner
+
+    // ponytail: opt-out for sections whose next transition isn't the shrink-to-bar
+    // wipe (e.g. one covered by its own curtain elements instead) — they still get
+    // `local` progress via stack:progress below, just skip this generic visual.
+    if (!el.hasAttribute("data-no-close-clip")) {
+      const clipT = gsap.utils.clamp(0, 1, local / CLIP_CLOSE_T);
+      const inset = clipT * MAX_INSET;
+      // ponytail: no hard visibility toggle here — that boolean flip right at the local===1
+      // boundary is what caused the flicker (state settles/overshoots near the edge). The
+      // section is expected to collapse itself away (e.g. Hero scales its bar down to 0)
+      // by the time local reaches 1, so there's nothing left to hide by then anyway.
+      gsap.set(el, { clipPath: `inset(0 ${inset}vw 0 ${inset}vw)` });
+      // tied to clipT (not local) so the overlay is already fully opaque by the time
+      // clipT finishes closing, instead of still ramping up during the finale that follows
+      const fadeT = gsap.utils.clamp(0, 1, (clipT - FADE_START) / (1 - FADE_START));
+      gsap.set(overlays[i], { opacity: Math.pow(fadeT, 0.6) }); // ponytail: exponent <1 front-loads the ramp so it reads dark sooner
+    }
+
     // lets each section react to its own closing progress (e.g. parallax content away)
     // without this generic module reaching into section-specific DOM
     el.dispatchEvent(new CustomEvent("stack:progress", { detail: { progress: local } }));

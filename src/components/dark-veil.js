@@ -112,6 +112,10 @@ export function createDarkVeil(container, options = {}) {
 
   const resize = () => {
     const rect = container.getBoundingClientRect();
+    // ponytail: container scales to 0 while Hero is collapsed (see Hero.astro's
+    // spin finale) — resizing the canvas to 0x0 drops the WebGL context on some
+    // drivers with no recovery, so skip and keep the last valid size instead
+    if (rect.width <= 0 || rect.height <= 0) return;
     renderer.setSize(rect.width * resolutionScale, rect.height * resolutionScale);
     uniforms.uResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight];
   };

@@ -16,6 +16,7 @@ const rightWords = rightText.split(" ");
   class="whatido fixed inset-0 h-screen w-screen"
   id="whatido-section"
   data-stack
+  data-no-close-clip
 >
   <div class="whatido__noise" id="whatido-noise" aria-hidden="true"></div>
 
@@ -23,17 +24,31 @@ const rightWords = rightText.split(" ");
     <div class="whatido__col whatido__col--left" id="whatido-col-left">
       <div class="whatido__tilt" id="whatido-tilt-left">
         <div class="whatido__meta">
-          <span class="whatido__meta-wrap"><span class="whatido__meta-item">Conceito</span></span>
-          <span class="whatido__meta-wrap"><span class="whatido__meta-item">01 / Estrutura</span></span>
+          <span class="whatido__meta-wrap"
+            ><span class="whatido__meta-item">Conceito</span></span
+          >
+          <span class="whatido__meta-wrap"
+            ><span class="whatido__meta-item">01 / Estrutura</span></span
+          >
         </div>
         <h2 class="whatido__title">
-          {leftTitle.map((ch) => (
-            <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
-          ))}
+          {
+            leftTitle.map((ch) => (
+              <span class="whatido__letter-wrap">
+                <span class="whatido__letter">{ch}</span>
+              </span>
+            ))
+          }
         </h2>
         <div class="whatido__divider" aria-hidden="true"></div>
         <p class="whatido__text">
-          {leftWords.flatMap((w, i) => (i === 0 ? [<span class="whatido__word">{w}</span>] : [" ", <span class="whatido__word">{w}</span>]))}
+          {
+            leftWords.flatMap((w, i) =>
+              i === 0
+                ? [<span class="whatido__word">{w}</span>]
+                : [" ", <span class="whatido__word">{w}</span>],
+            )
+          }
         </p>
       </div>
     </div>
@@ -41,17 +56,31 @@ const rightWords = rightText.split(" ");
     <div class="whatido__col whatido__col--right" id="whatido-col-right">
       <div class="whatido__tilt" id="whatido-tilt-right">
         <div class="whatido__meta">
-          <span class="whatido__meta-wrap"><span class="whatido__meta-item">Execução</span></span>
-          <span class="whatido__meta-wrap"><span class="whatido__meta-item">02 / Movimento</span></span>
+          <span class="whatido__meta-wrap"
+            ><span class="whatido__meta-item">Execução</span></span
+          >
+          <span class="whatido__meta-wrap"
+            ><span class="whatido__meta-item">02 / Movimento</span></span
+          >
         </div>
         <h2 class="whatido__title">
-          {rightTitle.map((ch) => (
-            <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
-          ))}
+          {
+            rightTitle.map((ch) => (
+              <span class="whatido__letter-wrap">
+                <span class="whatido__letter">{ch}</span>
+              </span>
+            ))
+          }
         </h2>
         <div class="whatido__divider" aria-hidden="true"></div>
         <p class="whatido__text">
-          {rightWords.flatMap((w, i) => (i === 0 ? [<span class="whatido__word">{w}</span>] : [" ", <span class="whatido__word">{w}</span>]))}
+          {
+            rightWords.flatMap((w, i) =>
+              i === 0
+                ? [<span class="whatido__word">{w}</span>]
+                : [" ", <span class="whatido__word">{w}</span>],
+            )
+          }
         </p>
       </div>
     </div>
@@ -239,11 +268,15 @@ const rightWords = rightText.split(" ");
   const tiltRight = document.getElementById("whatido-tilt-right")!;
   const dividers = section.querySelectorAll<HTMLElement>(".whatido__divider");
   const leftMeta = colLeft.querySelectorAll<HTMLElement>(".whatido__meta-item");
-  const rightMeta = colRight.querySelectorAll<HTMLElement>(".whatido__meta-item");
+  const rightMeta = colRight.querySelectorAll<HTMLElement>(
+    ".whatido__meta-item",
+  );
   const leftLetters = colLeft.querySelectorAll<HTMLElement>(".whatido__letter");
-  const rightLetters = colRight.querySelectorAll<HTMLElement>(".whatido__letter");
+  const rightLetters =
+    colRight.querySelectorAll<HTMLElement>(".whatido__letter");
   const leftWords = colLeft.querySelectorAll<HTMLElement>(".whatido__word");
   const rightWords = colRight.querySelectorAll<HTMLElement>(".whatido__word");
+  const textBlocks = section.querySelectorAll<HTMLElement>(".whatido__inner");
 
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
@@ -253,7 +286,11 @@ const rightWords = rightText.split(" ");
     gsap.set(cols, { x: 0, opacity: 1, filter: "none" });
     gsap.set([...leftMeta, ...rightMeta], { y: "0%", opacity: 1, skewY: 0 });
     gsap.set([...leftLetters, ...rightLetters], { y: "0%", opacity: 1 });
-    gsap.set([...leftWords, ...rightWords], { y: "0%", opacity: 1, filter: "none" });
+    gsap.set([...leftWords, ...rightWords], {
+      y: "0%",
+      opacity: 1,
+      filter: "none",
+    });
     gsap.set(dividers, { scaleX: 1 });
   } else {
     // film-grain flicker: jump the tile between random offsets instead of a smooth drift
@@ -275,7 +312,11 @@ const rightWords = rightText.split(" ");
     // they're being pulled out from under it rather than a plain fade/slide
     gsap.set([...leftMeta, ...rightMeta], { y: "120%", opacity: 0, skewY: 6 });
     gsap.set([...leftLetters, ...rightLetters], { y: "110%", opacity: 0 });
-    gsap.set([...leftWords, ...rightWords], { y: "40%", opacity: 0, filter: "blur(6px)" });
+    gsap.set([...leftWords, ...rightWords], {
+      y: "40%",
+      opacity: 0,
+      filter: "blur(6px)",
+    });
 
     // element i of a group reveals across its own slice of the segment (1/count wide),
     // in order — a manually-scrubbed stand-in for gsap stagger, since this whole reveal
@@ -287,7 +328,11 @@ const rightWords = rightText.split(" ");
     // reveal (not a per-element scrub) for content that should just appear/disappear
     // as a block, like toggleActions "play reverse" but gated on our own progress
     // value instead of a real ScrollTrigger (there's no real scroll here, see sectionStack.ts)
-    function makeToggle(targets: HTMLElement[] | NodeListOf<HTMLElement>, threshold: number, vars: gsap.TweenVars) {
+    function makeToggle(
+      targets: HTMLElement[] | NodeListOf<HTMLElement>,
+      threshold: number,
+      vars: gsap.TweenVars,
+    ) {
       const tween = gsap.to(targets, { ...vars, paused: true });
       let revealed = false;
       return (t: number) => {
@@ -310,8 +355,23 @@ const rightWords = rightText.split(" ");
 
     // idle float once the columns finish sliding to their resting spot — a paused
     // yoyo loop toggled on/off by spinT reaching 1, instead of a play-once timeline
-    const floatLeft = gsap.to(colLeft, { y: "-1vh", duration: 2.6, ease: "sine.inOut", repeat: -1, yoyo: true, paused: true });
-    const floatRight = gsap.to(colRight, { y: "1vh", duration: 2.8, ease: "sine.inOut", repeat: -1, yoyo: true, paused: true, delay: 0.4 });
+    const floatLeft = gsap.to(colLeft, {
+      y: "-1vh",
+      duration: 2.6,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+      paused: true,
+    });
+    const floatRight = gsap.to(colRight, {
+      y: "1vh",
+      duration: 2.8,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+      paused: true,
+      delay: 0.4,
+    });
     let floating = false;
     function setFloating(on: boolean) {
       if (on === floating) return;
@@ -339,35 +399,75 @@ const rightWords = rightText.split(" ");
     section.addEventListener("mousemove", (e) => {
       const x = e.clientX / window.innerWidth - 0.5;
       const y = e.clientY / window.innerHeight - 0.5;
-      gsap.to(tiltLeft, { x: x * 28, y: y * 28, duration: 0.6, ease: "power2.out", overwrite: "auto" });
-      gsap.to(tiltRight, { x: x * -28, y: y * -28, duration: 0.6, ease: "power2.out", overwrite: "auto" });
+      gsap.to(tiltLeft, {
+        x: x * 28,
+        y: y * 28,
+        duration: 0.6,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+      gsap.to(tiltRight, {
+        x: x * -28,
+        y: y * -28,
+        duration: 0.6,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
     });
 
     section.addEventListener("mouseleave", () => {
-      gsap.to(tiltLeft, { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
-      gsap.to(tiltRight, { x: 0, y: 0, duration: 1, ease: "power3.out", overwrite: "auto" });
+      gsap.to(tiltLeft, {
+        x: 0,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        overwrite: "auto",
+      });
+      gsap.to(tiltRight, {
+        x: 0,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        overwrite: "auto",
+      });
     });
 
     // whole reveal is driven off the same "progress" Hero already emits as it closes —
     // cols/letters/divider scrub continuously with it (gradual, reversible), while
     // meta/words are all-or-nothing toggles at their own threshold (see makeToggle).
-    window.addEventListener("hero:bar-shrink", ((e: CustomEvent<{ progress: number }>) => {
+    window.addEventListener("hero:bar-shrink", ((
+      e: CustomEvent<{ progress: number }>,
+    ) => {
       const t = e.detail.progress;
 
       const colsT = gsap.utils.clamp(0, 1, t / 0.35);
-      gsap.set(colLeft, { x: gsap.utils.interpolate("-3vw", "-4vw", colsT), opacity: colsT, filter: gsap.utils.interpolate("blur(8px)", "blur(0px)", colsT) });
-      gsap.set(colRight, { x: gsap.utils.interpolate("3vw", "4vw", colsT), opacity: colsT, filter: gsap.utils.interpolate("blur(8px)", "blur(0px)", colsT) });
+      gsap.set(colLeft, {
+        x: gsap.utils.interpolate("-3vw", "-4vw", colsT),
+        opacity: colsT,
+        filter: gsap.utils.interpolate("blur(8px)", "blur(0px)", colsT),
+      });
+      gsap.set(colRight, {
+        x: gsap.utils.interpolate("3vw", "4vw", colsT),
+        opacity: colsT,
+        filter: gsap.utils.interpolate("blur(8px)", "blur(0px)", colsT),
+      });
 
       revealMeta(t);
 
       const lettersT = gsap.utils.clamp(0, 1, (t - 0.05) / 0.4);
       leftLetters.forEach((el, i) => {
         const lt = seqT(lettersT, i, leftLetters.length);
-        gsap.set(el, { y: gsap.utils.interpolate("110%", "0%", lt), opacity: lt });
+        gsap.set(el, {
+          y: gsap.utils.interpolate("110%", "0%", lt),
+          opacity: lt,
+        });
       });
       rightLetters.forEach((el, i) => {
         const lt = seqT(lettersT, i, rightLetters.length);
-        gsap.set(el, { y: gsap.utils.interpolate("110%", "0%", lt), opacity: lt });
+        gsap.set(el, {
+          y: gsap.utils.interpolate("110%", "0%", lt),
+          opacity: lt,
+        });
       });
 
       const dividerT = gsap.utils.clamp(0, 1, (t - 0.35) / 0.2);
@@ -379,10 +479,32 @@ const rightWords = rightText.split(" ");
 
       // columns only start pulling further toward center once the bar itself starts
       // spinning (see Hero.astro's spinT, same CLIP_CLOSE_T threshold)
-      const spinT = gsap.utils.clamp(0, 1, (t - CLIP_CLOSE_T) / (1 - CLIP_CLOSE_T));
+      const spinT = gsap.utils.clamp(
+        0,
+        1,
+        (t - CLIP_CLOSE_T) / (1 - CLIP_CLOSE_T),
+      );
       gsap.set(colLeft, { x: gsap.utils.interpolate("-4vw", "8vw", spinT) });
       gsap.set(colRight, { x: gsap.utils.interpolate("4vw", "-8vw", spinT) });
       setFloating(spinT >= 1);
+    }) as EventListener);
+
+    // rebroadcasts this section's own closing progress on window, same as Hero does
+    // with hero:bar-shrink, so the next stacked section (AboutMe) can react to it
+    // without reaching into this section's DOM directly.
+    section.addEventListener("stack:progress", ((
+      e: CustomEvent<{ progress: number }>,
+    ) => {
+      const t = e.detail.progress;
+      window.dispatchEvent(
+        new CustomEvent("whatido:progress", { detail: { progress: t } }),
+      );
+
+      // short dead zone reads as "scrolling does nothing", then the text blocks
+      // blur away fast (holding blurred after) ahead of AboutMe's own slide-in
+      // starting at 2/3 (see AboutMe.astro — keep in sync).
+      const blurT = gsap.utils.clamp(0, 1, (t - 0.15) / 0.15);
+      gsap.set(textBlocks, { filter: `blur(${blurT * 10}px)` });
     }) as EventListener);
   }
 </script>
