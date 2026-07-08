@@ -1,39 +1,58 @@
 ---
+// ponytail: placeholder copy, swap in real content
+const leftTitle = "Arquitetura".split("");
+const leftText =
+  "Desenvolvimento modular, limpo e de alta performance. Layouts responsivos com foco na acessibilidade e semântica web. Codificação robusta para experiências estáveis.".split(
+    " ",
+  );
+const rightTitle = "Experiência".split("");
+const rightText =
+  "Transições fluidas e micro-interações elegantes que dão vida à interface. Criação de experiências imersivas e jornadas do usuário cativantes através do movimento.".split(
+    " ",
+  );
 ---
 
-{/* ponytail: placeholder copy, swap in real content */}
-<section
-  class="whatido fixed inset-0 h-screen w-screen"
-  id="whatido-section"
-  data-stack
-  data-no-close-clip
->
+<section class="whatido fixed inset-0 h-screen w-screen" id="whatido-section" data-stack data-no-close-clip>
   <div class="whatido__inner">
     <div class="whatido__col whatido__col--left" id="whatido-col-left">
-      <div class="whatido__meta">
+      <div class="whatido__meta" id="whatido-meta-left">
         <span class="whatido__meta-item">Conceito</span>
         <span class="whatido__meta-item">01 / Estrutura</span>
       </div>
-      <h2 class="whatido__title">Arquitetura</h2>
+      <h2 class="whatido__title" id="whatido-title-left">
+        {leftTitle.map((ch) => (
+          <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
+        ))}
+      </h2>
       <div class="whatido__divider" aria-hidden="true"></div>
-      <p class="whatido__text">
-        Desenvolvimento modular, limpo e de alta performance. Layouts
-        responsivos com foco na acessibilidade e semântica web. Codificação
-        robusta para experiências estáveis.
+      <p class="whatido__text" id="whatido-text-left">
+        {leftText.map((word, i) => (
+          <Fragment>
+            <span class="whatido__word-wrap"><span class="whatido__word">{word}</span></span>
+            {i < leftText.length - 1 ? " " : ""}
+          </Fragment>
+        ))}
       </p>
     </div>
 
     <div class="whatido__col whatido__col--right" id="whatido-col-right">
-      <div class="whatido__meta">
+      <div class="whatido__meta" id="whatido-meta-right">
         <span class="whatido__meta-item">Execução</span>
         <span class="whatido__meta-item">02 / Movimento</span>
       </div>
-      <h2 class="whatido__title">Experiência</h2>
+      <h2 class="whatido__title" id="whatido-title-right">
+        {rightTitle.map((ch) => (
+          <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
+        ))}
+      </h2>
       <div class="whatido__divider" aria-hidden="true"></div>
-      <p class="whatido__text">
-        Transições fluidas e micro-interações elegantes que dão vida à
-        interface. Criação de experiências imersivas e jornadas do usuário
-        cativantes através do movimento.
+      <p class="whatido__text" id="whatido-text-right">
+        {rightText.map((word, i) => (
+          <Fragment>
+            <span class="whatido__word-wrap"><span class="whatido__word">{word}</span></span>
+            {i < rightText.length - 1 ? " " : ""}
+          </Fragment>
+        ))}
       </p>
     </div>
   </div>
@@ -91,10 +110,41 @@
     font-size: clamp(2.6rem, 5.2vw, 5.5rem);
     line-height: 1;
     white-space: nowrap;
+  }
+
+  .whatido__letter-wrap {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1;
+    perspective: 400px;
+  }
+
+  .whatido__letter {
+    display: inline-block;
+    /* ponytail: background-size/position set inline per letter (see script) so the
+       gradient reads as one continuous sweep across the whole word instead of each
+       letter rendering its own isolated copy of it */
     background: linear-gradient(100deg, #0891b2, #10b981);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
+    will-change: transform, opacity;
+  }
+
+  .whatido__word-wrap {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1.6;
+  }
+
+  .whatido__word {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  .whatido__meta-item {
+    display: inline-block;
+    will-change: transform, opacity;
   }
 
   .whatido__divider {
@@ -177,11 +227,95 @@
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
+  // the title's gradient lives per-letter (see .whatido__letter CSS) so each
+  // letter can animate independently — this stretches one shared background
+  // across the full title width and offsets each letter to its own slice, so
+  // it still reads as a single continuous cyan->emerald sweep across the word
+  function layoutTitleGradient(titleEl: HTMLElement) {
+    const totalWidth = titleEl.offsetWidth;
+    titleEl
+      .querySelectorAll<HTMLElement>(".whatido__letter")
+      .forEach((letter) => {
+        const offset = letter.getBoundingClientRect().left - titleEl.getBoundingClientRect().left;
+        letter.style.backgroundSize = `${totalWidth}px 100%`;
+        letter.style.backgroundPosition = `${-offset}px 0`;
+      });
+  }
+
+  // builds a paused timeline for one column: meta -> title (letter by letter)
+  // -> paragraph (word by word), each phase starting slightly before the
+  // previous one finishes so the reveal reads continuous rather than stepped.
+  // Letters get a subtle 3D flip-up (rotateX) instead of a plain slide, and an
+  // elastic-leaning ease on the title gives the reveal more character than a
+  // generic power-out would.
+  function buildRevealTimeline(colId: string, titleId: string) {
+    const col = document.getElementById(colId)!;
+    const titleEl = document.getElementById(titleId)!;
+    layoutTitleGradient(titleEl);
+
+    const meta = col.querySelectorAll<HTMLElement>(".whatido__meta-item");
+    const letters = titleEl.querySelectorAll<HTMLElement>(".whatido__letter");
+    const words = col.querySelectorAll<HTMLElement>(".whatido__word");
+
+    gsap.set(col.querySelectorAll(".whatido__letter-wrap, .whatido__word-wrap"), {
+      transformPerspective: 400,
+    });
+    gsap.set(meta, { y: 12, opacity: 0 });
+    gsap.set(letters, { yPercent: 115, rotateX: -50, opacity: 0, transformOrigin: "50% 100%" });
+    gsap.set(words, { yPercent: 60, opacity: 0 });
+
+    return gsap
+      .timeline({ paused: true })
+      .to(letters, {
+        yPercent: 0,
+        rotateX: 0,
+        opacity: 1,
+        duration: 0.75,
+        stagger: 0.028,
+        ease: "back.out(1.7)",
+      })
+      .to(
+        meta,
+        { y: 0, opacity: 1, duration: 0.45, stagger: 0.07, ease: "power3.out" },
+        "-=0.35",
+      )
+      .to(
+        words,
+        { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.04, ease: "power2.out" },
+        "-=0.2",
+      );
+  }
+
   if (reduceMotion) {
     gsap.set(cols, { x: 0, opacity: 1 });
+    gsap.set(section.querySelectorAll(".whatido__meta-item, .whatido__letter, .whatido__word"), {
+      y: 0,
+      opacity: 1,
+    });
   } else {
     gsap.set(colLeft, { x: "-3vw", opacity: 0 });
     gsap.set(colRight, { x: "3vw", opacity: 0 });
+
+    const revealLeft = buildRevealTimeline("whatido-col-left", "whatido-title-left");
+    const revealRight = buildRevealTimeline("whatido-col-right", "whatido-title-right").delay(0.15);
+    let revealed = false;
+
+    window.addEventListener("hero:bar-shrink", ((
+      e: CustomEvent<{ progress: number }>,
+    ) => {
+      const t = e.detail.progress;
+      const shouldReveal = t >= CLIP_CLOSE_T;
+      if (shouldReveal !== revealed) {
+        revealed = shouldReveal;
+        if (revealed) {
+          revealLeft.play();
+          revealRight.play();
+        } else {
+          revealLeft.reverse();
+          revealRight.reverse();
+        }
+      }
+    }) as EventListener);
 
     // scroll-driven: columns fade in and slide toward center as the hero bar
     // closes, then keep pulling further toward center once it starts spinning

@@ -1,5 +1,7 @@
 ---
 import Navbar from "./Navbar.astro";
+import heroVideoForward from "../assets/dark-veil.webm";
+import heroVideoReverse from "../assets/dark-veil-reverse.webm";
 
 const firstName = "Matheus".split("");
 const lastName = "Simões".split("");
@@ -10,7 +12,25 @@ const lastName = "Simões".split("");
     <div class="hero__loader-bar" id="hero-loader-bar"></div>
   </div>
 
-  <div class="hero__aurora" id="hero-aurora" aria-hidden="true"></div>
+  <div class="hero__aurora" id="hero-aurora" aria-hidden="true">
+    <video
+      id="hero-aurora-video-forward"
+      class="hero__aurora-video"
+      src={heroVideoForward}
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+    <video
+      id="hero-aurora-video-reverse"
+      class="hero__aurora-video"
+      src={heroVideoReverse}
+      muted
+      playsinline
+      preload="auto"
+    ></video>
+  </div>
 
   <div class="hero__scan" id="hero-scan" aria-hidden="true"></div>
 
@@ -126,6 +146,22 @@ const lastName = "Simões".split("");
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    overflow: hidden;
+  }
+
+  .hero__aurora-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    opacity: 0;
+  }
+
+  .hero__aurora-video--active {
+    opacity: 1;
   }
 
   .hero__bottom {
@@ -212,7 +248,6 @@ const lastName = "Simões".split("");
 
 <script>
   import gsap from "gsap";
-  import { createDarkVeil } from "./dark-veil";
   import { enableSectionStack, CLIP_CLOSE_T, getOverlay } from "../lib/sectionStack";
   import { startTextType } from "../lib/textType";
 
@@ -230,6 +265,8 @@ const lastName = "Simões".split("");
   const semi = document.getElementById("hero-semi")!;
   const scan = document.getElementById("hero-scan")!;
   const aurora = document.getElementById("hero-aurora")!;
+  const auroraForward = document.getElementById("hero-aurora-video-forward") as HTMLVideoElement;
+  const auroraReverse = document.getElementById("hero-aurora-video-reverse") as HTMLVideoElement;
   const heroType = document.getElementById("hero-type")!;
 
   const loader = document.getElementById("hero-loader")!;
@@ -240,20 +277,55 @@ const lastName = "Simões".split("");
     resolveFirstFrame = resolve;
   });
 
-  const darkVeil = createDarkVeil(aurora, {
-    hueShift: 50,
-    noiseIntensity: 0.09,
-    scanlineIntensity: 0.43,
-    speed: 0.8,
-    scanlineFrequency: 1.3,
-    warpAmount: 0.3,
-    onFirstFrame: () => {
-      resolveFirstFrame();
-      // shader render competes with the letter stagger for GPU/main-thread time
-      // while aurora sits at opacity:0 anyway — pause until it's about to fade in
-      darkVeil.pause();
-    },
-  });
+  // ponytail: <video> has no reliable native reverse playback (negative
+  // playbackRate isn't supported cross-browser), so the seamless loop uses
+  // two pre-rendered clips — one forward, one already reversed — swapping
+  // which one is visible/playing on "ended" instead of cutting back to frame 0.
+  let auroraCurrent = auroraForward;
+  let auroraNext = auroraReverse;
+  let auroraRunning = false;
+
+  // rewind the standby clip the moment it stops being current, so its first
+  // frame is already decoded and painted by the time it's swapped to active —
+  // rewinding only at swap time left a blank/black frame while it seeked, i.e. the flash
+  function primeAurora(video: HTMLVideoElement) {
+    video.pause();
+    video.currentTime = 0;
+  }
+
+  function swapAurora() {
+    if (!auroraRunning) return;
+    const finished = auroraCurrent;
+    const incoming = auroraNext;
+    [auroraCurrent, auroraNext] = [auroraNext, auroraCurrent];
+
+    incoming.classList.add("hero__aurora-video--active");
+    incoming.play();
+    finished.classList.remove("hero__aurora-video--active");
+    primeAurora(finished);
+  }
+
+  primeAurora(auroraReverse);
+  auroraForward.addEventListener("ended", swapAurora);
+  auroraReverse.addEventListener("ended", swapAurora);
+
+  function auroraPlay() {
+    auroraRunning = true;
+    auroraCurrent.play();
+  }
+
+  const onAuroraCanPlay = () => {
+    resolveFirstFrame();
+    // decoding competes with the letter stagger for GPU/main-thread time
+    // while aurora sits at opacity:0 anyway — pause until it's about to fade in
+    auroraForward.pause();
+  };
+  auroraForward.classList.add("hero__aurora-video--active");
+  if (auroraForward.readyState >= 3) {
+    onAuroraCanPlay();
+  } else {
+    auroraForward.addEventListener("canplay", onAuroraCanPlay, { once: true });
+  }
 
   const word1Letters = Array.from(
     document.querySelectorAll<HTMLElement>("#hero-word-1 .hero__letter"),
@@ -273,7 +345,7 @@ const lastName = "Simões".split("");
       gsap.set(scan, { autoAlpha: 0 });
       gsap.set(aurora, { autoAlpha: 1 });
       gsap.set(heroType, { autoAlpha: 1 });
-      darkVeil.resume();
+      auroraPlay();
       startTextType(heroType, heroTypePhrases);
       enableSectionStack();
     } else {
@@ -317,7 +389,7 @@ const lastName = "Simões".split("");
         )
         .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
         .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
-        .call(() => darkVeil.resume(), [], "-=1.8")
+        .call(() => auroraPlay(), [], "-=1.8")
         .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
         .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
         .call(() => startTextType(heroType, heroTypePhrases))
