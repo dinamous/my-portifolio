@@ -56,8 +56,6 @@
     &lt;Sobre <span class="aboutme__label-slash">/</span>&gt;
   </div>
 
-  <div class="aboutme__scan" aria-hidden="true"></div>
-
   <div class="aboutme__block aboutme__block--top" id="aboutme-block-top"></div>
   <div class="aboutme__block aboutme__block--bottom" id="aboutme-block-bottom"></div>
 </section>
@@ -276,21 +274,6 @@
 
   .aboutme__label-slash {
     color: rgba(241, 244, 242, 0.55);
-  }
-
-  .aboutme__scan {
-    position: absolute;
-    inset: 0;
-    z-index: 8;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0) 0,
-      rgba(0, 0, 0, 0) 2px,
-      rgba(0, 0, 0, 0.2) 3px,
-      rgba(0, 0, 0, 0) 4px
-    );
-    opacity: 0.5;
-    mix-blend-mode: multiply;
   }
 
   @media (max-width: 900px) {

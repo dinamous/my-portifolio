@@ -5,6 +5,9 @@ gsap.registerPlugin(Observer);
 
 let sections: HTMLElement[] = [];
 let overlays: HTMLElement[] = [];
+export function getOverlay(el: HTMLElement): HTMLElement | undefined {
+  return overlays[sections.indexOf(el)];
+}
 const state = { value: 0 };
 let target = 0; // raw progress, 0..sections.length-1, accumulated straight from scroll input
 let max = 0;
