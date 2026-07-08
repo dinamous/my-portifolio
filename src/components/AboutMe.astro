@@ -6,6 +6,58 @@
   id="aboutme-section"
   data-stack
 >
+  {/* solid ground the content reveals onto — without it, the gaps between word/portrait/
+     text would show WhatIDo's own (light) background once the curtain blocks exit */}
+  <div class="aboutme__backdrop" id="aboutme-backdrop" aria-hidden="true"></div>
+
+  <div class="aboutme__glow aboutme__glow--1" id="aboutme-glow-1" aria-hidden="true"></div>
+  <div class="aboutme__glow aboutme__glow--2" id="aboutme-glow-2" aria-hidden="true"></div>
+
+  <div class="aboutme__word" id="aboutme-word" aria-hidden="true">
+    sobre<span class="aboutme__accent">;</span>
+  </div>
+
+  {/* ponytail: placeholder portrait fill (gradient + reused /noise.png), swap for a real photo when available */}
+  <div class="aboutme__portrait-wrap" id="aboutme-portrait-wrap" aria-hidden="true">
+    <div class="aboutme__portrait" id="aboutme-portrait">
+      <div class="aboutme__portrait-fill"></div>
+      <span class="aboutme__portrait-tag">{"{ ms:01 }"}</span>
+    </div>
+  </div>
+
+  <div class="aboutme__statement" id="aboutme-statement">
+    <h2 class="aboutme__heading">
+      <span class="aboutme__line"><span class="aboutme__inner">Não desenho telas.</span></span>
+      <span class="aboutme__line"><span class="aboutme__inner">Componho movimento.</span></span>
+      <span class="aboutme__line"
+        ><span class="aboutme__inner"
+          >Vida em cada <em class="aboutme__em">transição<span class="aboutme__accent">;</span></em></span
+        ></span
+      >
+    </h2>
+  </div>
+
+  <div class="aboutme__bio" id="aboutme-bio">
+    <span class="aboutme__rev aboutme__index">// 24</span>
+    <div>
+      <div class="aboutme__rev aboutme__tag">&lt;about&gt;</div>
+      <p class="aboutme__rev aboutme__text">
+        Sou o Matheus, desenvolvedor <em class="aboutme__em">front-end</em> apaixonado
+        por movimento. Dou vida a interfaces com animações, transições e modelagens 3D,
+        sempre buscando fazer a tela deixar de ser estática. Para mim, código é
+        matéria-prima; a <em class="aboutme__em">emoção</em> é o acabamento. Cada
+        detalhe é pensado para ser sentido, não apenas visto.
+      </p>
+      <div class="aboutme__rev aboutme__tag">&lt;/about&gt;</div>
+    </div>
+  </div>
+
+  <div class="aboutme__rev aboutme__label" id="aboutme-label">
+    &lt;Sobre <span class="aboutme__label-slash">/</span>&gt;
+  </div>
+
+  <div class="aboutme__scan" aria-hidden="true"></div>
+
   <div class="aboutme__block aboutme__block--top" id="aboutme-block-top"></div>
   <div class="aboutme__block aboutme__block--bottom" id="aboutme-block-bottom"></div>
 </section>
@@ -14,11 +66,14 @@
   .aboutme {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     pointer-events: none;
-    /* transparent: only the two blocks below should ever be visible. sectionStack
-       assigns the last section the lowest z-index (reveal-from-behind default);
-       this section instead curtains its own blocks over whatever's on top, so it
-       needs to sit above Hero/WhatIDo the whole time without hiding them itself. */
+    /* transparent: only the two blocks (and, once revealed, the content below) should
+       ever be visible. sectionStack assigns the last section the lowest z-index
+       (reveal-from-behind default); this section instead curtains its own blocks over
+       whatever's on top, so it needs to sit above Hero/WhatIDo the whole time. The
+       revealed content lives in this same top layer so the curtain-wipe uncovers it
+       directly, without ever needing WhatIDo underneath to hide itself. */
     z-index: 20 !important;
   }
 
@@ -28,6 +83,260 @@
     background: #000;
     will-change: transform;
   }
+
+  .aboutme__backdrop {
+    position: absolute;
+    inset: 0;
+    background: #04100d;
+    will-change: opacity;
+  }
+
+  .aboutme__glow {
+    position: absolute;
+    filter: blur(16px);
+  }
+
+  .aboutme__glow--1 {
+    top: -16vh;
+    left: 50%;
+    width: 120vw;
+    height: 120vh;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      46% 40% at 50% 42%,
+      rgba(52, 211, 153, 0.28),
+      rgba(8, 145, 178, 0.12) 46%,
+      rgba(0, 0, 0, 0) 72%
+    );
+  }
+
+  .aboutme__glow--2 {
+    bottom: -24vh;
+    right: -14vw;
+    width: 70vw;
+    height: 70vw;
+    max-width: 920px;
+    max-height: 920px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(8, 145, 178, 0.18),
+      rgba(8, 145, 178, 0.06) 50%,
+      rgba(0, 0, 0, 0) 74%
+    );
+  }
+
+  .aboutme__word {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "Cormorant Infant", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(120px, 22vw, 400px);
+    line-height: 0.82;
+    letter-spacing: -0.01em;
+    color: #f4f7f5;
+    white-space: nowrap;
+    will-change: transform;
+  }
+
+  .aboutme__accent {
+    color: #34d399;
+  }
+
+  .aboutme__portrait-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(260px, 30vw, 430px);
+    height: clamp(380px, 68vh, 660px);
+    will-change: transform;
+  }
+
+  .aboutme__portrait {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 50px 130px -30px rgba(0, 0, 0, 0.92);
+    will-change: clip-path;
+  }
+
+  .aboutme__portrait-fill {
+    position: absolute;
+    inset: -8% -6%;
+    background:
+      url("/noise.png"),
+      radial-gradient(120% 85% at 32% 16%, rgba(126, 244, 192, 0.3), rgba(0, 0, 0, 0) 56%),
+      linear-gradient(155deg, #0f3b34, #072220 60%, #030807);
+    background-repeat: repeat, no-repeat, no-repeat;
+    background-blend-mode: overlay, screen, normal;
+  }
+
+  .aboutme__portrait-tag {
+    position: absolute;
+    left: 16px;
+    bottom: 14px;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: rgba(234, 255, 245, 0.72);
+  }
+
+  .aboutme__statement {
+    position: absolute;
+    top: 11vh;
+    left: 6vw;
+    max-width: 52vw;
+  }
+
+  .aboutme__heading {
+    margin: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 3.3vw, 50px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: #f4f7f5;
+  }
+
+  .aboutme__line {
+    display: block;
+    overflow: hidden;
+  }
+
+  .aboutme__inner {
+    display: block;
+    will-change: transform;
+  }
+
+  .aboutme__em {
+    font-family: "Cormorant Infant", serif;
+    font-style: italic;
+    font-weight: 500;
+    color: #34d399;
+  }
+
+  .aboutme__bio {
+    position: absolute;
+    bottom: 11vh;
+    left: 6vw;
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 22px;
+    max-width: 540px;
+  }
+
+  .aboutme__rev {
+    will-change: transform, opacity;
+  }
+
+  .aboutme__index {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: rgba(241, 244, 242, 0.4);
+    padding-top: 4px;
+  }
+
+  .aboutme__tag {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: rgba(52, 211, 153, 0.85);
+  }
+
+  .aboutme__tag:first-child {
+    margin-bottom: 10px;
+  }
+
+  .aboutme__tag:last-child {
+    margin-top: 10px;
+  }
+
+  .aboutme__text {
+    margin: 0 0 0 14px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 15.5px;
+    line-height: 1.68;
+    color: rgba(241, 244, 242, 0.82);
+  }
+
+  .aboutme__label {
+    position: absolute;
+    top: 11vh;
+    right: 6vw;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 14px;
+    color: #34d399;
+    text-align: right;
+  }
+
+  .aboutme__label-slash {
+    color: rgba(241, 244, 242, 0.55);
+  }
+
+  .aboutme__scan {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.2) 3px,
+      rgba(0, 0, 0, 0) 4px
+    );
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+  }
+
+  @media (max-width: 900px) {
+    .aboutme__statement {
+      max-width: 68vw;
+    }
+
+    .aboutme__portrait-wrap {
+      width: clamp(220px, 40vw, 340px);
+      height: clamp(320px, 56vh, 520px);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .aboutme__word {
+      font-size: clamp(90px, 34vw, 220px);
+    }
+
+    .aboutme__portrait-wrap {
+      width: 52vw;
+      height: 40vh;
+    }
+
+    .aboutme__statement {
+      top: 8vh;
+      left: 6vw;
+      max-width: 88vw;
+    }
+
+    .aboutme__heading {
+      font-size: clamp(22px, 6.5vw, 32px);
+    }
+
+    .aboutme__bio {
+      bottom: 6vh;
+      left: 6vw;
+      max-width: 88vw;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+    }
+
+    .aboutme__label {
+      top: 8vh;
+      right: 6vw;
+    }
+  }
 </style>
 
 <script>
@@ -35,27 +344,119 @@
 
   const blockTop = document.getElementById("aboutme-block-top")!;
   const blockBottom = document.getElementById("aboutme-block-bottom")!;
+  const backdrop = document.getElementById("aboutme-backdrop")!;
+  const glow1 = document.getElementById("aboutme-glow-1")!;
+  const glow2 = document.getElementById("aboutme-glow-2")!;
+  const word = document.getElementById("aboutme-word")!;
+  const portraitWrap = document.getElementById("aboutme-portrait-wrap")!;
+  const portrait = document.getElementById("aboutme-portrait")!;
+  const statement = document.getElementById("aboutme-statement")!;
+  const bio = document.getElementById("aboutme-bio")!;
+  const label = document.getElementById("aboutme-label")!;
+  const lines = statement.querySelectorAll<HTMLElement>(".aboutme__inner");
+  const revs = document.querySelectorAll<HTMLElement>(".aboutme__rev");
+  const revealTargets = [backdrop, glow1, glow2, word, portraitWrap, statement, bio, label];
 
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
   if (reduceMotion) {
-    gsap.set([blockTop, blockBottom], { xPercent: 0 });
+    gsap.set([blockTop, blockBottom], { autoAlpha: 0 });
+    gsap.set(revealTargets, { opacity: 1, x: 0, y: 0, scale: 1, filter: "none" });
+    gsap.set(portrait, { clipPath: "inset(0% 0% 0% 0%)" });
+    gsap.set(lines, { yPercent: 0 });
+    gsap.set(revs, { y: 0, opacity: 1 });
   } else {
     gsap.set(blockTop, { xPercent: -100 });
     gsap.set(blockBottom, { xPercent: 100 });
+    gsap.set([backdrop, glow1, glow2, word, statement, bio, label], { opacity: 0 });
+    gsap.set(portraitWrap, { opacity: 0, scale: 1.08 });
+    gsap.set(portrait, { clipPath: "inset(46% 0% 46% 0%)" });
+    gsap.set(lines, { yPercent: 120 });
+    gsap.set(revs, { y: 22, opacity: 0 });
 
-    // curtains straight over whatever's on top as WhatIDo's own scroll segment
-    // progresses — no reliance on WhatIDo's clip-path closing (it's opted out via
-    // data-no-close-clip), just this section's own reveal. Starts at the 2/3 mark
-    // (after WhatIDo's dead-zone + text-blur, see WhatIDo.astro — keep in sync)
-    // and slides in over a quick 0.2 stretch instead of dragging out the rest.
-    window.addEventListener("whatido:progress", ((e: CustomEvent<{ progress: number }>) => {
+    // reveals element i of a group across its own slice of the segment (1/count wide),
+    // in order — same manually-scrubbed stand-in for gsap stagger used in WhatIDo.astro,
+    // since this whole reveal is driven off a single continuous progress value.
+    const seqT = (segT: number, index: number, count: number) =>
+      gsap.utils.clamp(0, 1, segT * count - index);
+
+    // curtain blocks first slide IN to meet in the middle (covering whatever's behind),
+    // then continue OUT the opposite side and fully clear the screen — only once they're
+    // gone (exitT === 1) does the content start revealing (revealT), backdrop first so
+    // WhatIDo's own background never shows through the gaps around the content.
+    window.addEventListener("whatido:progress", ((
+      e: CustomEvent<{ progress: number }>,
+    ) => {
       const t = e.detail.progress;
-      const slideT = gsap.utils.clamp(0, 1, (t - 2 / 3) / 0.2);
-      gsap.set(blockTop, { xPercent: gsap.utils.interpolate(-100, 0, slideT) });
-      gsap.set(blockBottom, { xPercent: gsap.utils.interpolate(100, 0, slideT) });
+      const slideT = gsap.utils.clamp(0, 1, (t - 2 / 3) / (1 / 3));
+      const coverT = gsap.utils.clamp(0, 1, slideT / 0.4);
+      const exitT = gsap.utils.clamp(0, 1, (slideT - 0.4) / 0.2);
+      const revealT = gsap.utils.clamp(0, 1, (slideT - 0.6) / 0.4);
+
+      gsap.set(blockTop, {
+        xPercent: coverT < 1
+          ? gsap.utils.interpolate(-100, 0, coverT)
+          : gsap.utils.interpolate(0, 100, exitT),
+      });
+      gsap.set(blockBottom, {
+        xPercent: coverT < 1
+          ? gsap.utils.interpolate(100, 0, coverT)
+          : gsap.utils.interpolate(0, -100, exitT),
+      });
+
+      const backdropT = gsap.utils.clamp(0, 1, revealT / 0.15);
+      gsap.set(backdrop, { opacity: backdropT });
+
+      const glowT = gsap.utils.clamp(0, 1, revealT / 0.4);
+      gsap.set([glow1, glow2], { opacity: glowT });
+
+      const wordT = gsap.utils.clamp(0, 1, revealT / 0.5);
+      gsap.set(word, { opacity: wordT });
+
+      const portraitT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.55);
+      gsap.set(portraitWrap, {
+        opacity: portraitT,
+        scale: gsap.utils.interpolate(1.08, 1, portraitT),
+      });
+      const clipInset = gsap.utils.interpolate(46, 0, portraitT);
+      gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
+
+      const linesT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.5);
+      gsap.set(statement, { opacity: linesT > 0 ? 1 : 0 });
+      lines.forEach((el, i) => {
+        const lt = seqT(linesT, i, lines.length);
+        gsap.set(el, { yPercent: gsap.utils.interpolate(120, 0, lt) });
+      });
+
+      const revsT = gsap.utils.clamp(0, 1, (revealT - 0.45) / 0.5);
+      gsap.set(bio, { opacity: revsT > 0 ? 1 : 0 });
+      gsap.set(label, { opacity: revsT > 0 ? 1 : 0 });
+      revs.forEach((el, i) => {
+        const rt = seqT(revsT, i, revs.length);
+        gsap.set(el, { y: gsap.utils.interpolate(22, 0, rt), opacity: rt });
+      });
     }) as EventListener);
+
+    // subtle mouse parallax across the revealed scene — listens on window (not the
+    // section) since .aboutme keeps pointer-events:none for its whole top-layer curtain.
+    const wX = gsap.quickTo(word, "x", { duration: 1.2, ease: "power3" });
+    const g1X = gsap.quickTo(glow1, "x", { duration: 1.3, ease: "power3" });
+    const g1Y = gsap.quickTo(glow1, "y", { duration: 1.3, ease: "power3" });
+    const g2X = gsap.quickTo(glow2, "x", { duration: 1.5, ease: "power3" });
+    const pX = gsap.quickTo(portraitWrap, "x", { duration: 1.0, ease: "power3" });
+    const pY = gsap.quickTo(portraitWrap, "y", { duration: 1.0, ease: "power3" });
+
+    window.addEventListener("mousemove", (e) => {
+      const dx = e.clientX / window.innerWidth - 0.5;
+      const dy = e.clientY / window.innerHeight - 0.5;
+      wX(dx * 46);
+      g1X(-dx * 60);
+      g1Y(-dy * 44);
+      g2X(dx * 40);
+      pX(-dx * 26);
+      pY(-dy * 20);
+    });
   }
 </script>
