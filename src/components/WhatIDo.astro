@@ -1,14 +1,4 @@
 ---
-const leftTitle = "Arquitetura".split("");
-const rightTitle = "Experiência".split("");
-
-const leftText =
-  "Desenvolvimento modular, limpo e de alta performance. Layouts responsivos com foco na acessibilidade e semântica web. Codificação robusta para experiências estáveis.";
-const rightText =
-  "Transições fluidas e micro-interações elegantes que dão vida à interface. Criação de experiências imersivas e jornadas do usuário cativantes através do movimento.";
-
-const leftWords = leftText.split(" ");
-const rightWords = rightText.split(" ");
 ---
 
 {/* ponytail: placeholder copy, swap in real content */}
@@ -18,71 +8,33 @@ const rightWords = rightText.split(" ");
   data-stack
   data-no-close-clip
 >
-  <div class="whatido__noise" id="whatido-noise" aria-hidden="true"></div>
-
   <div class="whatido__inner">
     <div class="whatido__col whatido__col--left" id="whatido-col-left">
-      <div class="whatido__tilt" id="whatido-tilt-left">
-        <div class="whatido__meta">
-          <span class="whatido__meta-wrap"
-            ><span class="whatido__meta-item">Conceito</span></span
-          >
-          <span class="whatido__meta-wrap"
-            ><span class="whatido__meta-item">01 / Estrutura</span></span
-          >
-        </div>
-        <h2 class="whatido__title">
-          {
-            leftTitle.map((ch) => (
-              <span class="whatido__letter-wrap">
-                <span class="whatido__letter">{ch}</span>
-              </span>
-            ))
-          }
-        </h2>
-        <div class="whatido__divider" aria-hidden="true"></div>
-        <p class="whatido__text">
-          {
-            leftWords.flatMap((w, i) =>
-              i === 0
-                ? [<span class="whatido__word">{w}</span>]
-                : [" ", <span class="whatido__word">{w}</span>],
-            )
-          }
-        </p>
+      <div class="whatido__meta">
+        <span class="whatido__meta-item">Conceito</span>
+        <span class="whatido__meta-item">01 / Estrutura</span>
       </div>
+      <h2 class="whatido__title">Arquitetura</h2>
+      <div class="whatido__divider" aria-hidden="true"></div>
+      <p class="whatido__text">
+        Desenvolvimento modular, limpo e de alta performance. Layouts
+        responsivos com foco na acessibilidade e semântica web. Codificação
+        robusta para experiências estáveis.
+      </p>
     </div>
 
     <div class="whatido__col whatido__col--right" id="whatido-col-right">
-      <div class="whatido__tilt" id="whatido-tilt-right">
-        <div class="whatido__meta">
-          <span class="whatido__meta-wrap"
-            ><span class="whatido__meta-item">Execução</span></span
-          >
-          <span class="whatido__meta-wrap"
-            ><span class="whatido__meta-item">02 / Movimento</span></span
-          >
-        </div>
-        <h2 class="whatido__title">
-          {
-            rightTitle.map((ch) => (
-              <span class="whatido__letter-wrap">
-                <span class="whatido__letter">{ch}</span>
-              </span>
-            ))
-          }
-        </h2>
-        <div class="whatido__divider" aria-hidden="true"></div>
-        <p class="whatido__text">
-          {
-            rightWords.flatMap((w, i) =>
-              i === 0
-                ? [<span class="whatido__word">{w}</span>]
-                : [" ", <span class="whatido__word">{w}</span>],
-            )
-          }
-        </p>
+      <div class="whatido__meta">
+        <span class="whatido__meta-item">Execução</span>
+        <span class="whatido__meta-item">02 / Movimento</span>
       </div>
+      <h2 class="whatido__title">Experiência</h2>
+      <div class="whatido__divider" aria-hidden="true"></div>
+      <p class="whatido__text">
+        Transições fluidas e micro-interações elegantes que dão vida à
+        interface. Criação de experiências imersivas e jornadas do usuário
+        cativantes através do movimento.
+      </p>
     </div>
   </div>
 </section>
@@ -94,18 +46,6 @@ const rightWords = rightText.split(" ");
     align-items: center;
     clip-path: inset(0% 0% 0% 0%);
     will-change: clip-path;
-  }
-
-  .whatido__noise {
-    position: absolute;
-    inset: -20%;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.1;
-    mix-blend-mode: multiply;
-    background-image: url("/noise.png");
-    background-repeat: repeat;
-    will-change: background-position;
   }
 
   .whatido__inner {
@@ -121,11 +61,7 @@ const rightWords = rightText.split(" ");
 
   .whatido__col {
     max-width: 26vw;
-    will-change: transform, opacity, filter;
-  }
-
-  .whatido__tilt {
-    will-change: transform;
+    will-change: transform, opacity;
   }
 
   .whatido__col--right {
@@ -147,17 +83,6 @@ const rightWords = rightText.split(" ");
     text-transform: uppercase;
   }
 
-  .whatido__meta-wrap {
-    display: inline-block;
-    overflow: hidden;
-    line-height: 1;
-  }
-
-  .whatido__meta-item {
-    display: inline-block;
-    will-change: transform, opacity;
-  }
-
   .whatido__title {
     margin: 0 0 1.5rem;
     font-family: "Cormorant Infant", serif;
@@ -166,17 +91,6 @@ const rightWords = rightText.split(" ");
     font-size: clamp(2.6rem, 5.2vw, 5.5rem);
     line-height: 1;
     white-space: nowrap;
-  }
-
-  .whatido__letter-wrap {
-    display: inline-block;
-    overflow: hidden;
-    line-height: 1;
-  }
-
-  .whatido__letter {
-    display: inline-block;
-    will-change: transform, opacity;
     background: linear-gradient(100deg, #0891b2, #10b981);
     background-clip: text;
     -webkit-background-clip: text;
@@ -204,11 +118,6 @@ const rightWords = rightText.split(" ");
     font-weight: 500;
     font-size: clamp(0.9rem, 1.2vw, 1.05rem);
     line-height: 1.6;
-  }
-
-  .whatido__word {
-    display: inline-block;
-    will-change: transform, opacity, filter;
   }
 
   .whatido__col--left .whatido__text {
@@ -260,181 +169,23 @@ const rightWords = rightText.split(" ");
   import { CLIP_CLOSE_T } from "../lib/sectionStack";
 
   const section = document.getElementById("whatido-section")!;
-  const noise = document.getElementById("whatido-noise")!;
   const colLeft = document.getElementById("whatido-col-left")!;
   const colRight = document.getElementById("whatido-col-right")!;
   const cols = [colLeft, colRight];
-  const tiltLeft = document.getElementById("whatido-tilt-left")!;
-  const tiltRight = document.getElementById("whatido-tilt-right")!;
-  const dividers = section.querySelectorAll<HTMLElement>(".whatido__divider");
-  const leftMeta = colLeft.querySelectorAll<HTMLElement>(".whatido__meta-item");
-  const rightMeta = colRight.querySelectorAll<HTMLElement>(
-    ".whatido__meta-item",
-  );
-  const leftLetters = colLeft.querySelectorAll<HTMLElement>(".whatido__letter");
-  const rightLetters =
-    colRight.querySelectorAll<HTMLElement>(".whatido__letter");
-  const leftWords = colLeft.querySelectorAll<HTMLElement>(".whatido__word");
-  const rightWords = colRight.querySelectorAll<HTMLElement>(".whatido__word");
-  const textBlocks = section.querySelectorAll<HTMLElement>(".whatido__inner");
 
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
   if (reduceMotion) {
-    gsap.set(cols, { x: 0, opacity: 1, filter: "none" });
-    gsap.set([...leftMeta, ...rightMeta], { y: "0%", opacity: 1, skewY: 0 });
-    gsap.set([...leftLetters, ...rightLetters], { y: "0%", opacity: 1 });
-    gsap.set([...leftWords, ...rightWords], {
-      y: "0%",
-      opacity: 1,
-      filter: "none",
-    });
-    gsap.set(dividers, { scaleX: 1 });
+    gsap.set(cols, { x: 0, opacity: 1 });
   } else {
-    // film-grain flicker: jump the tile between random offsets instead of a smooth drift
-    gsap.to(noise, {
-      keyframes: [
-        { backgroundPosition: "7% 13%" },
-        { backgroundPosition: "-11% 4%" },
-        { backgroundPosition: "3% -9%" },
-        { backgroundPosition: "-6% -14%" },
-      ],
-      duration: 0.6,
-      repeat: -1,
-      ease: "steps(1)",
-    });
+    gsap.set(colLeft, { x: "-3vw", opacity: 0 });
+    gsap.set(colRight, { x: "3vw", opacity: 0 });
 
-    gsap.set(colLeft, { x: "-3vw", opacity: 0, filter: "blur(8px)" });
-    gsap.set(colRight, { x: "3vw", opacity: 0, filter: "blur(8px)" });
-    // meta labels get a curtain-wipe: masked by the overflow-hidden wrap, skewed like
-    // they're being pulled out from under it rather than a plain fade/slide
-    gsap.set([...leftMeta, ...rightMeta], { y: "120%", opacity: 0, skewY: 6 });
-    gsap.set([...leftLetters, ...rightLetters], { y: "110%", opacity: 0 });
-    gsap.set([...leftWords, ...rightWords], {
-      y: "40%",
-      opacity: 0,
-      filter: "blur(6px)",
-    });
-
-    // element i of a group reveals across its own slice of the segment (1/count wide),
-    // in order — a manually-scrubbed stand-in for gsap stagger, since this whole reveal
-    // is driven by gsap.set on every scroll tick rather than a play-once timeline
-    const seqT = (segT: number, index: number, count: number) =>
-      gsap.utils.clamp(0, 1, segT * count - index);
-
-    // play forward past the threshold, reverse back below it — an all-or-nothing
-    // reveal (not a per-element scrub) for content that should just appear/disappear
-    // as a block, like toggleActions "play reverse" but gated on our own progress
-    // value instead of a real ScrollTrigger (there's no real scroll here, see sectionStack.ts)
-    function makeToggle(
-      targets: HTMLElement[] | NodeListOf<HTMLElement>,
-      threshold: number,
-      vars: gsap.TweenVars,
-    ) {
-      const tween = gsap.to(targets, { ...vars, paused: true });
-      let revealed = false;
-      return (t: number) => {
-        const shouldReveal = t >= threshold;
-        if (shouldReveal === revealed) return;
-        revealed = shouldReveal;
-        if (shouldReveal) tween.play();
-        else tween.reverse();
-      };
-    }
-
-    const revealMeta = makeToggle([...leftMeta, ...rightMeta], 0.05, {
-      y: "0%",
-      opacity: 1,
-      skewY: 0,
-      duration: 0.5,
-      stagger: 0.08,
-      ease: "power3.out",
-    });
-
-    // idle float once the columns finish sliding to their resting spot — a paused
-    // yoyo loop toggled on/off by spinT reaching 1, instead of a play-once timeline
-    const floatLeft = gsap.to(colLeft, {
-      y: "-1vh",
-      duration: 2.6,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
-      paused: true,
-    });
-    const floatRight = gsap.to(colRight, {
-      y: "1vh",
-      duration: 2.8,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
-      paused: true,
-      delay: 0.4,
-    });
-    let floating = false;
-    function setFloating(on: boolean) {
-      if (on === floating) return;
-      floating = on;
-      if (on) {
-        floatLeft.play(0);
-        floatRight.play(0);
-      } else {
-        floatLeft.pause();
-        floatRight.pause();
-        gsap.set([colLeft, colRight], { y: 0 });
-      }
-    }
-
-    const revealWords = makeToggle([...leftWords, ...rightWords], 0.55, {
-      y: "0%",
-      opacity: 1,
-      filter: "blur(0px)",
-      duration: 0.6,
-      ease: "power3.out",
-    });
-
-    // subtle mouse-tilt parallax once revealed — lives on an inner wrapper so it
-    // doesn't fight the scroll-driven "x" set on the column itself below
-    section.addEventListener("mousemove", (e) => {
-      const x = e.clientX / window.innerWidth - 0.5;
-      const y = e.clientY / window.innerHeight - 0.5;
-      gsap.to(tiltLeft, {
-        x: x * 28,
-        y: y * 28,
-        duration: 0.6,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-      gsap.to(tiltRight, {
-        x: x * -28,
-        y: y * -28,
-        duration: 0.6,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    });
-
-    section.addEventListener("mouseleave", () => {
-      gsap.to(tiltLeft, {
-        x: 0,
-        y: 0,
-        duration: 1,
-        ease: "power3.out",
-        overwrite: "auto",
-      });
-      gsap.to(tiltRight, {
-        x: 0,
-        y: 0,
-        duration: 1,
-        ease: "power3.out",
-        overwrite: "auto",
-      });
-    });
-
-    // whole reveal is driven off the same "progress" Hero already emits as it closes —
-    // cols/letters/divider scrub continuously with it (gradual, reversible), while
-    // meta/words are all-or-nothing toggles at their own threshold (see makeToggle).
+    // scroll-driven: columns fade in and slide toward center as the hero bar
+    // closes, then keep pulling further toward center once it starts spinning
+    // (see Hero.astro's spinT, same CLIP_CLOSE_T threshold).
     window.addEventListener("hero:bar-shrink", ((
       e: CustomEvent<{ progress: number }>,
     ) => {
@@ -444,41 +195,12 @@ const rightWords = rightText.split(" ");
       gsap.set(colLeft, {
         x: gsap.utils.interpolate("-3vw", "-4vw", colsT),
         opacity: colsT,
-        filter: gsap.utils.interpolate("blur(8px)", "blur(0px)", colsT),
       });
       gsap.set(colRight, {
         x: gsap.utils.interpolate("3vw", "4vw", colsT),
         opacity: colsT,
-        filter: gsap.utils.interpolate("blur(8px)", "blur(0px)", colsT),
       });
 
-      revealMeta(t);
-
-      const lettersT = gsap.utils.clamp(0, 1, (t - 0.05) / 0.4);
-      leftLetters.forEach((el, i) => {
-        const lt = seqT(lettersT, i, leftLetters.length);
-        gsap.set(el, {
-          y: gsap.utils.interpolate("110%", "0%", lt),
-          opacity: lt,
-        });
-      });
-      rightLetters.forEach((el, i) => {
-        const lt = seqT(lettersT, i, rightLetters.length);
-        gsap.set(el, {
-          y: gsap.utils.interpolate("110%", "0%", lt),
-          opacity: lt,
-        });
-      });
-
-      const dividerT = gsap.utils.clamp(0, 1, (t - 0.35) / 0.2);
-      gsap.set(dividers, { scaleX: dividerT });
-
-      // words appear together as one block past this point (not one at a time), and
-      // reverse back out as a block if the scroll returns past the same threshold
-      revealWords(t);
-
-      // columns only start pulling further toward center once the bar itself starts
-      // spinning (see Hero.astro's spinT, same CLIP_CLOSE_T threshold)
       const spinT = gsap.utils.clamp(
         0,
         1,
@@ -486,7 +208,6 @@ const rightWords = rightText.split(" ");
       );
       gsap.set(colLeft, { x: gsap.utils.interpolate("-4vw", "8vw", spinT) });
       gsap.set(colRight, { x: gsap.utils.interpolate("4vw", "-8vw", spinT) });
-      setFloating(spinT >= 1);
     }) as EventListener);
 
     // rebroadcasts this section's own closing progress on window, same as Hero does
@@ -499,12 +220,6 @@ const rightWords = rightText.split(" ");
       window.dispatchEvent(
         new CustomEvent("whatido:progress", { detail: { progress: t } }),
       );
-
-      // short dead zone reads as "scrolling does nothing", then the text blocks
-      // blur away fast (holding blurred after) ahead of AboutMe's own slide-in
-      // starting at 2/3 (see AboutMe.astro — keep in sync).
-      const blurT = gsap.utils.clamp(0, 1, (t - 0.15) / 0.15);
-      gsap.set(textBlocks, { filter: `blur(${blurT * 10}px)` });
     }) as EventListener);
   }
 </script>

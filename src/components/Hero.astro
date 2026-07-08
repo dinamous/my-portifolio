@@ -6,6 +6,10 @@ const lastName = "Simões".split("");
 ---
 
 <section class="hero fixed inset-0 h-screen w-screen" id="hero-section" data-stack>
+  <div class="hero__loader" id="hero-loader" aria-hidden="true">
+    <div class="hero__loader-bar" id="hero-loader-bar"></div>
+  </div>
+
   <div class="hero__aurora" id="hero-aurora" aria-hidden="true"></div>
 
   <div class="hero__scan" id="hero-scan" aria-hidden="true"></div>
@@ -36,6 +40,25 @@ const lastName = "Simões".split("");
     overflow: hidden;
     clip-path: inset(0% 0% 0% 0%);
     will-change: clip-path;
+  }
+
+  .hero__loader {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: #000;
+  }
+
+  .hero__loader-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #fff;
+    transform-origin: left center;
+    transform: scaleX(0);
+    will-change: transform;
   }
 
   .hero__scan {
@@ -208,6 +231,15 @@ const lastName = "Simões".split("");
   const scan = document.getElementById("hero-scan")!;
   const aurora = document.getElementById("hero-aurora")!;
   const heroType = document.getElementById("hero-type")!;
+
+  const loader = document.getElementById("hero-loader")!;
+  const loaderBar = document.getElementById("hero-loader-bar")!;
+
+  let resolveFirstFrame: () => void;
+  const darkVeilFirstFrame = new Promise<void>((resolve) => {
+    resolveFirstFrame = resolve;
+  });
+
   const darkVeil = createDarkVeil(aurora, {
     hueShift: 50,
     noiseIntensity: 0.09,
@@ -215,6 +247,12 @@ const lastName = "Simões".split("");
     speed: 0.8,
     scanlineFrequency: 1.3,
     warpAmount: 0.3,
+    onFirstFrame: () => {
+      resolveFirstFrame();
+      // shader render competes with the letter stagger for GPU/main-thread time
+      // while aurora sits at opacity:0 anyway — pause until it's about to fade in
+      darkVeil.pause();
+    },
   });
 
   const word1Letters = Array.from(
@@ -228,61 +266,91 @@ const lastName = "Simões".split("");
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
+  function runEntrance() {
+    if (reduceMotion) {
+      gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
+      gsap.set(semi, { opacity: 1, scale: 1 });
+      gsap.set(scan, { autoAlpha: 0 });
+      gsap.set(aurora, { autoAlpha: 1 });
+      gsap.set(heroType, { autoAlpha: 1 });
+      darkVeil.resume();
+      startTextType(heroType, heroTypePhrases);
+      enableSectionStack();
+    } else {
+      const isColumn = getComputedStyle(row).flexDirection === "column";
+      const mainAxis = isColumn ? "y" : "x";
+      const tightGap = 48; // px between the two words while centered
+
+      const rowRect = row.getBoundingClientRect();
+      const rowCenterX = rowRect.left + rowRect.width / 2;
+      const rowCenterY = rowRect.top + rowRect.height / 2;
+      const pivot = isColumn ? rowCenterY : rowCenterX;
+
+      const rects = words.map((w) => w.getBoundingClientRect());
+      const sizes = rects.map((r) => (isColumn ? r.height : r.width));
+      const centers = rects.map((r) =>
+        isColumn ? r.top + r.height / 2 : r.left + r.width / 2,
+      );
+      const wordDeltas = words.map((_, i) => {
+        const side = i === 0 ? -1 : 1;
+        const targetCenter = pivot + side * (tightGap / 2 + sizes[i] / 2);
+        return targetCenter - centers[i];
+      });
+
+      gsap.set(row, { y: window.innerHeight / 2 - rowCenterY });
+      words.forEach((w, i) =>
+        gsap.set(w, { [mainAxis]: wordDeltas[i], scale: 0.8 }),
+      );
+
+      const scanHeight = scan.offsetHeight;
+      gsap.set(scan, { y: heroSection.offsetHeight });
+
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .to(word1Letters, { y: "0%", opacity: 1, duration: 1.1, stagger: 0.09 }, 0)
+        .to(word2Letters, { y: "0%", opacity: 1, duration: 1.1, stagger: 0.09 }, 0)
+        .to(semi, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(3)" }, "+=0.15")
+        .to(
+          words,
+          { x: 0, y: 0, scale: 1, duration: 1.1, stagger: 0.12, ease: "power3.inOut" },
+          "+=0.3",
+        )
+        .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
+        .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
+        .call(() => darkVeil.resume(), [], "-=1.8")
+        .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
+        .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
+        .call(() => startTextType(heroType, heroTypePhrases))
+        .call(() => window.dispatchEvent(new CustomEvent("hero:reveal-nav")), [], "+=0.15");
+
+      window.addEventListener("navbar:revealed", enableSectionStack, { once: true });
+    }
+  }
+
   if (reduceMotion) {
-    gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
-    gsap.set(semi, { opacity: 1, scale: 1 });
-    gsap.set(scan, { autoAlpha: 0 });
-    gsap.set(aurora, { autoAlpha: 1 });
-    gsap.set(heroType, { autoAlpha: 1 });
-    startTextType(heroType, heroTypePhrases);
-    enableSectionStack();
+    gsap.set(loader, { autoAlpha: 0 });
+    runEntrance();
   } else {
-    const isColumn = getComputedStyle(row).flexDirection === "column";
-    const mainAxis = isColumn ? "y" : "x";
-    const tightGap = 48; // px between the two words while centered
-
-    const rowRect = row.getBoundingClientRect();
-    const rowCenterX = rowRect.left + rowRect.width / 2;
-    const rowCenterY = rowRect.top + rowRect.height / 2;
-    const pivot = isColumn ? rowCenterY : rowCenterX;
-
-    const rects = words.map((w) => w.getBoundingClientRect());
-    const sizes = rects.map((r) => (isColumn ? r.height : r.width));
-    const centers = rects.map((r) =>
-      isColumn ? r.top + r.height / 2 : r.left + r.width / 2,
-    );
-    const wordDeltas = words.map((_, i) => {
-      const side = i === 0 ? -1 : 1;
-      const targetCenter = pivot + side * (tightGap / 2 + sizes[i] / 2);
-      return targetCenter - centers[i];
+    const progressTween = gsap.to(loaderBar, {
+      scaleX: 0.9,
+      duration: 2.5,
+      ease: "power1.out",
     });
 
-    gsap.set(row, { y: window.innerHeight / 2 - rowCenterY });
-    words.forEach((w, i) =>
-      gsap.set(w, { [mainAxis]: wordDeltas[i], scale: 0.8 }),
-    );
+    const fontsReady = document.fonts.ready;
+    const safetyTimeout = new Promise<void>((resolve) => setTimeout(resolve, 3000));
 
-    const scanHeight = scan.offsetHeight;
-    gsap.set(scan, { y: heroSection.offsetHeight });
-
-    gsap
-      .timeline({ defaults: { ease: "power3.out" } })
-      .to(word1Letters, { y: "0%", opacity: 1, duration: 1.1, stagger: 0.09 }, 0)
-      .to(word2Letters, { y: "0%", opacity: 1, duration: 1.1, stagger: 0.09 }, 0)
-      .to(semi, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(3)" }, "+=0.15")
-      .to(
-        words,
-        { x: 0, y: 0, scale: 1, duration: 1.1, stagger: 0.12, ease: "power3.inOut" },
-        "+=0.3",
-      )
-      .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
-      .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
-      .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
-      .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
-      .call(() => startTextType(heroType, heroTypePhrases))
-      .call(() => window.dispatchEvent(new CustomEvent("hero:reveal-nav")), [], "+=0.15");
-
-    window.addEventListener("navbar:revealed", enableSectionStack, { once: true });
+    Promise.race([
+      Promise.all([fontsReady, darkVeilFirstFrame]),
+      safetyTimeout,
+    ]).then(() => {
+      progressTween.kill();
+      gsap
+        .timeline()
+        .to(loaderBar, { scaleX: 1, duration: 0.3, ease: "power2.out" })
+        .to(loader, { autoAlpha: 0, duration: 0.4, ease: "power2.out" }, "+=0.15")
+        .call(runEntrance);
+    });
   }
 
   // scroll-close parallax: darkveil drifts up and out, the name recedes with a slight scale-down

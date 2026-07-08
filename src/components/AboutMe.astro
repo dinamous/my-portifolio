@@ -373,10 +373,9 @@
       e: CustomEvent<{ progress: number }>,
     ) => {
       const t = e.detail.progress;
-      const slideT = gsap.utils.clamp(0, 1, (t - 2 / 3) / (1 / 3));
-      const coverT = gsap.utils.clamp(0, 1, slideT / 0.4);
-      const exitT = gsap.utils.clamp(0, 1, (slideT - 0.4) / 0.2);
-      const revealT = gsap.utils.clamp(0, 1, (slideT - 0.6) / 0.4);
+      const coverT = gsap.utils.clamp(0, 1, t / 0.4);
+      const exitT = gsap.utils.clamp(0, 1, (t - 0.4) / 0.2);
+      const revealT = gsap.utils.clamp(0, 1, (t - 0.6) / 0.4);
 
       gsap.set(blockTop, {
         xPercent: coverT < 1

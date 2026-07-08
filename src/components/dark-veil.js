@@ -85,6 +85,7 @@ export function createDarkVeil(container, options = {}) {
     scanlineFrequency = 0,
     warpAmount = 0,
     resolutionScale = 1,
+    onFirstFrame,
   } = options;
 
   const renderer = new Renderer({ dpr: Math.min(window.devicePixelRatio || 1, 2) });
@@ -135,6 +136,7 @@ export function createDarkVeil(container, options = {}) {
 
   const start = performance.now();
   let rafId = 0;
+  let firstFrameFired = false;
   const loop = () => {
     rafId = requestAnimationFrame(loop);
     uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
@@ -142,6 +144,10 @@ export function createDarkVeil(container, options = {}) {
     mouse[0] += (targetMouseX - mouse[0]) * 0.05;
     mouse[1] += (targetMouseY - mouse[1]) * 0.05;
     renderer.render({ scene: mesh });
+    if (!firstFrameFired) {
+      firstFrameFired = true;
+      onFirstFrame?.();
+    }
   };
   rafId = requestAnimationFrame(loop);
 
