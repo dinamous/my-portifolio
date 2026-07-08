@@ -329,5 +329,10 @@ const lastName = "Simões".split("");
     // fires from the first scroll tick (p>0), as soon as the clip-path starts shrinking
     // the bar — WhatIDo listens on window to pull its own columns in from the border
     window.dispatchEvent(new CustomEvent("hero:bar-shrink", { detail: { progress: p } }));
+
+    // once the spin has fully shrunk the bar away, pull it out of the layout so it
+    // can't intercept scroll/clicks — driven by the same p that everything else here
+    // reacts to, so scrolling back up (p < 1) restores display before the bar grows back
+    gsap.set(heroSection, { display: spinT >= 1 ? "none" : "" });
   }) as EventListener);
 </script>
