@@ -73,13 +73,22 @@
        revealed content lives in this same top layer so the curtain-wipe uncovers it
        directly, without ever needing WhatIDo underneath to hide itself. */
     z-index: 20 !important;
+    /* single gutter pair, measured out from the portrait's center axis, so statement/
+       bio/label all sit the same distance from the anchor instead of independent corners */
+    --aboutme-gutter-x: 6vw;
+    --aboutme-gutter-y: 11vh;
   }
+
+  /* ---- curtain / backdrop --------------------------------------------- */
 
   .aboutme__block {
     width: 100%;
     height: 50dvh;
     background: #000;
     will-change: transform;
+    /* now that the blocks lock in place as the reveal's backdrop instead of exiting,
+       they must sit behind the absolutely-positioned content instead of painting last */
+    z-index: -1;
   }
 
   .aboutme__backdrop {
@@ -123,6 +132,8 @@
       rgba(0, 0, 0, 0) 74%
     );
   }
+
+  /* ---- revealed content, anchored off the portrait's center axis ------ */
 
   .aboutme__word {
     position: absolute;
@@ -187,8 +198,8 @@
 
   .aboutme__statement {
     position: absolute;
-    top: 11vh;
-    left: 6vw;
+    top: var(--aboutme-gutter-y);
+    left: var(--aboutme-gutter-x);
     max-width: 52vw;
   }
 
@@ -221,8 +232,8 @@
 
   .aboutme__bio {
     position: absolute;
-    bottom: 11vh;
-    left: 6vw;
+    bottom: var(--aboutme-gutter-y);
+    left: var(--aboutme-gutter-x);
     display: grid;
     grid-template-columns: 52px 1fr;
     gap: 22px;
@@ -264,8 +275,8 @@
 
   .aboutme__label {
     position: absolute;
-    top: 11vh;
-    right: 6vw;
+    top: var(--aboutme-gutter-y);
+    right: var(--aboutme-gutter-x);
     font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     font-size: 14px;
     color: #34d399;
@@ -288,6 +299,11 @@
   }
 
   @media (max-width: 640px) {
+    .aboutme {
+      --aboutme-gutter-x: 6vw;
+      --aboutme-gutter-y: 8vh;
+    }
+
     .aboutme__word {
       font-size: clamp(90px, 34vw, 220px);
     }
@@ -298,8 +314,6 @@
     }
 
     .aboutme__statement {
-      top: 8vh;
-      left: 6vw;
       max-width: 88vw;
     }
 
@@ -308,16 +322,9 @@
     }
 
     .aboutme__bio {
-      bottom: 6vh;
-      left: 6vw;
       max-width: 88vw;
       grid-template-columns: 34px 1fr;
       gap: 12px;
-    }
-
-    .aboutme__label {
-      top: 8vh;
-      right: 6vw;
     }
   }
 </style>
@@ -365,28 +372,21 @@
     const seqT = (segT: number, index: number, count: number) =>
       gsap.utils.clamp(0, 1, segT * count - index);
 
-    // curtain blocks first slide IN to meet in the middle (covering whatever's behind),
-    // then continue OUT the opposite side and fully clear the screen — only once they're
-    // gone (exitT === 1) does the content start revealing (revealT), backdrop first so
-    // WhatIDo's own background never shows through the gaps around the content.
+    const coverEase = gsap.parseEase("power2.out");
+
+    // curtain blocks wait offscreen through a short delay, then glide in — easing out as
+    // they approach — until each one fully covers its half of the screen and locks there,
+    // becoming the solid background the content reveals onto. They never exit; revealT
+    // picks up right after coverT completes.
     window.addEventListener("whatido:progress", ((
       e: CustomEvent<{ progress: number }>,
     ) => {
       const t = e.detail.progress;
-      const coverT = gsap.utils.clamp(0, 1, t / 0.4);
-      const exitT = gsap.utils.clamp(0, 1, (t - 0.4) / 0.2);
+      const coverT = coverEase(gsap.utils.clamp(0, 1, (t - 0.15) / 0.45));
       const revealT = gsap.utils.clamp(0, 1, (t - 0.6) / 0.4);
 
-      gsap.set(blockTop, {
-        xPercent: coverT < 1
-          ? gsap.utils.interpolate(-100, 0, coverT)
-          : gsap.utils.interpolate(0, 100, exitT),
-      });
-      gsap.set(blockBottom, {
-        xPercent: coverT < 1
-          ? gsap.utils.interpolate(100, 0, coverT)
-          : gsap.utils.interpolate(0, -100, exitT),
-      });
+      gsap.set(blockTop, { xPercent: gsap.utils.interpolate(-100, 0, coverT) });
+      gsap.set(blockBottom, { xPercent: gsap.utils.interpolate(100, 0, coverT) });
 
       const backdropT = gsap.utils.clamp(0, 1, revealT / 0.15);
       gsap.set(backdrop, { opacity: backdropT });
