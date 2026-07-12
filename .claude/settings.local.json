@@ -1,10 +1,12 @@
 {
-  "enabledPlugins": {
-    "superpowers@claude-plugins-official": true
-  },
   "permissions": {
     "allow": [
-      "Bash(claude doctor *)"
+      "Bash(claude doctor *)",
+      "Bash(npm view *)",
+      "Bash(npm install *)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }

@@ -428,8 +428,11 @@ const lastName = "Simões".split("");
   // scroll-close parallax: darkveil drifts up and out, the name recedes with a slight scale-down
   heroSection.addEventListener("stack:progress", ((e: CustomEvent<{ progress: number }>) => {
     const p = e.detail.progress;
-    gsap.set(aurora, { yPercent: -p * 35, opacity: 1 - p * 0.5 });
-    gsap.set(row, { y: -p * 50, scale: 1 - p * 0.15, opacity: 1 - p * 0.6 });
+    // sped up relative to p so the aurora/name are fully gone well before the
+    // section finishes closing, instead of fading out across the whole range
+    const exitT = gsap.utils.clamp(0, 1, p * 1.8);
+    gsap.set(aurora, { yPercent: -exitT * 35, opacity: 1 - exitT * 0.5 });
+    gsap.set(row, { y: -exitT * 50, scale: 1 - exitT * 0.15, opacity: 1 - exitT * 0.6 });
 
     // clip-path finishes closing (and the overlay is already fully black) by CLIP_CLOSE_T,
     // leaving the rest of the range for a subtle spin of that already-clipped bar — transform
@@ -448,9 +451,18 @@ const lastName = "Simões".split("");
     const baseScaleY = 1 + growT * 0.25;
 
     // color migrates from black into WhatIDo's title gradient color (matching
-    // the letter gradient's midtone, not the cooler cyan start) — eased so it
-    // reaches emerald well before the spin finishes instead of a linear ramp
-    const colorT = Math.min(1, spinT * 1.6);
+    // the letter gradient's midtone, not the cooler cyan start) — driven off p
+    // (not spinT) and starting before CLIP_CLOSE_T so the migration is already
+    // underway once rotation kicks in. Eased (not linear) over a wider band so
+    // it reads as a smooth wash instead of a hard, narrow snap to green.
+    const COLOR_START_T = CLIP_CLOSE_T - 0.2;
+    const COLOR_END_T = CLIP_CLOSE_T + 0.15;
+    const colorLinearT = gsap.utils.clamp(
+      0,
+      1,
+      (p - COLOR_START_T) / (COLOR_END_T - COLOR_START_T),
+    );
+    const colorT = gsap.parseEase("power2.inOut")(colorLinearT);
     const barColor = gsap.utils.interpolate("#000000", "#0e9f8e", colorT);
 
     gsap.set(heroSection, {

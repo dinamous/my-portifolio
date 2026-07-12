@@ -13,12 +13,10 @@ const rightText =
 ---
 
 <section class="whatido fixed inset-0 h-screen w-screen" id="whatido-section" data-stack data-no-close-clip>
-  <div class="whatido__inner">
+  <div class="whatido__grid" id="whatido-grid" data-depth="0.15" aria-hidden="true"></div>
+  <div class="whatido__inner" id="whatido-inner">
     <div class="whatido__col whatido__col--left" id="whatido-col-left">
-      <div class="whatido__meta" id="whatido-meta-left">
-        <span class="whatido__meta-item">Conceito</span>
-        <span class="whatido__meta-item">01 / Estrutura</span>
-      </div>
+
       <h2 class="whatido__title" id="whatido-title-left">
         {leftTitle.map((ch) => (
           <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
@@ -36,10 +34,7 @@ const rightText =
     </div>
 
     <div class="whatido__col whatido__col--right" id="whatido-col-right">
-      <div class="whatido__meta" id="whatido-meta-right">
-        <span class="whatido__meta-item">Execução</span>
-        <span class="whatido__meta-item">02 / Movimento</span>
-      </div>
+
       <h2 class="whatido__title" id="whatido-title-right">
         {rightTitle.map((ch) => (
           <span class="whatido__letter-wrap"><span class="whatido__letter">{ch}</span></span>
@@ -60,11 +55,30 @@ const rightText =
 
 <style>
   .whatido {
-    background: #f2f0ef;
+    position: relative;
+    background: #030303;
     display: flex;
     align-items: center;
     clip-path: inset(0% 0% 0% 0%);
     will-change: clip-path;
+  }
+
+  .whatido__grid {
+    position: absolute;
+    inset: 0;
+    /* parallax-js overrides `position` inline (relative for the first layer
+       in a scene, absolute for the rest) and sets left/top: 0 but never
+       touches sizing — width/height 100% keeps this full-bleed regardless of
+       which position value it ends up with. */
+    width: 100%;
+    height: 100%;
+    background-image:
+      linear-gradient(rgba(244, 247, 245, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(244, 247, 245, 0.018) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    transform-origin: center;
+    will-change: transform, opacity;
   }
 
   .whatido__inner {
@@ -76,6 +90,7 @@ const rightText =
     gap: 4vw;
     width: 100%;
     padding: 0 6vw;
+    perspective: 1200px;
   }
 
   .whatido__col {
@@ -93,8 +108,8 @@ const rightText =
     gap: 1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 0.6rem;
-    border-bottom: 1px solid #e5e7eb;
-    color: #6b7280;
+    border-bottom: 1px solid rgba(244, 247, 245, 0.15);
+    color: rgba(244, 247, 245, 0.55);
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
     font-size: clamp(0.65rem, 0.9vw, 0.75rem);
@@ -150,7 +165,7 @@ const rightText =
   .whatido__divider {
     height: 1px;
     margin-bottom: 1.5rem;
-    background: #d1d5db;
+    background: rgba(244, 247, 245, 0.25);
     transform: scaleX(0);
     transform-origin: left center;
   }
@@ -163,9 +178,9 @@ const rightText =
     max-width: 42ch;
     margin: 0;
     margin-left: auto;
-    color: #374151;
+    color: #f4f7f5;
     font-family: "Space Grotesk", sans-serif;
-    font-weight: 500;
+    font-weight: 400;
     font-size: clamp(0.9rem, 1.2vw, 1.05rem);
     line-height: 1.6;
   }
@@ -216,9 +231,11 @@ const rightText =
 
 <script>
   import gsap from "gsap";
+  import Parallax from "parallax-js";
   import { CLIP_CLOSE_T } from "../lib/sectionStack";
 
   const section = document.getElementById("whatido-section")!;
+  const grid = document.getElementById("whatido-grid")!;
   const colLeft = document.getElementById("whatido-col-left")!;
   const colRight = document.getElementById("whatido-col-right")!;
   const cols = [colLeft, colRight];
@@ -288,6 +305,7 @@ const rightText =
 
   if (reduceMotion) {
     gsap.set(cols, { x: 0, opacity: 1 });
+    gsap.set(grid, { opacity: 1 });
     gsap.set(section.querySelectorAll(".whatido__meta-item, .whatido__letter, .whatido__word"), {
       y: 0,
       opacity: 1,
@@ -295,37 +313,56 @@ const rightText =
   } else {
     gsap.set(colLeft, { x: "-3vw", opacity: 0 });
     gsap.set(colRight, { x: "3vw", opacity: 0 });
+    gsap.set(grid, { opacity: 0, scale: 1.08 });
 
     const revealLeft = buildRevealTimeline("whatido-col-left", "whatido-title-left");
-    const revealRight = buildRevealTimeline("whatido-col-right", "whatido-title-right").delay(0.15);
-    let revealed = false;
+    const revealRight = buildRevealTimeline("whatido-col-right", "whatido-title-right");
+    const REVEAL_START_T = 0.55; // hold reveal until the bar has closed most of the way
+    const RIGHT_LAG_T = 0.08; // right column's reveal starts slightly behind the left's
 
-    window.addEventListener("hero:bar-shrink", ((
-      e: CustomEvent<{ progress: number }>,
-    ) => {
-      const t = e.detail.progress;
-      const shouldReveal = t >= CLIP_CLOSE_T;
-      if (shouldReveal !== revealed) {
-        revealed = shouldReveal;
-        if (revealed) {
-          revealLeft.play();
-          revealRight.play();
-        } else {
-          revealLeft.reverse();
-          revealRight.reverse();
-        }
-      }
-    }) as EventListener);
+    // reveal progress lags behind its raw scroll-mapped target instead of snapping to
+    // it every tick (mirrors ScrollTrigger's numeric `scrub` lag, and sectionStack's
+    // own quickTo smoothing of state.value) so the timelines glide instead of racing
+    // through in whatever single scroll tick crosses their range.
+    const revealProgress = { left: 0, right: 0 };
+    const setLeftProgress = gsap.quickTo(revealProgress, "left", {
+      duration: 0.6,
+      ease: "power2.out",
+      onUpdate: () => revealLeft.progress(revealProgress.left),
+    });
+    const setRightProgress = gsap.quickTo(revealProgress, "right", {
+      duration: 0.6,
+      ease: "power2.out",
+      onUpdate: () => revealRight.progress(revealProgress.right),
+    });
 
     // scroll-driven: columns fade in and slide toward center as the hero bar
     // closes, then keep pulling further toward center once it starts spinning
-    // (see Hero.astro's spinT, same CLIP_CLOSE_T threshold).
+    // (see Hero.astro's spinT, same CLIP_CLOSE_T threshold). The reveal timelines
+    // are scrubbed via .progress() off the same t instead of played()/reversed()
+    // once at a threshold, so they track scroll position directly (ScrollTrigger's
+    // scrub behavior) rather than running on their own once triggered.
     window.addEventListener("hero:bar-shrink", ((
       e: CustomEvent<{ progress: number }>,
     ) => {
       const t = e.detail.progress;
 
+      setLeftProgress(
+        gsap.utils.clamp(0, 1, (t - REVEAL_START_T) / (CLIP_CLOSE_T - REVEAL_START_T)),
+      );
+      setRightProgress(
+        gsap.utils.clamp(
+          0,
+          1,
+          (t - REVEAL_START_T - RIGHT_LAG_T) / (CLIP_CLOSE_T - REVEAL_START_T - RIGHT_LAG_T),
+        ),
+      );
+
       const colsT = gsap.utils.clamp(0, 1, t / 0.35);
+      gsap.set(grid, {
+        opacity: colsT,
+        scale: gsap.utils.interpolate(1.08, 1, colsT),
+      });
       gsap.set(colLeft, {
         x: gsap.utils.interpolate("-3vw", "-4vw", colsT),
         opacity: colsT,
@@ -355,5 +392,18 @@ const rightText =
         new CustomEvent("whatido:progress", { detail: { progress: t } }),
       );
     }) as EventListener);
+
+    // mouse-driven float on the background grid: independent of scroll, so the
+    // section still feels alive once the stack is pinned at its end (scroll
+    // clamped, nothing left to scrub). Scoped to the grid only — parallax-js
+    // force-sets `position: relative`/`absolute` on every layer it manages,
+    // which fights the columns' flex layout, so they're left alone. hoverOnly
+    // means the grid only drifts while the cursor is over the section,
+    // settling back to rest on leave.
+    new Parallax(section, {
+      relativeInput: true,
+      hoverOnly: true,
+      selector: "[data-depth]",
+    });
   }
 </script>
