@@ -1,0 +1,232 @@
+.aboutme {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: opacity;
+  /* transparent: only the two blocks (and, once revealed, the content below) should
+     ever be visible. sectionStack assigns the last section the lowest z-index
+     (reveal-from-behind default); this section instead curtains its own blocks over
+     whatever's on top, so it needs to sit above Hero/WhatIDo the whole time. The
+     revealed content lives in this same top layer so the curtain-wipe uncovers it
+     directly, without ever needing WhatIDo underneath to hide itself. */
+  z-index: 20 !important;
+}
+
+/* ---- curtain / backdrop --------------------------------------------- */
+
+.aboutme__block {
+  width: 100%;
+  height: 50dvh;
+  background: #000;
+  will-change: transform;
+  /* now that the blocks lock in place as the reveal's backdrop instead of exiting,
+     they must sit behind the absolutely-positioned content instead of painting last */
+  z-index: -1;
+}
+
+/* default off-screen in CSS itself, not just via the script's gsap.set — with this
+   many components now loading JS on the page, waiting on the script to hide these
+   would leave a visible gap where two solid black bars (z-index:20 above everything)
+   flash over the Hero before GSAP ever runs */
+.aboutme__block--top {
+  transform: translateX(-100%);
+}
+
+.aboutme__block--bottom {
+  transform: translateX(100%);
+}
+
+.aboutme__backdrop {
+  position: absolute;
+  inset: 0;
+  background: #030304;
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* ---- frame: a portrait + a text column, instead of Hero's screen-wide floating
+   word or WhatIDo's split symmetric columns — this section reads as a quiet,
+   contained "dossier" spread rather than either of those */
+
+.aboutme__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: clamp(48px, 6vw, 100px);
+  width: min(1160px, 88vw);
+  margin: 0 auto;
+}
+
+.aboutme__portrait-wrap {
+  position: relative;
+  flex: 0 0 clamp(220px, 26vw, 320px);
+  height: clamp(300px, 50vh, 440px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.aboutme__glow {
+  position: absolute;
+  inset: -18% -24%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(8, 145, 178, 0.32),
+    rgba(16, 185, 129, 0.1) 52%,
+    rgba(0, 0, 0, 0) 76%
+  );
+  filter: blur(28px);
+  opacity: 0;
+  will-change: opacity;
+}
+
+.aboutme__portrait {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.9);
+  will-change: clip-path;
+}
+
+.aboutme__portrait-fill {
+  position: absolute;
+  inset: -8% -6%;
+  background:
+    url("/noise.png"),
+    radial-gradient(120% 85% at 32% 16%, rgba(8, 145, 178, 0.3), rgba(0, 0, 0, 0) 56%),
+    linear-gradient(155deg, #0a2e33, #071018 60%, #020203);
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-blend-mode: overlay, screen, normal;
+}
+
+.aboutme__content {
+  flex: 1;
+  min-width: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.aboutme__kicker {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.aboutme__accent {
+  color: #10b981;
+}
+
+.aboutme__index {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: rgba(241, 244, 242, 0.4);
+}
+
+.aboutme__tag {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: rgba(8, 145, 178, 0.9);
+}
+
+.aboutme__label-slash {
+  color: rgba(241, 244, 242, 0.55);
+}
+
+.aboutme__heading {
+  margin: 0 0 22px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(26px, 3.3vw, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #f4f7f5;
+}
+
+.aboutme__line {
+  display: block;
+  overflow: hidden;
+}
+
+.aboutme__inner {
+  display: block;
+  will-change: transform;
+}
+
+.aboutme__em {
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  color: #10b981;
+}
+
+.aboutme__divider {
+  height: 1px;
+  width: 64px;
+  margin-bottom: 22px;
+  background: linear-gradient(100deg, #0891b2, #10b981);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.aboutme__rev {
+  will-change: transform, opacity;
+}
+
+.aboutme__tag-inline {
+  margin-right: 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: rgba(8, 145, 178, 0.9);
+}
+
+.aboutme__text {
+  max-width: 48ch;
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: rgba(241, 244, 242, 0.82);
+}
+
+@media (max-width: 900px) {
+  .aboutme__frame {
+    gap: 40px;
+  }
+
+  .aboutme__portrait-wrap {
+    flex-basis: clamp(180px, 30vw, 260px);
+    height: clamp(260px, 42vh, 360px);
+  }
+}
+
+@media (max-width: 640px) {
+  .aboutme__frame {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  .aboutme__portrait-wrap {
+    flex-basis: auto;
+    width: 52vw;
+    height: 34vh;
+  }
+
+  .aboutme__content {
+    width: 100%;
+  }
+
+  .aboutme__heading {
+    font-size: clamp(22px, 6.5vw, 32px);
+  }
+
+  .aboutme__text {
+    max-width: 100%;
+  }
+}

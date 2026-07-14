@@ -1,0 +1,141 @@
+/* ponytail: position:absolute (not fixed) matches every other hero child
+   (.hero__aurora/scan/type/bottom) — it keeps the navbar inside the
+   hero's own clip-path/containing-block context, so the section's
+   closing wipe clips it in sync with the rest instead of a fixed
+   element sailing past the clip and only vanishing at the final
+   visibility:hidden snap */
+.navbar {
+  position: absolute;
+  inset: auto 0 4vh 0;
+  z-index: 10;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.navbar__nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  padding-inline: 5vw;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
+.navbar__bar {
+  width: calc(100% - 10vw);
+  height: 3px;
+  margin: 0 auto 1.1rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #fff 25%,
+    #fff 75%,
+    transparent
+  );
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+}
+
+.navbar__brand {
+  grid-column: 1;
+  justify-self: start;
+  color: #fff;
+  opacity: 0.7;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+  letter-spacing: 0.02em;
+}
+
+.navbar__social {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.navbar__pages {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.navbar__brand,
+.navbar__social li,
+.navbar__pages li {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.navbar__social,
+.navbar__pages {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.navbar__social li:not(:first-child)::before,
+.navbar__pages li:not(:first-child)::before {
+  content: "/";
+  display: inline-block;
+  margin-right: 1rem;
+  color: #fff;
+  opacity: 0.6;
+  font-weight: 400;
+}
+
+.navbar__nav a {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 1px;
+  color: #fff;
+  opacity: 0.7;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-size: clamp(0.75rem, 1.3vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  transition: opacity 0.25s ease;
+}
+
+.navbar__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: #fff;
+  transition: width 0.3s ease;
+}
+
+.navbar__nav a:hover,
+.navbar__nav a:focus-visible {
+  opacity: 1;
+}
+
+.navbar__nav a:hover::after,
+.navbar__nav a:focus-visible::after {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    inset: auto 0 3vh 0;
+  }
+
+  .navbar__nav {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.9rem;
+  }
+
+  .navbar__brand,
+  .navbar__social,
+  .navbar__pages {
+    grid-column: 1;
+    justify-self: center;
+  }
+}
