@@ -7,54 +7,45 @@
   data-stack
   data-no-close-clip
 >
-  {/* solid ground the content reveals onto — without it, the gaps between word/portrait/
-     text would show WhatIDo's own (light) background once the curtain blocks exit */}
+  {/* solid ground the content reveals onto — without it, the gaps between frame/backdrop
+     would show WhatIDo's own (light) background once the curtain blocks exit */}
   <div class="aboutme__backdrop" id="aboutme-backdrop" aria-hidden="true"></div>
 
-  <div class="aboutme__glow aboutme__glow--1" id="aboutme-glow-1" aria-hidden="true"></div>
-  <div class="aboutme__glow aboutme__glow--2" id="aboutme-glow-2" aria-hidden="true"></div>
-
-  <div class="aboutme__word" id="aboutme-word" aria-hidden="true">
-    sobre<span class="aboutme__accent">;</span>
-  </div>
-
-  {/* ponytail: placeholder portrait fill (gradient + reused /noise.png), swap for a real photo when available */}
-  <div class="aboutme__portrait-wrap" id="aboutme-portrait-wrap" aria-hidden="true">
-    <div class="aboutme__portrait" id="aboutme-portrait">
-      <div class="aboutme__portrait-fill"></div>
-      <span class="aboutme__portrait-tag">{"{ ms:01 }"}</span>
+  <div class="aboutme__frame" id="aboutme-frame">
+    {/* ponytail: placeholder portrait fill (gradient + reused /noise.png), swap for a real photo when available */}
+    <div class="aboutme__portrait-wrap" id="aboutme-portrait-wrap" aria-hidden="true">
+      <div class="aboutme__glow" id="aboutme-glow"></div>
+      <div class="aboutme__portrait" id="aboutme-portrait">
+        <div class="aboutme__portrait-fill"></div>
+      </div>
     </div>
-  </div>
 
-  <div class="aboutme__statement" id="aboutme-statement">
-    <h2 class="aboutme__heading">
-      <span class="aboutme__line"><span class="aboutme__inner">Não desenho telas.</span></span>
-      <span class="aboutme__line"><span class="aboutme__inner">Componho movimento.</span></span>
-      <span class="aboutme__line"
-        ><span class="aboutme__inner"
-          >Vida em cada <em class="aboutme__em">transição<span class="aboutme__accent">;</span></em></span
-        ></span
-      >
-    </h2>
-  </div>
+    <div class="aboutme__content" id="aboutme-content">
+      <div class="aboutme__kicker" id="aboutme-kicker">
+        <span class="aboutme__rev aboutme__index">// 24</span>
+        <span class="aboutme__rev aboutme__tag">&lt;Sobre <span class="aboutme__label-slash">/</span>&gt;</span>
+      </div>
 
-  <div class="aboutme__bio" id="aboutme-bio">
-    <span class="aboutme__rev aboutme__index">// 24</span>
-    <div>
-      <div class="aboutme__rev aboutme__tag">&lt;about&gt;</div>
-      <p class="aboutme__rev aboutme__text">
-        Sou o Matheus, desenvolvedor <em class="aboutme__em">front-end</em> apaixonado
-        por movimento. Dou vida a interfaces com animações, transições e modelagens 3D,
-        sempre buscando fazer a tela deixar de ser estática. Para mim, código é
-        matéria-prima; a <em class="aboutme__em">emoção</em> é o acabamento. Cada
+      <h2 class="aboutme__heading">
+        <span class="aboutme__line"><span class="aboutme__inner">Não desenho telas.</span></span>
+        <span class="aboutme__line"><span class="aboutme__inner">Componho movimento.</span></span>
+        <span class="aboutme__line"
+          ><span class="aboutme__inner"
+            >Vida em cada <em class="aboutme__em">transição<span class="aboutme__accent">;</span></em></span
+          ></span
+        >
+      </h2>
+
+      <div class="aboutme__divider" id="aboutme-divider" aria-hidden="true"></div>
+
+      <p class="aboutme__rev aboutme__text" id="aboutme-text">
+        <span class="aboutme__tag-inline">&lt;about&gt;</span>Sou o Matheus, desenvolvedor
+        <em class="aboutme__em">front-end</em> apaixonado por movimento. Dou vida a interfaces com
+        animações, transições e modelagens 3D, sempre buscando fazer a tela deixar de ser estática.
+        Para mim, código é matéria-prima; a <em class="aboutme__em">emoção</em> é o acabamento. Cada
         detalhe é pensado para ser sentido, não apenas visto.
       </p>
-      <div class="aboutme__rev aboutme__tag">&lt;/about&gt;</div>
     </div>
-  </div>
-
-  <div class="aboutme__rev aboutme__label" id="aboutme-label">
-    &lt;Sobre <span class="aboutme__label-slash">/</span>&gt;
   </div>
 
   <div class="aboutme__block aboutme__block--top" id="aboutme-block-top"></div>
@@ -75,10 +66,6 @@
        revealed content lives in this same top layer so the curtain-wipe uncovers it
        directly, without ever needing WhatIDo underneath to hide itself. */
     z-index: 20 !important;
-    /* single gutter pair, measured out from the portrait's center axis, so statement/
-       bio/label all sit the same distance from the anchor instead of independent corners */
-    --aboutme-gutter-x: 6vw;
-    --aboutme-gutter-y: 11vh;
   }
 
   /* ---- curtain / backdrop --------------------------------------------- */
@@ -108,79 +95,47 @@
   .aboutme__backdrop {
     position: absolute;
     inset: 0;
-    background: #04100d;
+    background: #030304;
     opacity: 0;
     will-change: opacity;
   }
 
-  .aboutme__glow {
+  /* ---- frame: a portrait + a text column, instead of Hero's screen-wide floating
+     word or WhatIDo's split symmetric columns — this section reads as a quiet,
+     contained "dossier" spread rather than either of those */
+
+  .aboutme__frame {
     position: absolute;
-    opacity: 0;
-    filter: blur(16px);
-  }
-
-  .aboutme__glow--1 {
-    top: -16vh;
-    left: 50%;
-    width: 120vw;
-    height: 120vh;
-    transform: translateX(-50%);
-    background: radial-gradient(
-      46% 40% at 50% 42%,
-      rgba(52, 211, 153, 0.28),
-      rgba(8, 145, 178, 0.12) 46%,
-      rgba(0, 0, 0, 0) 72%
-    );
-  }
-
-  .aboutme__glow--2 {
-    bottom: -24vh;
-    right: -14vw;
-    width: 70vw;
-    height: 70vw;
-    max-width: 920px;
-    max-height: 920px;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle at 50% 50%,
-      rgba(8, 145, 178, 0.18),
-      rgba(8, 145, 178, 0.06) 50%,
-      rgba(0, 0, 0, 0) 74%
-    );
-  }
-
-  /* ---- revealed content, anchored off the portrait's center axis ------ */
-
-  .aboutme__word {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: "Cormorant Infant", serif;
-    font-style: italic;
-    font-weight: 500;
-    font-size: clamp(120px, 22vw, 400px);
-    line-height: 0.82;
-    letter-spacing: -0.01em;
-    color: #f4f7f5;
-    white-space: nowrap;
-    opacity: 0;
-    will-change: transform, opacity;
-  }
-
-  .aboutme__accent {
-    color: #34d399;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: clamp(48px, 6vw, 100px);
+    width: min(1160px, 88vw);
+    margin: 0 auto;
   }
 
   .aboutme__portrait-wrap {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: clamp(260px, 30vw, 430px);
-    height: clamp(380px, 68vh, 660px);
+    position: relative;
+    flex: 0 0 clamp(220px, 26vw, 320px);
+    height: clamp(300px, 50vh, 440px);
     opacity: 0;
     will-change: transform, opacity;
+  }
+
+  .aboutme__glow {
+    position: absolute;
+    inset: -18% -24%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 42%,
+      rgba(8, 145, 178, 0.32),
+      rgba(16, 185, 129, 0.1) 52%,
+      rgba(0, 0, 0, 0) 76%
+    );
+    filter: blur(28px);
+    opacity: 0;
+    will-change: opacity;
   }
 
   .aboutme__portrait {
@@ -189,7 +144,7 @@
     height: 100%;
     overflow: hidden;
     border-radius: 8px;
-    box-shadow: 0 50px 130px -30px rgba(0, 0, 0, 0.92);
+    box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.9);
     will-change: clip-path;
   }
 
@@ -198,35 +153,51 @@
     inset: -8% -6%;
     background:
       url("/noise.png"),
-      radial-gradient(120% 85% at 32% 16%, rgba(126, 244, 192, 0.3), rgba(0, 0, 0, 0) 56%),
-      linear-gradient(155deg, #0f3b34, #072220 60%, #030807);
+      radial-gradient(120% 85% at 32% 16%, rgba(8, 145, 178, 0.3), rgba(0, 0, 0, 0) 56%),
+      linear-gradient(155deg, #0a2e33, #071018 60%, #020203);
     background-repeat: repeat, no-repeat, no-repeat;
     background-blend-mode: overlay, screen, normal;
   }
 
-  .aboutme__portrait-tag {
-    position: absolute;
-    left: 16px;
-    bottom: 14px;
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    color: rgba(234, 255, 245, 0.72);
+  .aboutme__content {
+    flex: 1;
+    min-width: 0;
+    opacity: 0;
+    will-change: transform, opacity;
   }
 
-  .aboutme__statement {
-    position: absolute;
-    top: var(--aboutme-gutter-y);
-    left: var(--aboutme-gutter-x);
-    max-width: 52vw;
-    opacity: 0;
+  .aboutme__kicker {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .aboutme__accent {
+    color: #10b981;
+  }
+
+  .aboutme__index {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: rgba(241, 244, 242, 0.4);
+  }
+
+  .aboutme__tag {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: rgba(8, 145, 178, 0.9);
+  }
+
+  .aboutme__label-slash {
+    color: rgba(241, 244, 242, 0.55);
   }
 
   .aboutme__heading {
-    margin: 0;
+    margin: 0 0 22px;
     font-family: "Space Grotesk", sans-serif;
     font-weight: 700;
-    font-size: clamp(26px, 3.3vw, 50px);
+    font-size: clamp(26px, 3.3vw, 48px);
     line-height: 1.08;
     letter-spacing: -0.02em;
     color: #f4f7f5;
@@ -246,106 +217,72 @@
     font-family: "Cormorant Infant", serif;
     font-style: italic;
     font-weight: 500;
-    color: #34d399;
+    color: #10b981;
   }
 
-  .aboutme__bio {
-    position: absolute;
-    bottom: var(--aboutme-gutter-y);
-    left: var(--aboutme-gutter-x);
-    display: grid;
-    grid-template-columns: 52px 1fr;
-    gap: 22px;
-    max-width: 540px;
-    opacity: 0;
+  .aboutme__divider {
+    height: 1px;
+    width: 64px;
+    margin-bottom: 22px;
+    background: linear-gradient(100deg, #0891b2, #10b981);
+    transform: scaleX(0);
+    transform-origin: left center;
   }
 
   .aboutme__rev {
     will-change: transform, opacity;
   }
 
-  .aboutme__index {
+  .aboutme__tag-inline {
+    margin-right: 10px;
     font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     font-size: 12px;
-    color: rgba(241, 244, 242, 0.4);
-    padding-top: 4px;
-  }
-
-  .aboutme__tag {
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 12px;
-    color: rgba(52, 211, 153, 0.85);
-  }
-
-  .aboutme__tag:first-child {
-    margin-bottom: 10px;
-  }
-
-  .aboutme__tag:last-child {
-    margin-top: 10px;
+    color: rgba(8, 145, 178, 0.9);
   }
 
   .aboutme__text {
-    margin: 0 0 0 14px;
+    max-width: 48ch;
+    margin: 0;
     font-family: "Space Grotesk", sans-serif;
     font-size: 15.5px;
-    line-height: 1.68;
+    line-height: 1.7;
     color: rgba(241, 244, 242, 0.82);
   }
 
-  .aboutme__label {
-    position: absolute;
-    top: var(--aboutme-gutter-y);
-    right: var(--aboutme-gutter-x);
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 14px;
-    color: #34d399;
-    text-align: right;
-    opacity: 0;
-  }
-
-  .aboutme__label-slash {
-    color: rgba(241, 244, 242, 0.55);
-  }
-
   @media (max-width: 900px) {
-    .aboutme__statement {
-      max-width: 68vw;
+    .aboutme__frame {
+      gap: 40px;
     }
 
     .aboutme__portrait-wrap {
-      width: clamp(220px, 40vw, 340px);
-      height: clamp(320px, 56vh, 520px);
+      flex-basis: clamp(180px, 30vw, 260px);
+      height: clamp(260px, 42vh, 360px);
     }
   }
 
   @media (max-width: 640px) {
-    .aboutme {
-      --aboutme-gutter-x: 6vw;
-      --aboutme-gutter-y: 8vh;
-    }
-
-    .aboutme__word {
-      font-size: clamp(90px, 34vw, 220px);
+    .aboutme__frame {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 28px;
     }
 
     .aboutme__portrait-wrap {
+      flex-basis: auto;
       width: 52vw;
-      height: 40vh;
+      height: 34vh;
     }
 
-    .aboutme__statement {
-      max-width: 88vw;
+    .aboutme__content {
+      width: 100%;
     }
 
     .aboutme__heading {
       font-size: clamp(22px, 6.5vw, 32px);
     }
 
-    .aboutme__bio {
-      max-width: 88vw;
-      grid-template-columns: 34px 1fr;
-      gap: 12px;
+    .aboutme__text {
+      max-width: 100%;
     }
   }
 </style>
@@ -357,17 +294,16 @@
   const blockTop = document.getElementById("aboutme-block-top")!;
   const blockBottom = document.getElementById("aboutme-block-bottom")!;
   const backdrop = document.getElementById("aboutme-backdrop")!;
-  const glow1 = document.getElementById("aboutme-glow-1")!;
-  const glow2 = document.getElementById("aboutme-glow-2")!;
-  const word = document.getElementById("aboutme-word")!;
+  const glow = document.getElementById("aboutme-glow")!;
   const portraitWrap = document.getElementById("aboutme-portrait-wrap")!;
   const portrait = document.getElementById("aboutme-portrait")!;
-  const statement = document.getElementById("aboutme-statement")!;
-  const bio = document.getElementById("aboutme-bio")!;
-  const label = document.getElementById("aboutme-label")!;
-  const lines = statement.querySelectorAll<HTMLElement>(".aboutme__inner");
-  const revs = document.querySelectorAll<HTMLElement>(".aboutme__rev");
-  const revealTargets = [backdrop, glow1, glow2, word, portraitWrap, statement, bio, label];
+  const content = document.getElementById("aboutme-content")!;
+  const kicker = document.getElementById("aboutme-kicker")!;
+  const divider = document.getElementById("aboutme-divider")!;
+  const text = document.getElementById("aboutme-text")!;
+  const lines = content.querySelectorAll<HTMLElement>(".aboutme__inner");
+  const kickerRevs = kicker.querySelectorAll<HTMLElement>(".aboutme__rev");
+  const revealTargets = [backdrop, glow, portraitWrap, content];
 
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
@@ -384,11 +320,14 @@
   // handler, which also updates unconditionally in both motion modes.
   gsap.set(blockTop, { xPercent: -100 });
   gsap.set(blockBottom, { xPercent: 100 });
-  gsap.set([backdrop, glow1, glow2, word, statement, bio, label], { opacity: 0 });
-  gsap.set(portraitWrap, { opacity: 0, scale: 1.08 });
+  gsap.set([backdrop, glow, portraitWrap, content], { opacity: 0 });
+  gsap.set(portraitWrap, { y: 50, scale: 1.05 });
+  gsap.set(content, { y: 32 });
   gsap.set(portrait, { clipPath: "inset(46% 0% 46% 0%)" });
   gsap.set(lines, { yPercent: 120 });
-  gsap.set(revs, { y: 22, opacity: 0 });
+  gsap.set(kickerRevs, { y: 18, opacity: 0 });
+  gsap.set(divider, { scaleX: 0 });
+  gsap.set(text, { y: 18, opacity: 0 });
 
   // reveals element i of a group across its own slice of the segment (1/count wide),
   // in order — same manually-scrubbed stand-in for gsap stagger used in WhatIDo.astro,
@@ -421,55 +360,62 @@
     const backdropT = gsap.utils.clamp(0, 1, revealT / 0.15);
     gsap.set(backdrop, { opacity: backdropT });
 
-    const glowT = gsap.utils.clamp(0, 1, revealT / 0.4);
-    gsap.set([glow1, glow2], { opacity: glowT });
+    const glowT = gsap.utils.clamp(0, 1, revealT / 0.35);
+    gsap.set(glow, { opacity: glowT });
 
-    const wordT = gsap.utils.clamp(0, 1, revealT / 0.5);
-    gsap.set(word, { opacity: wordT });
-
-    const portraitT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.55);
+    const portraitT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.5);
     gsap.set(portraitWrap, {
       opacity: portraitT,
-      scale: gsap.utils.interpolate(1.08, 1, portraitT),
+      y: gsap.utils.interpolate(50, 0, portraitT),
+      scale: gsap.utils.interpolate(1.05, 1, portraitT),
     });
     const clipInset = gsap.utils.interpolate(46, 0, portraitT);
     gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
 
-    const linesT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.5);
-    gsap.set(statement, { opacity: linesT > 0 ? 1 : 0 });
+    const contentT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.6);
+    gsap.set(content, {
+      opacity: contentT > 0 ? 1 : 0,
+      y: gsap.utils.interpolate(32, 0, contentT),
+    });
+
+    const kickerT = gsap.utils.clamp(0, 1, contentT / 0.3);
+    kickerRevs.forEach((el, i) => {
+      const kt = seqT(kickerT, i, kickerRevs.length);
+      gsap.set(el, { y: gsap.utils.interpolate(18, 0, kt), opacity: kt });
+    });
+
+    const linesT = gsap.utils.clamp(0, 1, (contentT - 0.2) / 0.5);
     lines.forEach((el, i) => {
       const lt = seqT(linesT, i, lines.length);
       gsap.set(el, { yPercent: gsap.utils.interpolate(120, 0, lt) });
     });
 
-    const revsT = gsap.utils.clamp(0, 1, (revealT - 0.45) / 0.5);
-    gsap.set(bio, { opacity: revsT > 0 ? 1 : 0 });
-    gsap.set(label, { opacity: revsT > 0 ? 1 : 0 });
-    revs.forEach((el, i) => {
-      const rt = seqT(revsT, i, revs.length);
-      gsap.set(el, { y: gsap.utils.interpolate(22, 0, rt), opacity: rt });
-    });
+    const dividerT = gsap.utils.clamp(0, 1, (contentT - 0.55) / 0.3);
+    gsap.set(divider, { scaleX: dividerT });
+
+    const textT = gsap.utils.clamp(0, 1, (contentT - 0.65) / 0.35);
+    gsap.set(text, { opacity: textT, y: gsap.utils.interpolate(18, 0, textT) });
   }) as EventListener);
 
   if (!reduceMotion) {
     // subtle mouse parallax across the revealed scene — listens on window (not the
     // section) since .aboutme keeps pointer-events:none for its whole top-layer curtain.
-    const wX = gsap.quickTo(word, "x", { duration: 1.2, ease: "power3" });
-    const g1X = gsap.quickTo(glow1, "x", { duration: 1.3, ease: "power3" });
-    const g1Y = gsap.quickTo(glow1, "y", { duration: 1.3, ease: "power3" });
-    const g2X = gsap.quickTo(glow2, "x", { duration: 1.5, ease: "power3" });
+    // glow drifts opposite the cursor (background layer), portrait/content drift with
+    // it (foreground) — same layered-opposition idiom as WhatIDo's grid vs. columns.
+    const gX = gsap.quickTo(glow, "x", { duration: 1.3, ease: "power3" });
+    const gY = gsap.quickTo(glow, "y", { duration: 1.3, ease: "power3" });
     const pX = gsap.quickTo(portraitWrap, "x", { duration: 1.0, ease: "power3" });
     const pY = gsap.quickTo(portraitWrap, "y", { duration: 1.0, ease: "power3" });
+    const cX = gsap.quickTo(content, "x", { duration: 1.0, ease: "power3" });
 
     window.addEventListener("mousemove", (e) => {
       const dx = e.clientX / window.innerWidth - 0.5;
       const dy = e.clientY / window.innerHeight - 0.5;
-      wX(dx * 46);
-      g1X(-dx * 60);
-      g1Y(-dy * 44);
-      g2X(dx * 40);
-      pX(-dx * 26);
-      pY(-dy * 20);
+      gX(-dx * 30);
+      gY(-dy * 24);
+      pX(dx * 16);
+      pY(dy * 12);
+      cX(dx * 10);
     });
   }
 

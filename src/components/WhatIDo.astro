@@ -453,6 +453,24 @@ const rightText =
     e: CustomEvent<{ progress: number }>,
   ) => {
     const t = e.detail.progress;
+
+    // once the reveal is done (t starts climbing only after Hero has fully closed),
+    // dissolve+shrink the content instead of leaving it at full opacity for AboutMe's
+    // curtain to hard-cover — runs after the hero:bar-shrink handler above in the same
+    // tick, so it wins over that handler's opacity/scale for cols and grid. Finishes by
+    // t=0.5, ahead of the curtain fully closing (t=0.6, see AboutMe's coverT), so nothing
+    // visible pops out from behind the blocks. Scale (not y) since x/y on cols and grid
+    // are already owned by the mousemove parallax quickTo's above.
+    const exitT = gsap.utils.clamp(0, 1, t / 0.5);
+    gsap.set(cols, {
+      opacity: 1 - exitT,
+      scale: gsap.utils.interpolate(1, 0.96, exitT),
+    });
+    gsap.set(grid, {
+      opacity: 1 - exitT,
+      scale: gsap.utils.interpolate(1, 1.06, exitT),
+    });
+
     gsap.set(section, { display: t >= 1 ? "none" : "" });
     window.dispatchEvent(
       new CustomEvent("whatido:progress", { detail: { progress: t } }),
