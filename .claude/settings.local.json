@@ -3,7 +3,18 @@
     "allow": [
       "Bash(claude doctor *)",
       "Bash(npm view *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "WebFetch(domain:lukebaffait.fr)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(claude mcp *)",
+      "Bash(npm run *)",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_run_code_unsafe",
+      "Bash(curl -s \"http://localhost:4321/src/components/WhatIDo.astro?astro&type=script&index=0&lang.ts\")",
+      "Bash(ffmpeg -version)",
+      "mcp__playwright__browser_take_screenshot"
     ]
   },
   "enabledPlugins": {

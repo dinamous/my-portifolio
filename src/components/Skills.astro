@@ -1,0 +1,233 @@
+---
+// ponytail: categorias/tags placeholder, ajustar conforme stack real evoluir
+const categories = [
+  { name: "Frontend", tags: ["Astro", "Tailwind CSS", "TypeScript", "Vite"] },
+  { name: "Animação & 3D", tags: ["GSAP", "Three.js", "WebGL", "Blender"] },
+  { name: "Ferramentas", tags: ["Figma", "Git", "Sanity", "Vercel"] },
+  { name: "Performance", tags: ["Lighthouse", "Core Web Vitals", "Lazy Loading", "A11y"] },
+];
+---
+
+<section class="skills fixed inset-0 h-screen w-screen" id="skills-section" data-stack data-no-close-clip>
+  <div class="skills__grid" id="skills-grid" data-depth="0.15" aria-hidden="true"></div>
+  <div class="skills__label" id="skills-label">&lt;Skills <span class="skills__label-slash">/</span>&gt;</div>
+  <div class="skills__panels" id="skills-panels">
+    {categories.map((cat, i) => (
+      <div class="skills__panel" id={`skills-panel-${i}`}>
+        <h3 class="skills__heading" data-text={cat.name}>{cat.name}</h3>
+        <div class="skills__tags">
+          {cat.tags.map((tag) => (
+            <span class="skills__tag" data-text={tag}>{tag}</span>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .skills {
+    position: relative;
+    background: #030b09;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    will-change: opacity;
+  }
+
+  .skills__grid {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      linear-gradient(rgba(244, 247, 245, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(244, 247, 245, 0.018) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    transform-origin: center;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .skills__label {
+    position: absolute;
+    top: 11vh;
+    left: 6vw;
+    z-index: 1;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 14px;
+    color: #34d399;
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  .skills__label-slash {
+    color: rgba(244, 247, 245, 0.55);
+  }
+
+  .skills__panels {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4vw 5vw;
+    width: 100%;
+    padding: 0 8vw;
+  }
+
+  .skills__panel {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .skills__heading {
+    margin: 0 0 1rem;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    letter-spacing: 0.02em;
+    color: #f4f7f5;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(244, 247, 245, 0.15);
+  }
+
+  .skills__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .skills__tag {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid rgba(244, 247, 245, 0.25);
+    border-radius: 999px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: rgba(244, 247, 245, 0.75);
+    cursor: default;
+    opacity: 0;
+    will-change: transform, opacity, border-color;
+  }
+
+  @media (max-width: 900px) {
+    .skills__panels {
+      grid-template-columns: 1fr;
+      gap: 5vh;
+    }
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+  import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
+  import Parallax from "parallax-js";
+
+  gsap.registerPlugin(ScrambleTextPlugin);
+
+  const section = document.getElementById("skills-section")!;
+  const grid = document.getElementById("skills-grid")!;
+  const label = document.getElementById("skills-label")!;
+  const panels = Array.from(document.querySelectorAll<HTMLElement>(".skills__panel"));
+  const headings = Array.from(document.querySelectorAll<HTMLElement>(".skills__heading"));
+  const tags = Array.from(document.querySelectorAll<HTMLElement>(".skills__tag"));
+
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  if (reduceMotion) {
+    gsap.set([grid, label, ...panels], { opacity: 1 });
+    gsap.set(tags, { opacity: 1, y: 0 });
+  } else {
+    gsap.set(grid, { opacity: 0, scale: 1.08 });
+    gsap.set(label, { opacity: 0 });
+    gsap.set(panels, { opacity: 0, y: 30 });
+    gsap.set(tags, { opacity: 0, y: 14 });
+
+    // scramble-in disparado uma unica vez por titulo, guardado num WeakSet
+    // pra nao repetir a cada tick de progresso escrubado
+    const scrambled = new WeakSet<HTMLElement>();
+    const scrambleIn = (el: HTMLElement) => {
+      if (scrambled.has(el)) return;
+      scrambled.add(el);
+      gsap.to(el, {
+        duration: 0.8,
+        scrambleText: { text: el.dataset.text ?? el.textContent ?? "", chars: "upperAndLowerCase", speed: 0.4 },
+        ease: "none",
+      });
+    };
+
+    const reveal = gsap
+      .timeline({ paused: true })
+      .to(grid, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }, 0)
+      .to(label, { opacity: 1, duration: 0.4 }, 0.1);
+
+    panels.forEach((panel, i) => {
+      const panelTags = panel.querySelectorAll(".skills__tag");
+      reveal
+        .to(panel, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.15 + i * 0.1)
+        .call(() => scrambleIn(headings[i]), [], 0.15 + i * 0.1)
+        .to(panelTags, { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }, 0.25 + i * 0.1);
+    });
+
+    const revealProgress = { value: 0 };
+    const setProgress = gsap.quickTo(revealProgress, "value", {
+      duration: 0.6,
+      ease: "power2.out",
+      onUpdate: () => reveal.progress(revealProgress.value),
+    });
+
+    window.addEventListener("projects:progress", ((e: CustomEvent<{ progress: number }>) => {
+      setProgress(e.detail.progress);
+    }) as EventListener);
+
+    // microinteracao: glitch/scramble ao passar o mouse sobre cada tag
+    tags.forEach((tag) => {
+      tag.addEventListener("mouseenter", () => {
+        gsap.to(tag, {
+          duration: 0.5,
+          scrambleText: { text: tag.dataset.text ?? tag.textContent ?? "", chars: "upperAndLowerCase", speed: 0.5 },
+          borderColor: "rgba(52, 211, 153, 0.7)",
+          ease: "none",
+        });
+      });
+      tag.addEventListener("mouseleave", () => {
+        gsap.to(tag, { borderColor: "rgba(244, 247, 245, 0.25)", duration: 0.4 });
+      });
+    });
+
+    new Parallax(section, { relativeInput: true, hoverOnly: true, selector: "[data-depth]" });
+  }
+
+  // saída própria da Skills: dissolve em glitch — os textos viram símbolo por um
+  // instante (reaproveitando o ScrambleTextPlugin já carregado aqui) antes do
+  // fade, identidade "digital" distinta do fade da AboutMe e da cascata da
+  // Projects. Disparado uma única vez (guard), não a cada tick de progresso.
+  // data-no-close-clip tira essa seção do fechamento genérico do sectionStack.
+  let glitchTriggered = false;
+  section.addEventListener("stack:progress", ((e: CustomEvent<{ progress: number }>) => {
+    const p = e.detail.progress;
+
+    if (!reduceMotion && !glitchTriggered && p > 0.12) {
+      glitchTriggered = true;
+      [...headings, ...tags].forEach((el) => {
+        gsap.to(el, {
+          duration: 0.5,
+          scrambleText: { text: el.textContent ?? "", chars: "!<>-_\\/[]{}—=+*^?#", speed: 0.35, revealDelay: 0 },
+          ease: "none",
+        });
+      });
+    }
+
+    const fadeT = reduceMotion ? p : gsap.utils.clamp(0, 1, (p - 0.15) / 0.5);
+    gsap.set(panels, { opacity: 1 - fadeT });
+    gsap.set([grid, label], { opacity: 1 - fadeT });
+    // mesmo motivo do fade de fundo na Projects: sem isso o fundo sólido da
+    // seção esconderia a Contact até o corte seco do display:none.
+    const bgFadeT = gsap.utils.clamp(0, 1, (p - 0.75) / 0.25);
+    gsap.set(section, { opacity: 1 - bgFadeT, display: p >= 1 ? "none" : "" });
+
+    window.dispatchEvent(new CustomEvent("skills:progress", { detail: { progress: p } }));
+  }) as EventListener);
+</script>

@@ -5,6 +5,7 @@
   class="aboutme fixed inset-0 h-screen w-screen"
   id="aboutme-section"
   data-stack
+  data-no-close-clip
 >
   {/* solid ground the content reveals onto — without it, the gaps between word/portrait/
      text would show WhatIDo's own (light) background once the curtain blocks exit */}
@@ -66,6 +67,7 @@
     flex-direction: column;
     overflow: hidden;
     pointer-events: none;
+    will-change: opacity;
     /* transparent: only the two blocks (and, once revealed, the content below) should
        ever be visible. sectionStack assigns the last section the lowest z-index
        (reveal-from-behind default); this section instead curtains its own blocks over
@@ -91,15 +93,29 @@
     z-index: -1;
   }
 
+  /* default off-screen in CSS itself, not just via the script's gsap.set — with this
+     many components now loading JS on the page, waiting on the script to hide these
+     would leave a visible gap where two solid black bars (z-index:20 above everything)
+     flash over the Hero before GSAP ever runs */
+  .aboutme__block--top {
+    transform: translateX(-100%);
+  }
+
+  .aboutme__block--bottom {
+    transform: translateX(100%);
+  }
+
   .aboutme__backdrop {
     position: absolute;
     inset: 0;
     background: #04100d;
+    opacity: 0;
     will-change: opacity;
   }
 
   .aboutme__glow {
     position: absolute;
+    opacity: 0;
     filter: blur(16px);
   }
 
@@ -148,7 +164,8 @@
     letter-spacing: -0.01em;
     color: #f4f7f5;
     white-space: nowrap;
-    will-change: transform;
+    opacity: 0;
+    will-change: transform, opacity;
   }
 
   .aboutme__accent {
@@ -162,7 +179,8 @@
     transform: translate(-50%, -50%);
     width: clamp(260px, 30vw, 430px);
     height: clamp(380px, 68vh, 660px);
-    will-change: transform;
+    opacity: 0;
+    will-change: transform, opacity;
   }
 
   .aboutme__portrait {
@@ -201,6 +219,7 @@
     top: var(--aboutme-gutter-y);
     left: var(--aboutme-gutter-x);
     max-width: 52vw;
+    opacity: 0;
   }
 
   .aboutme__heading {
@@ -238,6 +257,7 @@
     grid-template-columns: 52px 1fr;
     gap: 22px;
     max-width: 540px;
+    opacity: 0;
   }
 
   .aboutme__rev {
@@ -281,6 +301,7 @@
     font-size: 14px;
     color: #34d399;
     text-align: right;
+    opacity: 0;
   }
 
   .aboutme__label-slash {
@@ -332,6 +353,7 @@
 <script>
   import gsap from "gsap";
 
+  const section = document.getElementById("aboutme-section")!;
   const blockTop = document.getElementById("aboutme-block-top")!;
   const blockBottom = document.getElementById("aboutme-block-bottom")!;
   const backdrop = document.getElementById("aboutme-backdrop")!;
@@ -351,76 +373,85 @@
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
-  if (reduceMotion) {
-    gsap.set([blockTop, blockBottom], { autoAlpha: 0 });
-    gsap.set(revealTargets, { opacity: 1, x: 0, y: 0, scale: 1, filter: "none" });
-    gsap.set(portrait, { clipPath: "inset(0% 0% 0% 0%)" });
-    gsap.set(lines, { yPercent: 0 });
-    gsap.set(revs, { y: 0, opacity: 1 });
-  } else {
-    gsap.set(blockTop, { xPercent: -100 });
-    gsap.set(blockBottom, { xPercent: 100 });
-    gsap.set([backdrop, glow1, glow2, word, statement, bio, label], { opacity: 0 });
-    gsap.set(portraitWrap, { opacity: 0, scale: 1.08 });
-    gsap.set(portrait, { clipPath: "inset(46% 0% 46% 0%)" });
-    gsap.set(lines, { yPercent: 120 });
-    gsap.set(revs, { y: 22, opacity: 0 });
+  // ponytail: no reduced-motion branch splitting this setup from the reveal logic below —
+  // .aboutme keeps z-index:20 so its curtain can render above Hero/WhatIDo while they're
+  // still on screen mid-transition (their own natural z-index, assigned by sectionStack.ts,
+  // would otherwise cover it). That only stays correct as long as AboutMe starts hidden like
+  // every other section; jumping straight to opacity:1 here (as reduced motion used to) meant
+  // AboutMe's forced z-index put it on top of Hero/WhatIDo from the very first frame, instead
+  // of waiting its turn. The reveal below is pure gsap.set driven off scroll progress (no
+  // tweening), so it's safe to run unconditionally — same idiom as Hero's own stack:progress
+  // handler, which also updates unconditionally in both motion modes.
+  gsap.set(blockTop, { xPercent: -100 });
+  gsap.set(blockBottom, { xPercent: 100 });
+  gsap.set([backdrop, glow1, glow2, word, statement, bio, label], { opacity: 0 });
+  gsap.set(portraitWrap, { opacity: 0, scale: 1.08 });
+  gsap.set(portrait, { clipPath: "inset(46% 0% 46% 0%)" });
+  gsap.set(lines, { yPercent: 120 });
+  gsap.set(revs, { y: 22, opacity: 0 });
 
-    // reveals element i of a group across its own slice of the segment (1/count wide),
-    // in order — same manually-scrubbed stand-in for gsap stagger used in WhatIDo.astro,
-    // since this whole reveal is driven off a single continuous progress value.
-    const seqT = (segT: number, index: number, count: number) =>
-      gsap.utils.clamp(0, 1, segT * count - index);
+  // reveals element i of a group across its own slice of the segment (1/count wide),
+  // in order — same manually-scrubbed stand-in for gsap stagger used in WhatIDo.astro,
+  // since this whole reveal is driven off a single continuous progress value.
+  const seqT = (segT: number, index: number, count: number) =>
+    gsap.utils.clamp(0, 1, segT * count - index);
 
-    const coverEase = gsap.parseEase("power2.out");
+  const coverEase = gsap.parseEase("power2.out");
 
-    // curtain blocks wait offscreen through a short delay, then glide in — easing out as
-    // they approach — until each one fully covers its half of the screen and locks there,
-    // becoming the solid background the content reveals onto. They never exit; revealT
-    // picks up right after coverT completes.
-    window.addEventListener("whatido:progress", ((
-      e: CustomEvent<{ progress: number }>,
-    ) => {
-      const t = e.detail.progress;
-      const coverT = coverEase(gsap.utils.clamp(0, 1, (t - 0.15) / 0.45));
-      const revealT = gsap.utils.clamp(0, 1, (t - 0.6) / 0.4);
+  // tracks WhatIDo's own progress so the exit handler below can tell "not entered
+  // yet" (t < 1, p also reads 0 the whole time) apart from "entered and at rest"
+  // (t === 1, p also reads 0) — both clamp p to 0, so p alone can't distinguish them.
+  let enteredT = 0;
 
-      gsap.set(blockTop, { xPercent: gsap.utils.interpolate(-100, 0, coverT) });
-      gsap.set(blockBottom, { xPercent: gsap.utils.interpolate(100, 0, coverT) });
+  // curtain blocks wait offscreen through a short delay, then glide in — easing out as
+  // they approach — until each one fully covers its half of the screen and locks there,
+  // becoming the solid background the content reveals onto. They never exit; revealT
+  // picks up right after coverT completes.
+  window.addEventListener("whatido:progress", ((
+    e: CustomEvent<{ progress: number }>,
+  ) => {
+    const t = e.detail.progress;
+    enteredT = t;
+    const coverT = coverEase(gsap.utils.clamp(0, 1, (t - 0.15) / 0.45));
+    const revealT = gsap.utils.clamp(0, 1, (t - 0.6) / 0.4);
 
-      const backdropT = gsap.utils.clamp(0, 1, revealT / 0.15);
-      gsap.set(backdrop, { opacity: backdropT });
+    gsap.set(blockTop, { xPercent: gsap.utils.interpolate(-100, 0, coverT) });
+    gsap.set(blockBottom, { xPercent: gsap.utils.interpolate(100, 0, coverT) });
 
-      const glowT = gsap.utils.clamp(0, 1, revealT / 0.4);
-      gsap.set([glow1, glow2], { opacity: glowT });
+    const backdropT = gsap.utils.clamp(0, 1, revealT / 0.15);
+    gsap.set(backdrop, { opacity: backdropT });
 
-      const wordT = gsap.utils.clamp(0, 1, revealT / 0.5);
-      gsap.set(word, { opacity: wordT });
+    const glowT = gsap.utils.clamp(0, 1, revealT / 0.4);
+    gsap.set([glow1, glow2], { opacity: glowT });
 
-      const portraitT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.55);
-      gsap.set(portraitWrap, {
-        opacity: portraitT,
-        scale: gsap.utils.interpolate(1.08, 1, portraitT),
-      });
-      const clipInset = gsap.utils.interpolate(46, 0, portraitT);
-      gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
+    const wordT = gsap.utils.clamp(0, 1, revealT / 0.5);
+    gsap.set(word, { opacity: wordT });
 
-      const linesT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.5);
-      gsap.set(statement, { opacity: linesT > 0 ? 1 : 0 });
-      lines.forEach((el, i) => {
-        const lt = seqT(linesT, i, lines.length);
-        gsap.set(el, { yPercent: gsap.utils.interpolate(120, 0, lt) });
-      });
+    const portraitT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.55);
+    gsap.set(portraitWrap, {
+      opacity: portraitT,
+      scale: gsap.utils.interpolate(1.08, 1, portraitT),
+    });
+    const clipInset = gsap.utils.interpolate(46, 0, portraitT);
+    gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
 
-      const revsT = gsap.utils.clamp(0, 1, (revealT - 0.45) / 0.5);
-      gsap.set(bio, { opacity: revsT > 0 ? 1 : 0 });
-      gsap.set(label, { opacity: revsT > 0 ? 1 : 0 });
-      revs.forEach((el, i) => {
-        const rt = seqT(revsT, i, revs.length);
-        gsap.set(el, { y: gsap.utils.interpolate(22, 0, rt), opacity: rt });
-      });
-    }) as EventListener);
+    const linesT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.5);
+    gsap.set(statement, { opacity: linesT > 0 ? 1 : 0 });
+    lines.forEach((el, i) => {
+      const lt = seqT(linesT, i, lines.length);
+      gsap.set(el, { yPercent: gsap.utils.interpolate(120, 0, lt) });
+    });
 
+    const revsT = gsap.utils.clamp(0, 1, (revealT - 0.45) / 0.5);
+    gsap.set(bio, { opacity: revsT > 0 ? 1 : 0 });
+    gsap.set(label, { opacity: revsT > 0 ? 1 : 0 });
+    revs.forEach((el, i) => {
+      const rt = seqT(revsT, i, revs.length);
+      gsap.set(el, { y: gsap.utils.interpolate(22, 0, rt), opacity: rt });
+    });
+  }) as EventListener);
+
+  if (!reduceMotion) {
     // subtle mouse parallax across the revealed scene — listens on window (not the
     // section) since .aboutme keeps pointer-events:none for its whole top-layer curtain.
     const wX = gsap.quickTo(word, "x", { duration: 1.2, ease: "power3" });
@@ -441,4 +472,28 @@
       pY(-dy * 20);
     });
   }
+
+  // saída própria da AboutMe: o conteúdo pessoal recolhe primeiro (mesmo exitT
+  // de sempre), a cena fica só com a cortina preta sólida por um instante, e só
+  // então dissolve por completo — um fade cinematográfico pra revelar Projects,
+  // distinto do wipe/spin do Hero e do jeito que cada seção seguinte vai sair.
+  // data-no-close-clip tira essa seção do fechamento genérico do sectionStack
+  // (que brigaria com esse fade fazendo clip-path ao mesmo tempo).
+  section.addEventListener("stack:progress", ((e: CustomEvent<{ progress: number }>) => {
+    const p = e.detail.progress;
+
+    // p alone reads 0 both "before WhatIDo has handed off" and "just after entering,
+    // at rest" — without this guard, exitT (0 - 1) - 0 forces opacity back to 1 on
+    // every scroll tick from the very first pixel, even while still inside Hero.
+    if (enteredT >= 1) {
+      const exitT = gsap.utils.clamp(0, 1, p * 1.8);
+      gsap.set(revealTargets, { opacity: 1 - exitT, y: -exitT * 40 });
+      gsap.set(portraitWrap, { scale: 1 - exitT * 0.08 });
+    }
+
+    const fadeT = gsap.utils.clamp(0, 1, (p - 0.6) / 0.4);
+    gsap.set(section, { opacity: 1 - fadeT, display: p >= 1 ? "none" : "" });
+
+    window.dispatchEvent(new CustomEvent("aboutme:progress", { detail: { progress: p } }));
+  }) as EventListener);
 </script>

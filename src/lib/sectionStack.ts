@@ -104,3 +104,18 @@ export function initSectionStack(selector = "[data-stack]") {
 export function enableSectionStack() {
   enabled = true;
 }
+
+// permite navegação por clique (Navbar) sem duplicar a lista de seções —
+// resolve o id contra o mesmo array `sections` que o Observer já usa, e
+// escreve em `target` (não só em `moveTo`) porque é o acumulador cru que o
+// onChange do Observer continua incrementando a partir daí; só chamar
+// moveTo() sem atualizar target faria o próximo tick de wheel saltar de volta.
+export function goToSection(idOrIndex: string | number) {
+  const index =
+    typeof idOrIndex === "number"
+      ? idOrIndex
+      : sections.findIndex((el) => el.id === idOrIndex);
+  if (index < 0 || !moveTo) return;
+  target = gsap.utils.clamp(0, max, index);
+  moveTo(target);
+}

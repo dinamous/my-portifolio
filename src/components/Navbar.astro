@@ -9,9 +9,10 @@
       <li><a href="mailto:dinamous.dev@gmail.com">Email</a></li>
     </ul>
     <ul class="navbar__pages">
-      <li><a href="#sobre">Sobre</a></li>
-      <li><a href="#trabalhos">Trabalhos</a></li>
-      <li><a href="#contato">Contato</a></li>
+      <li><a href="#aboutme-section">Sobre</a></li>
+      <li><a href="#projects-section">Trabalhos</a></li>
+      <li><a href="#skills-section">Skills</a></li>
+      <li><a href="#contact-section">Contato</a></li>
     </ul>
   </nav>
 </div>
@@ -162,6 +163,7 @@
 
 <script>
   import gsap from "gsap";
+  import { goToSection } from "../lib/sectionStack";
 
   const bar = document.getElementById("navbar-bar")!;
   const items = Array.from(
@@ -169,6 +171,13 @@
       ".navbar__brand, .navbar__social li, .navbar__pages li",
     ),
   );
+
+  document.querySelectorAll<HTMLAnchorElement>(".navbar__pages a").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      goToSection(a.getAttribute("href")!.slice(1));
+    });
+  });
 
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
