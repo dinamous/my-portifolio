@@ -2,11 +2,10 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import Navbar from "../../components/Navbar/Navbar";
 import AnimatedLetters from "../../components/AnimatedLetters";
+import HeroBackground from "../../components/HeroBackground";
 import { enableSectionStack, CLIP_CLOSE_T, getOverlay } from "../../lib/sectionStack";
 import { startTextType } from "../../lib/textType";
 import { prefersReducedMotion } from "../../lib/motion";
-import heroVideoForward from "../../assets/dark-veil.webm";
-import heroVideoReverse from "../../assets/dark-veil-reverse.webm";
 import "./Hero.css";
 
 const heroTypePhrases = [
@@ -24,68 +23,11 @@ export default function Hero() {
     const words = [word1, word2];
     const semi = document.getElementById("hero-semi")!;
     const scan = document.getElementById("hero-scan")!;
-    const aurora = document.getElementById("hero-aurora")!;
-    const auroraForward = document.getElementById("hero-aurora-video-forward") as HTMLVideoElement;
-    const auroraReverse = document.getElementById("hero-aurora-video-reverse") as HTMLVideoElement;
+    const heroBg = document.getElementById("hero-bg")!;
     const heroType = document.getElementById("hero-type")!;
 
     const loader = document.getElementById("hero-loader")!;
     const loaderBar = document.getElementById("hero-loader-bar")!;
-
-    let resolveFirstFrame: () => void;
-    const darkVeilFirstFrame = new Promise<void>((resolve) => {
-      resolveFirstFrame = resolve;
-    });
-
-    // ponytail: <video> has no reliable native reverse playback (negative
-    // playbackRate isn't supported cross-browser), so the seamless loop uses
-    // two pre-rendered clips — one forward, one already reversed — swapping
-    // which one is visible/playing on "ended" instead of cutting back to frame 0.
-    let auroraCurrent = auroraForward;
-    let auroraNext = auroraReverse;
-    let auroraRunning = false;
-
-    // rewind the standby clip the moment it stops being current, so its first
-    // frame is already decoded and painted by the time it's swapped to active —
-    // rewinding only at swap time left a blank/black frame while it seeked, i.e. the flash
-    function primeAurora(video: HTMLVideoElement) {
-      video.pause();
-      video.currentTime = 0;
-    }
-
-    function swapAurora() {
-      if (!auroraRunning) return;
-      const finished = auroraCurrent;
-      const incoming = auroraNext;
-      [auroraCurrent, auroraNext] = [auroraNext, auroraCurrent];
-
-      incoming.classList.add("hero__aurora-video--active");
-      incoming.play();
-      finished.classList.remove("hero__aurora-video--active");
-      primeAurora(finished);
-    }
-
-    primeAurora(auroraReverse);
-    auroraForward.addEventListener("ended", swapAurora);
-    auroraReverse.addEventListener("ended", swapAurora);
-
-    function auroraPlay() {
-      auroraRunning = true;
-      auroraCurrent.play();
-    }
-
-    const onAuroraCanPlay = () => {
-      resolveFirstFrame();
-      // decoding competes with the letter stagger for GPU/main-thread time
-      // while aurora sits at opacity:0 anyway — pause until it's about to fade in
-      auroraForward.pause();
-    };
-    auroraForward.classList.add("hero__aurora-video--active");
-    if (auroraForward.readyState >= 3) {
-      onAuroraCanPlay();
-    } else {
-      auroraForward.addEventListener("canplay", onAuroraCanPlay, { once: true });
-    }
 
     const word1Letters = Array.from(
       document.querySelectorAll<HTMLElement>("#hero-word-1 .hero__letter"),
@@ -101,9 +43,8 @@ export default function Hero() {
         gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
         gsap.set(semi, { opacity: 1, scale: 1 });
         gsap.set(scan, { autoAlpha: 0 });
-        gsap.set(aurora, { autoAlpha: 1 });
+        gsap.set(heroBg, { autoAlpha: 1 });
         gsap.set(heroType, { autoAlpha: 1 });
-        auroraPlay();
         startTextType(heroType, heroTypePhrases);
         enableSectionStack();
       } else {
@@ -147,8 +88,7 @@ export default function Hero() {
           )
           .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
           .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
-          .call(() => auroraPlay(), [], "-=1.8")
-          .to(aurora, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
+          .to(heroBg, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
           .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
           .call(() => startTextType(heroType, heroTypePhrases))
           .call(() => window.dispatchEvent(new CustomEvent("hero:reveal-nav")), [], "+=0.15");
@@ -170,10 +110,7 @@ export default function Hero() {
       const fontsReady = document.fonts.ready;
       const safetyTimeout = new Promise<void>((resolve) => setTimeout(resolve, 3000));
 
-      Promise.race([
-        Promise.all([fontsReady, darkVeilFirstFrame]),
-        safetyTimeout,
-      ]).then(() => {
+      Promise.race([fontsReady, safetyTimeout]).then(() => {
         progressTween.kill();
         gsap
           .timeline()
@@ -183,13 +120,13 @@ export default function Hero() {
       });
     }
 
-    // scroll-close parallax: darkveil drifts up and out, the name recedes with a slight scale-down
+    // scroll-close parallax: liquid background drifts up and out, the name recedes with a slight scale-down
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
-      // sped up relative to p so the aurora/name are fully gone well before the
+      // sped up relative to p so the background/name are fully gone well before the
       // section finishes closing, instead of fading out across the whole range
       const exitT = gsap.utils.clamp(0, 1, p * 1.8);
-      gsap.set(aurora, { yPercent: -exitT * 35, opacity: 1 - exitT * 0.5 });
+      gsap.set(heroBg, { yPercent: -exitT * 35, opacity: 1 - exitT * 0.5 });
       gsap.set(row, { y: -exitT * 50, scale: 1 - exitT * 0.15, opacity: 1 - exitT * 0.6 });
 
       // clip-path finishes closing (and the overlay is already fully black) by CLIP_CLOSE_T,
@@ -258,37 +195,16 @@ export default function Hero() {
     heroSection.addEventListener("stack:progress", onStackProgress);
 
     return () => {
-      auroraForward.removeEventListener("ended", swapAurora);
-      auroraReverse.removeEventListener("ended", swapAurora);
-      auroraForward.removeEventListener("canplay", onAuroraCanPlay);
       heroSection.removeEventListener("stack:progress", onStackProgress);
     };
   }, []);
 
   return (
     <section className="hero fixed inset-0 h-screen w-screen" id="hero-section" data-stack>
+      <HeroBackground />
+
       <div className="hero__loader" id="hero-loader" aria-hidden="true">
         <div className="hero__loader-bar" id="hero-loader-bar"></div>
-      </div>
-
-      <div className="hero__aurora" id="hero-aurora" aria-hidden="true">
-        <video
-          id="hero-aurora-video-forward"
-          className="hero__aurora-video"
-          src={heroVideoForward}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-        ></video>
-        <video
-          id="hero-aurora-video-reverse"
-          className="hero__aurora-video"
-          src={heroVideoReverse}
-          muted
-          playsInline
-          preload="auto"
-        ></video>
       </div>
 
       <div className="hero__scan" id="hero-scan" aria-hidden="true"></div>

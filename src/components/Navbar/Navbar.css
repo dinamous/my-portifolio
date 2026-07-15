@@ -1,5 +1,5 @@
 /* ponytail: position:absolute (not fixed) matches every other hero child
-   (.hero__aurora/scan/type/bottom) — it keeps the navbar inside the
+   (.hero__bg/scan/type/bottom) — it keeps the navbar inside the
    hero's own clip-path/containing-block context, so the section's
    closing wipe clips it in sync with the rest instead of a fixed
    element sailing past the clip and only vanishing at the final

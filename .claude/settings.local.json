@@ -14,7 +14,8 @@
       "mcp__playwright__browser_run_code_unsafe",
       "Bash(curl -s \"http://localhost:4321/src/components/WhatIDo.astro?astro&type=script&index=0&lang.ts\")",
       "Bash(ffmpeg -version)",
-      "mcp__playwright__browser_take_screenshot"
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(npm ls *)"
     ]
   },
   "enabledPlugins": {
