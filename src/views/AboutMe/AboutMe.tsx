@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import gsap from "gsap";
+import { prefersReducedMotion } from "../../lib/motion";
 import "./AboutMe.css";
 
 export default function AboutMe() {
@@ -19,9 +20,7 @@ export default function AboutMe() {
     const kickerRevs = kicker.querySelectorAll<HTMLElement>(".aboutme__rev");
     const revealTargets = [backdrop, glow, portraitWrap, content];
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     // ponytail: no reduced-motion branch splitting this setup from the reveal logic below —
     // .aboutme keeps z-index:20 so its curtain can render above Hero/WhatIDo while they're

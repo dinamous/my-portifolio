@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import gsap from "gsap";
+import { prefersReducedMotion } from "../../lib/motion";
+import { scrubTimeline } from "../../lib/scrub";
+import AnimatedLetters from "../../components/AnimatedLetters";
 import "./Contact.css";
 
 const socials = [
@@ -7,7 +10,7 @@ const socials = [
   { label: "GitHub", href: "#" },
   { label: "Email", href: "mailto:dinamous.dev@gmail.com" },
 ];
-const headline = "Vamos criar movimento".split("");
+const headline = "Vamos criar movimento";
 
 export default function Contact() {
   useEffect(() => {
@@ -21,9 +24,7 @@ export default function Contact() {
     const accent = headlineEl.querySelector<HTMLElement>(".contact__accent")!;
     const revealTargets = [mail, social, tag];
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     const cleanups: Array<() => void> = [];
 
@@ -45,12 +46,7 @@ export default function Contact() {
         .to(accent, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(3)" }, "-=0.2")
         .to(revealTargets, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }, "-=0.2");
 
-      const revealProgress = { value: 0 };
-      const setProgress = gsap.quickTo(revealProgress, "value", {
-        duration: 0.6,
-        ease: "power2.out",
-        onUpdate: () => reveal.progress(revealProgress.value),
-      });
+      const setProgress = scrubTimeline(reveal);
 
       const onSkillsProgress = ((e: CustomEvent<{ progress: number }>) => {
         setProgress(e.detail.progress);
@@ -116,9 +112,7 @@ export default function Contact() {
       <div className="contact__glow" id="contact-glow" aria-hidden="true"></div>
       <div className="contact__inner">
         <h2 className="contact__headline" id="contact-headline">
-          {headline.map((ch, i) => (
-            <span className="contact__letter-wrap" key={i}><span className="contact__letter">{ch === " " ? " " : ch}</span></span>
-          ))}<span className="contact__accent">;</span>
+          <AnimatedLetters text={headline} prefix="contact" /><span className="contact__accent">;</span>
         </h2>
         <a className="contact__mail" id="contact-mail" href="mailto:dinamous.dev@gmail.com">
           dinamous.dev@gmail.com

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import gsap from "gsap";
-import { goToSection } from "../lib/sectionStack";
+import { goToSection } from "../../lib/sectionStack";
+import { prefersReducedMotion } from "../../lib/motion";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -22,9 +23,7 @@ export default function Navbar() {
     );
     pageLinks.forEach((a) => a.addEventListener("click", onPageLinkClick));
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     if (reduceMotion) {
       gsap.set(bar, { scaleX: 1, opacity: 1 });

@@ -2,6 +2,8 @@
 // since this project has no React dependency — same typing/deleting loop,
 // with *word* markers rendered in the surname's serif font.
 
+import { prefersReducedMotion } from "./motion";
+
 interface Segment {
   text: string;
   emphasis: boolean;
@@ -39,7 +41,7 @@ export function startTextType(
   const parsed = phrases.map(parsePhrase);
   const lengths = parsed.map((segs) => segs.reduce((n, s) => n + s.text.length, 0));
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (prefersReducedMotion()) {
     el.innerHTML = renderChars(parsed[0], lengths[0]);
     return;
   }

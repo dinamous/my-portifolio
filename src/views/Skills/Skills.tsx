@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import Parallax from "parallax-js";
+import { prefersReducedMotion } from "../../lib/motion";
+import { scrubTimeline } from "../../lib/scrub";
 import "./Skills.css";
 
 gsap.registerPlugin(ScrambleTextPlugin);
@@ -23,9 +25,7 @@ export default function Skills() {
     const headings = Array.from(document.querySelectorAll<HTMLElement>(".skills__heading"));
     const tags = Array.from(document.querySelectorAll<HTMLElement>(".skills__tag"));
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     let onProjectsProgress: EventListener | undefined;
     let parallaxInstance: InstanceType<typeof Parallax> | undefined;
@@ -66,12 +66,7 @@ export default function Skills() {
           .to(panelTags, { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }, 0.25 + i * 0.1);
       });
 
-      const revealProgress = { value: 0 };
-      const setProgress = gsap.quickTo(revealProgress, "value", {
-        duration: 0.6,
-        ease: "power2.out",
-        onUpdate: () => reveal.progress(revealProgress.value),
-      });
+      const setProgress = scrubTimeline(reveal);
 
       onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
         setProgress(e.detail.progress);

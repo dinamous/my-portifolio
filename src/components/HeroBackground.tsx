@@ -4,6 +4,7 @@ import { AdaptiveDpr, PerformanceMonitor, shaderMaterial } from "@react-three/dr
 import * as THREE from "three";
 import vertexShader from "../shaders/liquid.vert?raw";
 import fragmentShader from "../shaders/liquid.frag?raw";
+import { prefersReducedMotion } from "../lib/motion";
 
 const LiquidMaterial = shaderMaterial(
   {
@@ -34,10 +35,7 @@ function LiquidPlane() {
   const { viewport, size } = useThree();
   const mouse = useRef(new THREE.Vector2(0.5, 0.5));
   const targetMouse = useRef(new THREE.Vector2(0.5, 0.5));
-  const reducedMotion = useMemo(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  const reducedMotion = useMemo(() => prefersReducedMotion(), []);
 
   useEffect(() => {
     const onPointerMove = (e: PointerEvent) => {

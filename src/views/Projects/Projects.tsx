@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import gsap from "gsap";
+import { prefersReducedMotion } from "../../lib/motion";
+import { scrubTimeline } from "../../lib/scrub";
+import AnimatedLetters from "../../components/AnimatedLetters";
 import "./Projects.css";
 
 // ponytail: dados de projeto placeholder, trocar por projetos/imagens reais depois
@@ -8,7 +11,7 @@ const projects = [
   { index: "02", title: "Vórtice", tag: "Interação / GSAP" },
   { index: "03", title: "Prisma", tag: "3D / Three.js" },
   { index: "04", title: "Éter", tag: "Branding / Astro" },
-].map((p) => ({ ...p, letters: p.title.split("") }));
+];
 
 export default function Projects() {
   useEffect(() => {
@@ -16,9 +19,7 @@ export default function Projects() {
     const label = document.getElementById("projects-label")!;
     const rows = Array.from(document.querySelectorAll<HTMLElement>(".projects__row"));
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     let onAboutmeProgress: EventListener | undefined;
     const rowCleanups: Array<() => void> = [];
@@ -43,12 +44,7 @@ export default function Projects() {
           .to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.02, ease: "power2.out" }, "<");
       });
 
-      const revealProgress = { value: 0 };
-      const setProgress = gsap.quickTo(revealProgress, "value", {
-        duration: 0.6,
-        ease: "power2.out",
-        onUpdate: () => reveal.progress(revealProgress.value),
-      });
+      const setProgress = scrubTimeline(reveal);
 
       onAboutmeProgress = ((e: CustomEvent<{ progress: number }>) => {
         setProgress(e.detail.progress);
@@ -104,12 +100,7 @@ export default function Projects() {
       exit.to(row, { x: -100, opacity: 0, duration: 0.5, ease: "power2.in" }, i * 0.08);
     });
 
-    const exitProgress = { value: 0 };
-    const setExitProgress = gsap.quickTo(exitProgress, "value", {
-      duration: 0.4,
-      ease: "power2.out",
-      onUpdate: () => exit.progress(exitProgress.value),
-    });
+    const setExitProgress = scrubTimeline(exit, { duration: 0.4 });
 
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
@@ -143,9 +134,7 @@ export default function Projects() {
           <li className="projects__row" id={`projects-row-${i}`} key={p.index}>
             <span className="projects__index">{`{ pj:${p.index} }`}</span>
             <h3 className="projects__title">
-              {p.letters.map((ch, j) => (
-                <span className="projects__letter-wrap" key={j}><span className="projects__letter">{ch}</span></span>
-              ))}
+              <AnimatedLetters text={p.title} prefix="projects" />
               <span className="projects__title-underline" aria-hidden="true"></span>
             </h3>
             <span className="projects__tag">{p.tag}</span>

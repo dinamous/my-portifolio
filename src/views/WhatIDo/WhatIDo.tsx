@@ -1,19 +1,19 @@
-import { Fragment, useEffect } from "react";
+import { useEffect } from "react";
 import gsap from "gsap";
-import { CLIP_CLOSE_T } from "../lib/sectionStack";
+import { CLIP_CLOSE_T } from "../../lib/sectionStack";
+import { prefersReducedMotion } from "../../lib/motion";
+import { scrubTimeline } from "../../lib/scrub";
+import AnimatedLetters from "../../components/AnimatedLetters";
+import AnimatedWords from "../../components/AnimatedWords";
 import "./WhatIDo.css";
 
 // ponytail: placeholder copy, swap in real content
-const leftTitle = "Arquitetura".split("");
+const leftTitle = "Arquitetura";
 const leftText =
-  "Desenvolvimento modular, limpo e de alta performance. Layouts responsivos com foco na acessibilidade e semântica web. Codificação robusta para experiências estáveis.".split(
-    " ",
-  );
-const rightTitle = "Experiência".split("");
+  "Desenvolvimento modular, limpo e de alta performance. Layouts responsivos com foco na acessibilidade e semântica web. Codificação robusta para experiências estáveis.";
+const rightTitle = "Experiência";
 const rightText =
-  "Transições fluidas e micro-interações elegantes que dão vida à interface. Criação de experiências imersivas e jornadas do usuário cativantes através do movimento.".split(
-    " ",
-  );
+  "Transições fluidas e micro-interações elegantes que dão vida à interface. Criação de experiências imersivas e jornadas do usuário cativantes através do movimento.";
 
 export default function WhatIDo() {
   useEffect(() => {
@@ -23,9 +23,7 @@ export default function WhatIDo() {
     const colRight = document.getElementById("whatido-col-right")!;
     const cols = [colLeft, colRight];
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     // the title's gradient lives per-letter (see .whatido__letter CSS) so each
     // letter can animate independently — this stretches one shared background
@@ -126,17 +124,8 @@ export default function WhatIDo() {
       // it every tick (mirrors ScrollTrigger's numeric `scrub` lag, and sectionStack's
       // own quickTo smoothing of state.value) so the timelines glide instead of racing
       // through in whatever single scroll tick crosses their range.
-      const revealProgress = { left: 0, right: 0 };
-      const setLeftProgress = gsap.quickTo(revealProgress, "left", {
-        duration: 0.6,
-        ease: "power2.out",
-        onUpdate: () => revealLeft.progress(revealProgress.left),
-      });
-      const setRightProgress = gsap.quickTo(revealProgress, "right", {
-        duration: 0.6,
-        ease: "power2.out",
-        onUpdate: () => revealRight.progress(revealProgress.right),
-      });
+      const setLeftProgress = scrubTimeline(revealLeft);
+      const setRightProgress = scrubTimeline(revealRight);
 
       // scroll-driven: columns fade in and slide toward center as the hero bar
       // closes, then keep pulling further toward center once it starts spinning
@@ -270,43 +259,21 @@ export default function WhatIDo() {
       <div className="whatido__inner" id="whatido-inner">
         <div className="whatido__col whatido__col--left" id="whatido-col-left">
           <h2 className="whatido__title" id="whatido-title-left">
-            {leftTitle.map((ch, i) => (
-              <span className="whatido__letter-wrap" key={i}>
-                <span className="whatido__letter">{ch}</span>
-              </span>
-            ))}
+            <AnimatedLetters text={leftTitle} prefix="whatido" />
           </h2>
           <div className="whatido__divider" aria-hidden="true"></div>
           <p className="whatido__text" id="whatido-text-left">
-            {leftText.map((word, i) => (
-              <Fragment key={i}>
-                <span className="whatido__word-wrap">
-                  <span className="whatido__word">{word}</span>
-                </span>
-                {i < leftText.length - 1 ? " " : ""}
-              </Fragment>
-            ))}
+            <AnimatedWords text={leftText} prefix="whatido" />
           </p>
         </div>
 
         <div className="whatido__col whatido__col--right" id="whatido-col-right">
           <h2 className="whatido__title" id="whatido-title-right">
-            {rightTitle.map((ch, i) => (
-              <span className="whatido__letter-wrap" key={i}>
-                <span className="whatido__letter">{ch}</span>
-              </span>
-            ))}
+            <AnimatedLetters text={rightTitle} prefix="whatido" />
           </h2>
           <div className="whatido__divider" aria-hidden="true"></div>
           <p className="whatido__text" id="whatido-text-right">
-            {rightText.map((word, i) => (
-              <Fragment key={i}>
-                <span className="whatido__word-wrap">
-                  <span className="whatido__word">{word}</span>
-                </span>
-                {i < rightText.length - 1 ? " " : ""}
-              </Fragment>
-            ))}
+            <AnimatedWords text={rightText} prefix="whatido" />
           </p>
         </div>
       </div>

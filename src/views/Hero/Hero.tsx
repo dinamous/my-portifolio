@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import gsap from "gsap";
-import Navbar from "./Navbar";
-import { enableSectionStack, CLIP_CLOSE_T, getOverlay } from "../lib/sectionStack";
-import { startTextType } from "../lib/textType";
-import heroVideoForward from "../assets/dark-veil.webm";
-import heroVideoReverse from "../assets/dark-veil-reverse.webm";
+import Navbar from "../../components/Navbar/Navbar";
+import AnimatedLetters from "../../components/AnimatedLetters";
+import { enableSectionStack, CLIP_CLOSE_T, getOverlay } from "../../lib/sectionStack";
+import { startTextType } from "../../lib/textType";
+import { prefersReducedMotion } from "../../lib/motion";
+import heroVideoForward from "../../assets/dark-veil.webm";
+import heroVideoReverse from "../../assets/dark-veil-reverse.webm";
 import "./Hero.css";
-
-const firstName = "Matheus".split("");
-const lastName = "Simões".split("");
 
 const heroTypePhrases = [
   "Dev de poucas palavras, interfaces que falam por si. Vida em cada *transição*.",
@@ -95,9 +94,7 @@ export default function Hero() {
       document.querySelectorAll<HTMLElement>("#hero-word-2 .hero__letter"),
     );
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduceMotion = prefersReducedMotion();
 
     function runEntrance() {
       if (reduceMotion) {
@@ -301,14 +298,10 @@ export default function Hero() {
       <div className="hero__bottom">
         <h1 className="hero__row" id="hero-row">
           <span className="hero__word hero__word--first" id="hero-word-1">
-            {firstName.map((ch, i) => (
-              <span className="hero__letter-wrap" key={i}><span className="hero__letter">{ch}</span></span>
-            ))}
+            <AnimatedLetters text="Matheus" prefix="hero" />
           </span>
           <span className="hero__word hero__word--last" id="hero-word-2">
-            {lastName.map((ch, i) => (
-              <span className="hero__letter-wrap" key={i}><span className="hero__letter">{ch}</span></span>
-            ))}<span className="hero__semi" id="hero-semi">;</span>
+            <AnimatedLetters text="Simões" prefix="hero" /><span className="hero__semi" id="hero-semi">;</span>
           </span>
         </h1>
       </div>
