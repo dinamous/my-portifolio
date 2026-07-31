@@ -48,6 +48,9 @@ function applyState() {
     // without this generic module reaching into section-specific DOM
     el.dispatchEvent(new CustomEvent("stack:progress", { detail: { progress: local } }));
   });
+  // valor global (0..max) para quem precisa saber "onde" a pilha está sem
+  // escutar cada seção — ex. SectionNav decide visibilidade e seção ativa
+  window.dispatchEvent(new CustomEvent("stack:value", { detail: { value: state.value } }));
 }
 
 // ponytail: module-level singleton, mirrors the old getSmoother() pattern —

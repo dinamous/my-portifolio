@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { initSectionStack } from "./lib/sectionStack";
+import SectionNav from "./components/SectionNav/SectionNav";
 import Hero from "./views/Hero/Hero";
 import WhatIDo from "./views/WhatIDo/WhatIDo";
 import AboutMe from "./views/AboutMe/AboutMe";
@@ -20,6 +21,7 @@ export default function App() {
       <Projects />
       <Skills />
       <Contact />
+      <SectionNav />
     </>
   );
 }

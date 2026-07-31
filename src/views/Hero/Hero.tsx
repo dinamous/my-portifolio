@@ -9,7 +9,7 @@ import { prefersReducedMotion } from "../../lib/motion";
 import "./Hero.css";
 
 const heroTypePhrases = [
-  "Dev de poucas palavras, interfaces que falam por si. Vida em cada *transição*.",
+  "Dev de poucas palavras, interfaces que falam por si.",
   "Criador silencioso no *front* das ideias, dando vida com movimento e suavidade.",
   "Calmo por fora, *keyframes* por dentro. Detalhes que ninguém nota, mas todo mundo sente.",
 ];
@@ -22,6 +22,48 @@ export default function Hero() {
     const word2 = document.getElementById("hero-word-2")!;
     const words = [word1, word2];
     const semi = document.getElementById("hero-semi")!;
+    let semiBusy = false;
+    // easter egg do ";": glitch nas letras do nome com o ScrambleTextPlugin já
+    // registrado globalmente em Skills.tsx — "{original}" faz cada letra
+    // embaralhar e assentar de volta em si mesma, então nada muda de lugar
+    // ou vira caractere novo, só um flicker no lugar de cada uma
+    const onSemiActivate = () => {
+      if (semiBusy) return;
+      semiBusy = true;
+      const nameLetters = [...word1Letters, ...word2Letters];
+
+      if (reduceMotion) {
+        gsap.set(semi, { color: "#10b981" });
+        setTimeout(() => {
+          gsap.set(semi, { color: "#1a1a1a" });
+          semiBusy = false;
+        }, 300);
+        return;
+      }
+
+      gsap
+        .timeline({ onComplete: () => (semiBusy = false) })
+        .to(semi, { color: "#10b981", duration: 0.3 })
+        .to(
+          nameLetters,
+          {
+            duration: 1.4,
+            scrambleText: { text: "{original}", chars: "upperAndLowerCase", speed: 0.25 },
+            stagger: 0.05,
+            ease: "none",
+          },
+          "<",
+        )
+        .to(semi, { color: "#1a1a1a", duration: 0.5 });
+    };
+    const onSemiKeydown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onSemiActivate();
+      }
+    };
+    semi.addEventListener("click", onSemiActivate);
+    semi.addEventListener("keydown", onSemiKeydown);
     const scan = document.getElementById("hero-scan")!;
     const heroBg = document.getElementById("hero-bg")!;
     const heroType = document.getElementById("hero-type")!;
@@ -196,6 +238,8 @@ export default function Hero() {
 
     return () => {
       heroSection.removeEventListener("stack:progress", onStackProgress);
+      semi.removeEventListener("click", onSemiActivate);
+      semi.removeEventListener("keydown", onSemiKeydown);
     };
   }, []);
 
@@ -217,7 +261,13 @@ export default function Hero() {
             <AnimatedLetters text="Matheus" prefix="hero" />
           </span>
           <span className="hero__word hero__word--last" id="hero-word-2">
-            <AnimatedLetters text="Simões" prefix="hero" /><span className="hero__semi" id="hero-semi">;</span>
+            <AnimatedLetters text="Simões" prefix="hero" /><span
+              className="hero__semi"
+              id="hero-semi"
+              role="button"
+              tabIndex={0}
+              aria-label="Easter egg"
+            >;</span>
           </span>
         </h1>
       </div>
