@@ -18,7 +18,6 @@ export default function AboutMe() {
     const text = document.getElementById("aboutme-text")!;
     const lines = content.querySelectorAll<HTMLElement>(".aboutme__inner");
     const kickerRevs = kicker.querySelectorAll<HTMLElement>(".aboutme__rev");
-    const revealTargets = [backdrop, glow, portraitWrap, content];
 
     const reduceMotion = prefersReducedMotion();
 
@@ -134,25 +133,70 @@ export default function AboutMe() {
       cleanupMousemove = () => window.removeEventListener("mousemove", onMousemove);
     }
 
-    // saída própria da AboutMe: o conteúdo pessoal recolhe primeiro (mesmo exitT
-    // de sempre), a cena fica só com a cortina preta sólida por um instante, e só
-    // então dissolve por completo — um fade cinematográfico pra revelar Projects,
-    // distinto do wipe/spin do Hero e do jeito que cada seção seguinte vai sair.
-    // data-no-close-clip tira essa seção do fechamento genérico do sectionStack
-    // (que brigaria com esse fade fazendo clip-path ao mesmo tempo).
+    // saída própria da AboutMe: um scroll de respiro (EXIT_HOLD) segura o conteúdo
+    // totalmente visível antes de qualquer saída começar, depois cada elemento sai com
+    // o movimento inverso do que usou pra entrar (kicker/linhas deslizam pra cima,
+    // portrait fecha o clip de volta, divider recolhe a scaleX, etc.), cada um na sua
+    // própria janela de `et` — não um fadeout único. Todo o conteúdo termina de sair
+    // em EXIT_END; só depois disso a
+    // cortina sólida (aboutme__block--top/bottom, que não se move aqui) dissolve pra
+    // revelar Projects — Projects.tsx só começa a revelar seus próprios elementos a
+    // partir desse mesmo ponto (REVEAL_DELAY), então as duas transições nunca se
+    // sobrepõem. data-no-close-clip tira essa seção do fechamento genérico do
+    // sectionStack (que brigaria com esse fade fazendo clip-path ao mesmo tempo).
+    const EXIT_HOLD = 0.25; // scroll "de respiro": conteúdo fica parado, totalmente visível, antes de começar a sair
+    const EXIT_END = 0.7; // mais espaço de scroll pra saída, pra não ficar rápida
+    const exitEase = gsap.parseEase("power2.inOut"); // suaviza começo/fim de cada saída em vez do corte seco do clamp linear
+    const exitLocalT = (start: number, span: number, et: number) =>
+      exitEase(gsap.utils.clamp(0, 1, (et - start) / span));
+
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
 
       // p alone reads 0 both "before WhatIDo has handed off" and "just after entering,
-      // at rest" — without this guard, exitT (0 - 1) - 0 forces opacity back to 1 on
+      // at rest" — without this guard, et (0 - 1) - 0 forces opacity back to 1 on
       // every scroll tick from the very first pixel, even while still inside Hero.
       if (enteredT >= 1) {
-        const exitT = gsap.utils.clamp(0, 1, p * 1.8);
-        gsap.set(revealTargets, { opacity: 1 - exitT, y: -exitT * 40 });
-        gsap.set(portraitWrap, { scale: 1 - exitT * 0.08 });
+        const et = gsap.utils.clamp(0, 1, (p - EXIT_HOLD) / (EXIT_END - EXIT_HOLD));
+
+        const kickerT = exitLocalT(0, 0.4, et);
+        kickerRevs.forEach((el, i) => {
+          const kt = seqT(kickerT, i, kickerRevs.length);
+          gsap.set(el, { y: gsap.utils.interpolate(0, -18, kt), opacity: 1 - kt });
+        });
+
+        const linesT = exitLocalT(0.05, 0.45, et);
+        lines.forEach((el, i) => {
+          const lt = seqT(linesT, i, lines.length);
+          gsap.set(el, { yPercent: gsap.utils.interpolate(0, -120, lt) });
+        });
+
+        const dividerT = exitLocalT(0.15, 0.3, et);
+        gsap.set(divider, { scaleX: 1 - dividerT });
+
+        const textT = exitLocalT(0.2, 0.35, et);
+        gsap.set(text, { opacity: 1 - textT, y: gsap.utils.interpolate(0, -18, textT) });
+
+        const contentT = exitLocalT(0.35, 0.45, et);
+        gsap.set(content, { opacity: 1 - contentT, y: gsap.utils.interpolate(0, -32, contentT) });
+
+        const portraitT = exitLocalT(0.3, 0.5, et);
+        gsap.set(portraitWrap, {
+          opacity: 1 - portraitT,
+          y: gsap.utils.interpolate(0, -50, portraitT),
+          scale: gsap.utils.interpolate(1, 1.05, portraitT),
+        });
+        const clipInset = gsap.utils.interpolate(0, 46, portraitT);
+        gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
+
+        const glowT = exitLocalT(0.45, 0.4, et);
+        gsap.set(glow, { opacity: 1 - glowT });
+
+        const backdropT = exitLocalT(0.55, 0.45, et);
+        gsap.set(backdrop, { opacity: 1 - backdropT });
       }
 
-      const fadeT = gsap.utils.clamp(0, 1, (p - 0.6) / 0.4);
+      const fadeT = gsap.utils.clamp(0, 1, (p - EXIT_END) / (1 - EXIT_END));
       gsap.set(section, { opacity: 1 - fadeT, display: p >= 1 ? "none" : "" });
 
       window.dispatchEvent(new CustomEvent("aboutme:progress", { detail: { progress: p } }));

@@ -83,6 +83,7 @@ export default function Hero() {
     function runEntrance() {
       if (reduceMotion) {
         gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
+        gsap.set(words, { color: "#111111" });
         gsap.set(semi, { opacity: 1, scale: 1 });
         gsap.set(scan, { autoAlpha: 0 });
         gsap.set(heroBg, { autoAlpha: 1 });
@@ -130,6 +131,7 @@ export default function Hero() {
           )
           .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
           .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
+          .to(words, { color: "#111111", duration: 2.4, ease: "power2.inOut" }, "<")
           .to(heroBg, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
           .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
           .call(() => startTextType(heroType, heroTypePhrases))
@@ -168,7 +170,10 @@ export default function Hero() {
       // sped up relative to p so the background/name are fully gone well before the
       // section finishes closing, instead of fading out across the whole range
       const exitT = gsap.utils.clamp(0, 1, p * 1.8);
-      gsap.set(heroBg, { yPercent: -exitT * 35, opacity: 1 - exitT * 0.5 });
+      // scale (not translate) so the background shrinks toward its own center — the
+      // black .hero behind it shows evenly on every edge as it recedes instead of only
+      // at the bottom, reading as depth rather than a gap
+      gsap.set(heroBg, { scale: 1 - exitT * 0.15, opacity: 1 - exitT * 0.5 });
       gsap.set(row, { y: -exitT * 50, scale: 1 - exitT * 0.15, opacity: 1 - exitT * 0.6 });
 
       // clip-path finishes closing (and the overlay is already fully black) by CLIP_CLOSE_T,

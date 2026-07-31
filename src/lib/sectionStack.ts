@@ -84,11 +84,18 @@ export function initSectionStack(selector = "[data-stack]") {
   // per event — that's what smooths out discrete wheel notches without a
   // restart-from-zero-velocity kink each time (and without the lag a longer
   // one-off gsap.to would add)
-  moveTo = gsap.quickTo(state, "value", {
-    duration: reduceMotion ? 0 : 0.75,
-    ease: "power2.out",
-    onUpdate: applyState,
-  });
+  // reduzido: escreve direto, sem tween — quickTo com duration 0 divide por
+  // zero internamente e propaga NaN para state.value (pilha inteira congela)
+  moveTo = reduceMotion
+    ? (value: number) => {
+        state.value = value;
+        applyState();
+      }
+    : gsap.quickTo(state, "value", {
+        duration: 0.75,
+        ease: "power2.out",
+        onUpdate: applyState,
+      });
 
   Observer.create({
     target: window,

@@ -48,8 +48,11 @@ export default function Contact() {
 
       const setProgress = scrubTimeline(reveal);
 
+      // o reveal só roda na segunda metade da transição (p 0.45→1), janela em
+      // que o fundo da Skills já desvaneceu — escrubar em 0→1 fazia a entrada
+      // inteira acontecer escondida atrás do fundo opaco da Skills
       const onSkillsProgress = ((e: CustomEvent<{ progress: number }>) => {
-        setProgress(e.detail.progress);
+        setProgress(gsap.utils.clamp(0, 1, (e.detail.progress - 0.45) / 0.55));
       }) as EventListener;
       window.addEventListener("skills:progress", onSkillsProgress);
       cleanups.push(() => window.removeEventListener("skills:progress", onSkillsProgress));

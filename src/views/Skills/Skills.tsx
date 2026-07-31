@@ -95,6 +95,10 @@ export default function Skills() {
       });
 
       parallaxInstance = new Parallax(section, { relativeInput: true, hoverOnly: true, selector: "[data-depth]" });
+      // parallax-js força position:relative inline na primeira layer, tirando o
+      // grid do absolute/inset:0 do CSS — ele entra no fluxo do flex e empurra
+      // os painéis pra metade direita da tela
+      gsap.set(grid, { position: "absolute", top: 0, left: 0 });
     }
 
     // saída própria da Skills: dissolve em glitch — os textos viram símbolo por um
@@ -120,9 +124,11 @@ export default function Skills() {
       const fadeT = reduceMotion ? p : gsap.utils.clamp(0, 1, (p - 0.15) / 0.5);
       gsap.set(panels, { opacity: 1 - fadeT });
       gsap.set([grid, label], { opacity: 1 - fadeT });
-      // mesmo motivo do fade de fundo na Projects: sem isso o fundo sólido da
-      // seção esconderia a Contact até o corte seco do display:none.
-      const bgFadeT = gsap.utils.clamp(0, 1, (p - 0.75) / 0.25);
+      // mesmo motivo do fade de fundo na Projects, mas começando mais cedo
+      // (0.45, logo após os painéis dissolverem): o reveal da Contact é escrubado
+      // na segunda metade da faixa, e com o fundo sumindo só em 0.75+ a entrada
+      // dela acontecia inteira atrás do fundo opaco — dessincronizado.
+      const bgFadeT = gsap.utils.clamp(0, 1, (p - 0.45) / 0.3);
       gsap.set(section, { opacity: 1 - bgFadeT, display: p >= 1 ? "none" : "" });
 
       window.dispatchEvent(new CustomEvent("skills:progress", { detail: { progress: p } }));

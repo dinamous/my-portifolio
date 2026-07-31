@@ -32,9 +32,21 @@ export default function SectionNav() {
       document.querySelectorAll<HTMLElement>("[data-stack]"),
     ).map((el) => el.id);
 
+    // barra de progresso de cada link, mesmo comportamento do scroll-timeline
+    // do lukebaffait.fr: passadas cheias, futuras vazias e SÓ a barra da seção
+    // visível/ativa carrega. A janela de cada uma é a janela em que o link está
+    // ativo — v de idx-0.5 a idx+0.5 (o round(v) do estado ativo vira nesses
+    // mesmos pontos), então as janelas se emendam sem duas barras andarem juntas.
+    // A última seção (v para no max) tem a janela comprimida em [max-0.5, max].
+    const lastIdx = stackIds.length - 1;
+    const bars = anchors.map((a) => ({
+      el: a.querySelector<HTMLElement>(".sectionnav__progress")!,
+      idx: stackIds.indexOf(a.getAttribute("href")!.slice(1)),
+    }));
+
     const reduceMotion = prefersReducedMotion();
 
-    gsap.set(nav, { yPercent: -110, autoAlpha: 0 });
+    gsap.set(nav, { yPercent: 110, autoAlpha: 0 });
     gsap.set(items, { y: 12, opacity: 0 });
 
     const reveal = gsap
@@ -61,6 +73,11 @@ export default function SectionNav() {
           stackIds.indexOf(a.getAttribute("href")!.slice(1)) === active,
         );
       });
+
+      bars.forEach(({ el, idx }) => {
+        const fill = idx === lastIdx ? (v - idx + 0.5) * 2 : v - idx + 0.5;
+        gsap.set(el, { scaleX: gsap.utils.clamp(0, 1, fill) });
+      });
     }) as EventListener;
     window.addEventListener("stack:value", onStackValue);
 
@@ -79,6 +96,7 @@ export default function SectionNav() {
       anchors.forEach((a) => a.removeEventListener("click", onLinkClick));
       brand.removeEventListener("click", onBrandClick);
       reveal.kill();
+      bars.forEach(({ el }) => gsap.killTweensOf(el));
     };
   }, []);
 
@@ -94,6 +112,7 @@ export default function SectionNav() {
               <a href={`#${l.id}`}>
                 <span className="sectionnav__num">{l.num}</span>
                 {l.label}
+                <span className="sectionnav__progress" aria-hidden="true"></span>
               </a>
             </li>
           ))}

@@ -155,7 +155,7 @@
 
 .hero__semi {
   display: inline-block;
-  color: #272727;
+  color: #3d3d3d;
   opacity: 0;
   transform: scale(0.4);
   cursor: pointer;

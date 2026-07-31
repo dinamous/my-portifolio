@@ -4,7 +4,7 @@
    (WhatIDo claro, demais seções escuras), mesmo idiom do Navbar do Hero. */
 .sectionnav {
   position: fixed;
-  inset: 0 0 auto 0;
+  inset: auto 0 0 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -62,8 +62,10 @@
   font-size: 0.85em;
 }
 
-.sectionnav__links a::after {
-  content: "";
+/* barra de progresso por seção (estilo lukebaffait.fr): scaleX é escrito via
+   GSAP a cada tick do stack, então nada de transition aqui — o smoothing já
+   vem do quickTo do sectionStack */
+.sectionnav__progress {
   position: absolute;
   left: 0;
   bottom: 0;
@@ -72,7 +74,6 @@
   background: #fff;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
 }
 
 .sectionnav__links a:hover,
@@ -80,19 +81,9 @@
   opacity: 1;
 }
 
-.sectionnav__links a:hover::after,
-.sectionnav__links a:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* seção ativa: link aceso com underline travado, sem transição — o estado é
-   setado por classe a cada tick do stack, não é uma interação animada */
+/* seção ativa: link aceso — a barra cheia já vem do progresso do stack */
 .sectionnav__link--active {
   opacity: 1 !important;
-}
-
-.sectionnav__link--active::after {
-  transform: scaleX(1) !important;
 }
 
 @media (max-width: 640px) {

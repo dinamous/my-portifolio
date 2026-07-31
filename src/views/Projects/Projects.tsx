@@ -46,8 +46,17 @@ export default function Projects() {
 
       const setProgress = scrubTimeline(reveal);
 
+      // waits until AboutMe's content has fully exited (its own EXIT_END) before this
+      // section's elements start appearing — the two transitions never overlap, this
+      // one only starts as AboutMe's curtain begins to dissolve.
+      const REVEAL_DELAY = 0.7;
       onAboutmeProgress = ((e: CustomEvent<{ progress: number }>) => {
-        setProgress(e.detail.progress);
+        const revealT = gsap.utils.clamp(
+          0,
+          1,
+          (e.detail.progress - REVEAL_DELAY) / (1 - REVEAL_DELAY),
+        );
+        setProgress(revealT);
       }) as EventListener;
       window.addEventListener("aboutme:progress", onAboutmeProgress);
 
