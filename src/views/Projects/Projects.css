@@ -1,52 +1,186 @@
 .projects {
   background: #030303;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   overflow: hidden;
   will-change: opacity;
 }
 
-.projects__label {
-  position: absolute;
-  top: 11vh;
-  left: 6vw;
+.projects__header {
+  position: relative;
   z-index: 1;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 14px;
-  color: #34d399;
-  opacity: 0;
-  will-change: opacity;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6vh;
+  padding: 9vh 6vw 2.6vh;
+  border-bottom: 1px solid rgba(244, 247, 245, 0.14);
+  will-change: transform, opacity;
 }
 
-.projects__label-slash {
-  color: rgba(244, 247, 245, 0.55);
+.projects__heading {
+  margin: 0;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5.4vw, 5.2rem);
+  line-height: 1;
+  color: #f4f7f5;
+}
+
+.projects__meta {
+  display: flex;
+  align-items: center;
+  gap: 2.4vw;
+}
+
+/* marquee das stacks reais dos projetos — desloca via GSAP xPercent (não
+   @keyframes, ver regra de animação do projeto), duas cópias lado a lado
+   permitem o loop -50% ser perfeitamente contínuo */
+.projects__marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.projects__marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.projects__marquee-row {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.projects__marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.4em;
+  padding: 0 1.4em;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.4);
+}
+
+.projects__marquee-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #34d399;
+  opacity: 0.7;
+}
+
+/* indicador vertical de progresso da lista — o preenchimento acompanha o
+   scroll interno (ver LIST_T/browseT no efeito), não é decorativo */
+.projects__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  flex-shrink: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.75rem, 1vw, 0.9rem);
+  color: rgba(244, 247, 245, 0.45);
+}
+
+.projects__progress-track {
+  position: relative;
+  width: 2px;
+  height: 3vh;
+  min-height: 22px;
+  background: rgba(244, 247, 245, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.projects__progress-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top center;
+  transform: scaleY(0);
+  background: linear-gradient(180deg, #34d399, #0891b2);
+  will-change: transform;
+}
+
+.projects__list-viewport {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow: hidden;
+  padding: 0 6vw;
 }
 
 .projects__list {
-  position: relative;
-  z-index: 1;
   list-style: none;
   margin: 0;
+  padding: 0;
   width: 100%;
-  padding: 0 6vw;
+  will-change: transform;
 }
 
 .projects__row {
   position: relative;
   display: grid;
-  grid-template-columns: 90px 1fr auto;
-  align-items: baseline;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
   gap: 2vw;
-  padding: 2.4vh 0;
+  min-height: clamp(100px, 11vw, 180px);
+  padding: 1.6vh 0;
   border-bottom: 1px solid rgba(244, 247, 245, 0.12);
   opacity: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
   will-change: transform, opacity;
 }
 
-.projects__index {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 13px;
-  color: rgba(244, 247, 245, 0.45);
+.projects__row:focus-visible {
+  outline: 1px solid #34d399;
+  outline-offset: -4px;
+}
+
+/* tooltip "Ver projeto" que segue o cursor durante o hover — ver quickTo no
+   efeito; escondido em telas sem hover real (touch), onde não faz sentido */
+.projects__cursor-pill {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.7em 1.4em;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  background: rgba(3, 8, 7, 0.85);
+  backdrop-filter: blur(6px);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f4f7f5;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.projects__cursor-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #34d399, #0891b2);
+}
+
+@media (hover: none) {
+  .projects__cursor-pill {
+    display: none;
+  }
 }
 
 .projects__title {
@@ -94,13 +228,14 @@
   letter-spacing: 0.1em;
 }
 
+/* thumb vive na própria coluna do grid (entre título e tag) em vez de
+   position:absolute sobre a linha — evita sobrepor a tag e, como o clip-path
+   só recorta o desenho e não a caixa, a coluna já reserva o espaço final e o
+   hover não causa reflow nem vaza sobre a linha vizinha. */
 .projects__thumb {
-  position: absolute;
-  right: 6vw;
-  top: 50%;
+  position: relative;
   width: clamp(140px, 16vw, 260px);
   height: clamp(90px, 10vw, 165px);
-  transform: translateY(-50%);
   overflow: hidden;
   border-radius: 6px;
   clip-path: inset(50% 0% 50% 0%);
@@ -108,15 +243,19 @@
   will-change: clip-path;
 }
 
-.projects__thumb-fill {
+.projects__thumb-img {
   position: absolute;
-  inset: -8% -6%;
-  background:
-    url("/noise.png"),
-    radial-gradient(120% 85% at 30% 20%, rgba(126, 244, 192, 0.28), rgba(0, 0, 0, 0) 56%),
-    linear-gradient(155deg, #0f3b34, #072220 60%, #030807);
-  background-repeat: repeat, no-repeat, no-repeat;
-  background-blend-mode: overlay, screen, normal;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.projects__thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, rgba(15, 59, 52, 0.4), rgba(3, 8, 7, 0.55));
+  mix-blend-mode: multiply;
 }
 
 .projects__thumb-scan {
@@ -127,14 +266,56 @@
   opacity: 0;
 }
 
+/* poucos projetos (<=4) ficam espaçosos e centralizados na viewport fixa. */
+.projects[data-density="cozy"] .projects__list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+}
+
+/* a partir de 5 projetos, linhas compactam (ainda legíveis) e o excedente que
+   não cabe na viewport fixa é revelado por scroll interno (ver efeito) em vez
+   de encolher fonte/thumb até ilegível — isso é o que evita comprometer a
+   visibilidade do estado atual conforme mais projetos entram via Sanity. */
+.projects[data-density="compact"] .projects__header {
+  padding-top: 7vh;
+  padding-bottom: 2vh;
+}
+
+.projects[data-density="compact"] .projects__row {
+  min-height: clamp(64px, 8vh, 112px);
+  padding: 0.9vh 0;
+}
+
+.projects[data-density="compact"] .projects__title {
+  font-size: clamp(1.6rem, 3.6vh, 2.8rem);
+}
+
+.projects[data-density="compact"] .projects__thumb {
+  width: clamp(96px, 11vw, 176px);
+  height: clamp(52px, 6.8vh, 96px);
+}
+
 @media (max-width: 640px) {
-  .projects__row {
-    grid-template-columns: 60px 1fr;
+  .projects__header {
+    padding: 9vh 8vw 2.4vh;
   }
+
+  .projects__marquee {
+    display: none;
+  }
+
+  .projects__row {
+    grid-template-columns: 1fr;
+    gap: 0.6vh;
+    min-height: 0;
+  }
+
   .projects__tag {
-    grid-column: 2;
     justify-self: start;
   }
+
   .projects__thumb {
     display: none;
   }

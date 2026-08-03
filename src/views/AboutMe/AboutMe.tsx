@@ -222,18 +222,18 @@ export default function AboutMe() {
       <div className="aboutme__backdrop" id="aboutme-backdrop" aria-hidden="true"></div>
 
       <div className="aboutme__frame" id="aboutme-frame">
-        {/* ponytail: placeholder portrait fill (gradient + reused /noise.png), swap for a real photo when available */}
         <div className="aboutme__portrait-wrap" id="aboutme-portrait-wrap" aria-hidden="true">
           <div className="aboutme__glow" id="aboutme-glow"></div>
           <div className="aboutme__portrait" id="aboutme-portrait">
-            <div className="aboutme__portrait-fill"></div>
+            <img className="aboutme__portrait-fill" src="/matheus.png" alt="" />
           </div>
         </div>
 
         <div className="aboutme__content" id="aboutme-content">
           <div className="aboutme__kicker" id="aboutme-kicker">
-            <span className="aboutme__rev aboutme__index">// 24</span>
-            <span className="aboutme__rev aboutme__tag">&lt;Sobre <span className="aboutme__label-slash">/</span>&gt;</span>
+            <span className="aboutme__rev aboutme__index">02</span>
+            <span className="aboutme__rev aboutme__label-slash">/</span>
+            <span className="aboutme__rev aboutme__tag">Sobre</span>
           </div>
 
           <h2 className="aboutme__heading">

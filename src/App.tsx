@@ -7,6 +7,7 @@ import AboutMe from "./views/AboutMe/AboutMe";
 import Projects from "./views/Projects/Projects";
 import Skills from "./views/Skills/Skills";
 import Contact from "./views/Contact/Contact";
+import ProjectDetail from "./views/ProjectDetail/ProjectDetail";
 
 export default function App() {
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function App() {
       <Skills />
       <Contact />
       <SectionNav />
+      <ProjectDetail />
     </>
   );
 }

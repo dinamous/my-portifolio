@@ -12,6 +12,8 @@ const state = { value: 0 };
 let target = 0; // raw progress, 0..sections.length-1, accumulated straight from scroll input
 let max = 0;
 let enabled = false;
+let locked = false;
+let observer: Observer;
 let moveTo: (value: number) => void;
 
 const DISTANCE = 1800; // px of wheel/touch travel to fully close one section into the next — higher means each wheel notch moves a smaller fraction, so steps between notches read as smooth glide instead of a jump
@@ -97,7 +99,7 @@ export function initSectionStack(selector = "[data-stack]") {
         onUpdate: applyState,
       });
 
-  Observer.create({
+  observer = Observer.create({
     target: window,
     type: "wheel,touch,pointer",
     preventDefault: true,
@@ -112,7 +114,24 @@ export function initSectionStack(selector = "[data-stack]") {
 // Sections stay inert until the section revealing them finishes its own
 // intro animation, so scroll input can't advance the stack mid-timeline.
 export function enableSectionStack() {
+  if (!locked) enabled = true;
+}
+
+// usado pelo overlay de detalhe do projeto: o Observer roda com preventDefault:true
+// no window inteiro, então só zerar `enabled` não basta (ele ainda engoliria o wheel
+// e o overlay nunca rolaria) — Observer.disable() solta a captura de fato. `locked`
+// blinda contra o enableSectionStack() do Hero disparando enquanto travado (só pode
+// acontecer numa carga direta em /projetos/:slug, no meio do intro do Hero).
+export function lockSectionStack() {
+  locked = true;
+  enabled = false;
+  observer?.disable();
+}
+
+export function unlockSectionStack() {
+  locked = false;
   enabled = true;
+  observer?.enable();
 }
 
 // permite navegação por clique (Navbar) sem duplicar a lista de seções —
