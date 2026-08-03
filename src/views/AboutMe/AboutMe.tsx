@@ -223,9 +223,17 @@ export default function AboutMe() {
 
       <div className="aboutme__frame" id="aboutme-frame">
         <div className="aboutme__portrait-wrap" id="aboutme-portrait-wrap" aria-hidden="true">
-          <div className="aboutme__glow" id="aboutme-glow"></div>
-          <div className="aboutme__portrait" id="aboutme-portrait">
-            <img className="aboutme__portrait-fill" src="/matheus.png" alt="" />
+          <div className="aboutme__card">
+            <div className="aboutme__glow" id="aboutme-glow"></div>
+            <div className="aboutme__portrait" id="aboutme-portrait">
+              <img className="aboutme__portrait-fill" src="/profile-picture.png" alt="" />
+            </div>
+          </div>
+
+          <div className="aboutme__meta">
+            <span className="aboutme__meta-dot"></span>
+            <span className="aboutme__meta-label">Status</span>
+            <span className="aboutme__meta-value">Disponível para novos projetos</span>
           </div>
         </div>
 
@@ -248,13 +256,25 @@ export default function AboutMe() {
 
           <div className="aboutme__divider" id="aboutme-divider" aria-hidden="true"></div>
 
-          <p className="aboutme__rev aboutme__text" id="aboutme-text">
-            <span className="aboutme__tag-inline">&lt;about&gt;</span>Sou o Matheus, desenvolvedor{" "}
-            <em className="aboutme__em">front-end</em> apaixonado por movimento. Dou vida a interfaces com
-            animações, transições e modelagens 3D, sempre buscando fazer a tela deixar de ser estática.
-            Para mim, código é matéria-prima; a <em className="aboutme__em">emoção</em> é o acabamento. Cada
-            detalhe é pensado para ser sentido, não apenas visto.
-          </p>
+          <div className="aboutme__rev aboutme__text" id="aboutme-text">
+            <p className="aboutme__subtitle">
+              Desenvolvedor front-end especializado em animação, interação e experiências 3D.
+            </p>
+            <p>
+              <span className="aboutme__tag-inline">&lt;about&gt;</span>Sou o Matheus, desenvolvedor{" "}
+              <em className="aboutme__em">front-end</em> apaixonado por movimento. Dou vida a interfaces com
+              animações, transições e modelagens 3D, sempre buscando fazer a tela deixar de ser estática.
+              Para mim, código é matéria-prima; a <em className="aboutme__em">emoção</em> é o acabamento. Cada
+              detalhe é pensado para ser sentido, não apenas visto.
+            </p>
+            <p>
+              Curto pensar cada interação como um gesto: o peso certo de uma transição, o silêncio entre o
+              clique e a resposta, o instante em que a tela para de ser tela. Não gosto de interface que
+              grita — gosto da que sussurra, guia o olhar e some no fundo pra deixar a experiência falar.
+              Trabalho boa parte do tempo sozinho, mas trato cada projeto como se alguém fosse sentir cada
+              milissegundo dele.
+            </p>
+          </div>
         </div>
       </div>
 

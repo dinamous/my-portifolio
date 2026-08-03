@@ -16,7 +16,13 @@ let locked = false;
 let observer: Observer;
 let moveTo: (value: number) => void;
 
-const DISTANCE = 1800; // px of wheel/touch travel to fully close one section into the next — higher means each wheel notch moves a smaller fraction, so steps between notches read as smooth glide instead of a jump
+// fatia inicial do range de cada seção em que o scroll não move nada: a seção
+// acabou de terminar sua entrada, então dá um respiro antes de começar a sair
+const HOLD = 0.25;
+const TRANSITION_DISTANCE = 1800; // px of wheel/touch travel to fully close one section into the next — higher means each wheel notch moves a smaller fraction, so steps between notches read as smooth glide instead of a jump
+// o respiro come parte do range, então o curso total cresce na mesma proporção —
+// sem isso a transição em si ficaria 33% mais rápida por notch de wheel
+const DISTANCE = TRANSITION_DISTANCE / (1 - HOLD);
 export const FINAL_WIDTH_VW = 5; // width (in vw) left uncovered when a section finishes closing
 const MAX_INSET = (100 - FINAL_WIDTH_VW) / 2; // vw per side to shrink down to FINAL_WIDTH_VW
 const FADE_START = 0.25; // fraction of the transition where the black overlay starts appearing
@@ -27,7 +33,9 @@ export const CLIP_CLOSE_T = 0.7;
 function applyState() {
   sections.forEach((el, i) => {
     if (i === sections.length - 1) return; // last section never closes
-    const local = gsap.utils.clamp(0, 1, state.value - i);
+    // raw termina em 1 no mesmo ponto de sempre; o HOLD só empurra o início
+    const raw = gsap.utils.clamp(0, 1, state.value - i);
+    const local = gsap.utils.clamp(0, 1, (raw - HOLD) / (1 - HOLD));
 
     // ponytail: opt-out for sections whose next transition isn't the shrink-to-bar
     // wipe (e.g. one covered by its own curtain elements instead) — they still get

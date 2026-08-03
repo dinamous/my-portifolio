@@ -1,7 +1,6 @@
-import { useEffect, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent as ReactMouseEvent } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
-import { scrubTimeline } from "../../lib/scrub";
 import { projects } from "../../lib/projects";
 import { projectPath } from "../../lib/router";
 import AnimatedLetters from "../../components/AnimatedLetters";
@@ -18,13 +17,22 @@ const density = projects.length > 4 ? "compact" : "cozy";
 // row é um <a href> de verdade (ctrl/cmd/middle-click abrem em nova aba do jeito
 // normal do navegador); só intercepta o clique simples pra rodar a transição GSAP
 // do ProjectDetail em vez de uma navegação de página cheia.
-function handleOpenProject(e: ReactMouseEvent<HTMLAnchorElement>, slug: string) {
+function handleOpenProject(e: ReactMouseEvent<HTMLAnchorElement>, slug: string, active: boolean) {
+  // active vem do mesmo revealT/exitLocal que a animação usa — bloqueia o clique
+  // (inclusive ctrl/cmd-click) enquanto a row ainda não terminou de aparecer ou já
+  // começou a sair, sem depender de pointer-events (isso quebrava o hover, ver pill).
+  if (!active) {
+    e.preventDefault();
+    return;
+  }
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   e.preventDefault();
   window.dispatchEvent(new CustomEvent("project:open", { detail: { slug, x: e.clientX, y: e.clientY } }));
 }
 
 export default function Projects() {
+  const activeRef = useRef(false);
+
   useEffect(() => {
     const section = document.getElementById("projects-section")!;
     const header = document.getElementById("projects-header")!;
@@ -57,6 +65,26 @@ export default function Projects() {
     const rowCleanups: Array<() => void> = [];
     let marqueeTween: gsap.core.Tween | undefined;
     let pillTl: gsap.core.Timeline | undefined;
+    let reveal: gsap.core.Timeline | undefined;
+    let revealFired = false;
+    let hasEntered = false;
+    let exitStarted = false;
+
+    // AboutMe é um curtain com pointer-events:none no wrapper inteiro (deixa o
+    // clique vazar pro que está embaixo) e as rows já existem no DOM antes da
+    // própria entrada terminar — sem isso, dá pra "clicar através" da AboutMe numa
+    // row que ainda nem apareceu. activeRef (lido no onClick/onMouseenter) só liga
+    // quando a entrada (revealT) terminou e a saída ainda não começou; não mexe em
+    // pointer-events porque isso interferia no disparo nativo de mouseenter/leave.
+    const syncActive = () => {
+      const next = hasEntered && !exitStarted;
+      if (next === activeRef.current) return;
+      activeRef.current = next;
+      // liga/desliga o cursor:none junto (ver .projects__list--active no CSS) — sem
+      // isso o cursor nativo sumia mesmo fora da janela em que a pill pode aparecer.
+      list.classList.toggle("projects__list--active", next);
+    };
+    syncActive();
 
     if (marqueeTrack && !reduceMotion) {
       marqueeTween = gsap.to(marqueeTrack, {
@@ -73,38 +101,32 @@ export default function Projects() {
       gsap.set(section.querySelectorAll(".projects__letter"), { y: 0, opacity: 1 });
     } else {
       gsap.set(header, { opacity: 0, y: -16 });
-      gsap.set(rows, { opacity: 0, y: 24 });
+      gsap.set(rows, { opacity: 0, y: 40, x: -24 });
       gsap.set(section.querySelectorAll(".projects__letter"), { yPercent: 100, opacity: 0 });
 
-      const reveal = gsap
-        .timeline({ paused: true })
+      reveal = gsap
+        .timeline({
+          paused: true,
+          // hover/clique liberam pelo fim da própria timeline, não por um limiar de
+          // scroll — é o que tira a dependência de "rolar até tal ponto"
+          onComplete: () => {
+            hasEntered = true;
+            syncActive();
+          },
+        })
         .to(header, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0)
         .to(headerLetters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.025, ease: "power2.out" }, 0.05);
 
       rows.forEach((row, i) => {
         const letters = row.querySelectorAll(".projects__letter");
-        reveal
-          .to(row, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.1 + i * rowRevealStagger)
+        reveal!
+          // slingshot: back.out passa do alvo e volta — a row é "atirada" pra dentro
+          // em vez de deslizar; x junto com y dá a diagonal do estilingue
+          .to(row, { opacity: 1, y: 0, x: 0, duration: 0.7, ease: "back.out(1.7)" }, 0.1 + i * rowRevealStagger)
           .to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.02, ease: "power2.out" }, "<");
       });
 
-      const setProgress = scrubTimeline(reveal);
-
-      // waits until AboutMe's content has fully exited (its own EXIT_END) before this
-      // section's elements start appearing — the two transitions never overlap, this
-      // one only starts as AboutMe's curtain begins to dissolve.
-      const REVEAL_DELAY = 0.7;
-      onAboutmeProgress = ((e: CustomEvent<{ progress: number }>) => {
-        const revealT = gsap.utils.clamp(
-          0,
-          1,
-          (e.detail.progress - REVEAL_DELAY) / (1 - REVEAL_DELAY),
-        );
-        setProgress(revealT);
-      }) as EventListener;
-      window.addEventListener("aboutme:progress", onAboutmeProgress);
-
-      // tooltip "Ver projeto" que segue o cursor — um único elemento compartilhado
+      // seta que segue o cursor no hover — um único elemento compartilhado
       // por todas as rows (não um por row), seguindo via quickTo (retarget contínuo,
       // não gsap.to() novo por mousemove) e mostrado/escondido pela mesma técnica de
       // play/reverse usada abaixo pro thumb, para não herdar o bug de hover "preso".
@@ -148,6 +170,7 @@ export default function Projects() {
           pillY?.(e.clientY);
         };
         const onMouseenter = (e: MouseEvent) => {
+          if (!activeRef.current) return;
           hover.play();
           if (pill) gsap.set(pill, { x: e.clientX, y: e.clientY });
           pillTl?.play();
@@ -177,24 +200,73 @@ export default function Projects() {
       });
     }
 
-    // saída própria da Projects: é uma lista, então sair "in cascata" (linhas
-    // deslizando pra fora em sequência) tem mais identidade que um fade genérico —
-    // distinto do fade da AboutMe e do glitch que a Skills vai usar. Timeline
-    // pausada escrubada pelo progresso, mesmo idiom da entrada (aboutme:progress).
-    // data-no-close-clip tira essa seção do fechamento genérico do sectionStack.
-    const exit = gsap.timeline({ paused: true }).to(header, { opacity: 0, y: -16, duration: 0.3 }, 0);
-    rows.forEach((row, i) => {
-      exit.to(row, { x: -100, opacity: 0, duration: 0.5, ease: "power2.in" }, i * rowExitStagger);
-    });
+    // waits until AboutMe's content has fully exited (its own EXIT_END) before this
+    // section's elements start appearing — the two transitions never overlap, this
+    // one only starts as AboutMe's curtain begins to dissolve. Roda em ambos os modos
+    // de motion (não só no else acima) porque também é o que libera o clique/hover.
+    // ponytail: gatilho, não scrub — passou do limiar a entrada roda sozinha até o
+    // fim (e reverte inteira se o usuário voltar), então o hover fica disponível sem
+    // exigir que ele role até o final do range da AboutMe.
+    const REVEAL_DELAY = 0.7;
+    onAboutmeProgress = ((e: CustomEvent<{ progress: number }>) => {
+      const past = e.detail.progress >= REVEAL_DELAY;
+      if (past === revealFired) return;
+      revealFired = past;
+      if (past) {
+        if (reveal) reveal.play();
+        else {
+          hasEntered = true; // reduced motion: nada pra animar, libera direto
+          syncActive();
+        }
+      } else {
+        hasEntered = false;
+        syncActive();
+        reveal?.reverse();
+      }
+    }) as EventListener;
+    window.addEventListener("aboutme:progress", onAboutmeProgress);
 
-    const setExitProgress = scrubTimeline(exit, { duration: 0.4 });
+    // saída própria da Projects: é uma lista, então sair "in cascata" (linhas
+    // atiradas pra fora em sequência) tem mais identidade que um fade genérico —
+    // distinto do fade da AboutMe e do glitch que a Skills vai usar. Mesmo idiom da
+    // entrada: gatilho, não scrub — cruzou o limiar a cascata roda inteira sozinha,
+    // e voltar o scroll a reverte inteira, sem estado intermediário preso ao wheel.
+    // data-no-close-clip tira essa seção do fechamento genérico do sectionStack.
+    // a Skills escruba a entrada dela no projects:progress, então o que sai daqui é o
+    // progresso da própria timeline (não o do scroll) — as duas ficam em sincronia
+    // mesmo com a saída rodando sozinha.
+    const emitProgress = () =>
+      window.dispatchEvent(new CustomEvent("projects:progress", { detail: { progress: exit.progress() } }));
+
+    const exit = gsap
+      .timeline({
+        paused: true,
+        onUpdate: emitProgress,
+        onComplete: () => {
+          gsap.set(section, { display: "none" });
+          emitProgress();
+        },
+      })
+      .to(header, { opacity: 0, y: -16, duration: 0.3 }, 0);
+    rows.forEach((row, i) => {
+      // slingshot de saída: back.in recua um instante antes de arremessar a row
+      exit.to(row, { x: -140, opacity: 0, duration: 0.55, ease: "back.in(1.6)" }, i * rowExitStagger);
+    });
+    // a lista some em cascata primeiro; só no fim o próprio fundo sólido da seção
+    // desvanece — sem isso o fundo ficaria opaco até o display:none, escondendo a
+    // Skills por baixo até o último instante.
+    exit.to(section, { opacity: 0, duration: 0.4 }, ">-0.2");
+
+    const EXIT_TRIGGER = Math.max(LIST_T, 0.06);
+    let exitFired = false;
 
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
 
       // fase de "navegação": antes de qualquer coisa sair, o excedente da lista
       // (além do que cabe na viewport) desliza pra cima revelado por scroll —
-      // header e linhas visíveis continuam intactos até essa fase acabar.
+      // header e linhas visíveis continuam intactos até essa fase acabar. Essa
+      // continua escrubada de propósito: aqui o scroll está navegando a lista.
       const browseT = maxScroll > 0 ? gsap.utils.clamp(0, 1, p / LIST_T) : 1;
       gsap.set(list, { y: -maxScroll * browseT });
       gsap.set(progressFill, { scaleY: browseT });
@@ -203,25 +275,31 @@ export default function Projects() {
         progressIndex.textContent = String(activeIndex).padStart(2, "0");
       }
 
-      const exitLocal = maxScroll > 0 ? gsap.utils.clamp(0, 1, (p - LIST_T) / (1 - LIST_T)) : p;
+      const past = p >= EXIT_TRIGGER;
+      if (past === exitFired) return;
+      exitFired = past;
+      exitStarted = past;
+      syncActive();
+
       if (reduceMotion) {
-        gsap.set(rows, { opacity: 1 - exitLocal });
-        gsap.set(header, { opacity: 1 - exitLocal });
-      } else {
-        setExitProgress(exitLocal);
+        exit.progress(past ? 1 : 0);
+        gsap.set(section, { display: past ? "none" : "" });
+        emitProgress();
+        return;
       }
-      // a lista some em cascata primeiro; só no fim da faixa o próprio fundo
-      // sólido da seção desvanece — sem isso o fundo ficaria opaco até o corte
-      // seco do display:none, escondendo a Skills por baixo até o último instante.
-      const bgFadeT = gsap.utils.clamp(0, 1, (p - 0.75) / 0.25);
-      gsap.set(section, { opacity: 1 - bgFadeT, display: p >= 1 ? "none" : "" });
-      window.dispatchEvent(new CustomEvent("projects:progress", { detail: { progress: p } }));
+      if (past) exit.play();
+      else {
+        gsap.set(section, { display: "" });
+        exit.reverse();
+      }
     }) as EventListener;
     section.addEventListener("stack:progress", onStackProgress);
 
     return () => {
       if (onAboutmeProgress) window.removeEventListener("aboutme:progress", onAboutmeProgress);
       rowCleanups.forEach((fn) => fn());
+      reveal?.kill();
+      exit.kill();
       marqueeTween?.kill();
       pillTl?.kill();
       section.removeEventListener("stack:progress", onStackProgress);
@@ -248,7 +326,9 @@ export default function Projects() {
                   {marqueeItems.map((item, i) => (
                     <span className="projects__marquee-item" key={`${copy}-${item}-${i}`}>
                       {item}
-                      <span className="projects__marquee-dot" aria-hidden="true"></span>
+                      <span className="projects__marquee-star" aria-hidden="true">
+                        ✦
+                      </span>
                     </span>
                   ))}
                 </span>
@@ -274,7 +354,7 @@ export default function Projects() {
                 className="projects__row"
                 id={`projects-row-${i}`}
                 href={projectPath(p.slug)}
-                onClick={(e) => handleOpenProject(e, p.slug)}
+                onClick={(e) => handleOpenProject(e, p.slug, activeRef.current)}
               >
                 <h3 className="projects__title">
                   <AnimatedLetters text={p.title} prefix="projects" />
@@ -292,8 +372,10 @@ export default function Projects() {
         </ul>
       </div>
       <div className="projects__cursor-pill" id="projects-cursor-pill" aria-hidden="true">
-        <span className="projects__cursor-pill-dot" aria-hidden="true"></span>
-        Ver projeto
+        <svg className="projects__cursor-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 18 18 6" />
+          <path d="M8.5 6H18v9.5" />
+        </svg>
       </div>
     </section>
   );

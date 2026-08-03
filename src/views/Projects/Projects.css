@@ -69,12 +69,9 @@
   color: rgba(244, 247, 245, 0.4);
 }
 
-.projects__marquee-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #34d399;
-  opacity: 0.7;
+.projects__marquee-star {
+  font-size: 0.6em;
+  color: rgba(244, 247, 245, 0.4);
 }
 
 /* indicador vertical de progresso da lista — o preenchimento acompanha o
@@ -136,8 +133,15 @@
   opacity: 0;
   color: inherit;
   text-decoration: none;
-  cursor: pointer;
   will-change: transform, opacity;
+}
+
+/* cursor nativo só some quando a row está de fato interativa (mesma janela em
+   que a pill pode aparecer) — sem essa classe, o cursor sumia (cursor:none)
+   mesmo nos momentos em que a pill ainda não tinha permissão de aparecer,
+   deixando o mouse "invisível" sem nada no lugar. */
+.projects__list--active .projects__row {
+  cursor: none;
 }
 
 .projects__row:focus-visible {
@@ -145,8 +149,9 @@
   outline-offset: -4px;
 }
 
-/* tooltip "Ver projeto" que segue o cursor durante o hover — ver quickTo no
-   efeito; escondido em telas sem hover real (touch), onde não faz sentido */
+/* substitui o cursor no hover das rows — esfera verde com uma seta inclinada,
+   sinalizando "abre outra página"; ver quickTo no efeito. Escondida em telas
+   sem hover real (touch), onde não faz sentido. */
 .projects__cursor-pill {
   position: fixed;
   top: 0;
@@ -154,27 +159,22 @@
   z-index: 50;
   display: flex;
   align-items: center;
-  gap: 0.6em;
-  padding: 0.7em 1.4em;
-  border-radius: 999px;
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  background: rgba(3, 8, 7, 0.85);
-  backdrop-filter: blur(6px);
-  font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(0.75rem, 0.9vw, 0.85rem);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  justify-content: center;
+  width: clamp(46px, 3.6vw, 58px);
+  height: clamp(46px, 3.6vw, 58px);
+  border-radius: 50%;
+  background: #0b1013;
+  border: 1px solid rgba(244, 247, 245, 0.7);
+  box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.8);
   color: #f4f7f5;
-  white-space: nowrap;
   pointer-events: none;
   will-change: transform, opacity;
 }
 
-.projects__cursor-pill-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #34d399, #0891b2);
+.projects__cursor-arrow {
+  width: 42%;
+  height: 42%;
+  overflow: visible;
 }
 
 @media (hover: none) {

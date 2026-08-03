@@ -61,36 +61,72 @@
 }
 
 .aboutme__portrait-wrap {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   flex: 0 0 clamp(220px, 24vw, 300px);
-  height: clamp(300px, 48vh, 420px);
   opacity: 0;
   will-change: transform, opacity;
 }
 
+.aboutme__card {
+  position: relative;
+  width: 100%;
+  height: clamp(300px, 48vh, 420px);
+}
+
+.aboutme__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aboutme__meta-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px 1px rgba(16, 185, 129, 0.6);
+}
+
+.aboutme__meta-label {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.4);
+}
+
+.aboutme__meta-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: rgba(241, 244, 242, 0.8);
+}
+
 .aboutme__glow {
   position: absolute;
-  inset: -8% -10%;
+  inset: -22%;
   border-radius: 50%;
   background: radial-gradient(
-    circle at 50% 40%,
-    rgba(8, 145, 178, 0.16),
-    rgba(16, 185, 129, 0.06) 55%,
-    rgba(0, 0, 0, 0) 78%
+    circle at 50% 38%,
+    rgba(16, 185, 129, 0.28),
+    rgba(8, 145, 178, 0.16) 45%,
+    rgba(0, 0, 0, 0) 75%
   );
-  filter: blur(36px);
+  filter: blur(46px);
   opacity: 0;
   will-change: opacity;
 }
 
+/* sem borda/box-shadow — a foto dissolve nas bordas via mask-image em vez de um
+   recorte reto, pra ler como algo solto sobre o fundo, não uma caixa */
 .aboutme__portrait {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 3px;
-  border: 1px solid rgba(244, 247, 245, 0.12);
-  box-shadow: 0 30px 70px -35px rgba(0, 0, 0, 0.85);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 38%, transparent 92%);
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 38%, transparent 92%);
   will-change: clip-path;
 }
 
@@ -201,6 +237,24 @@
   color: rgba(241, 244, 242, 0.75);
 }
 
+.aboutme__text p {
+  margin: 0;
+}
+
+.aboutme__text p + p {
+  margin-top: 14px;
+}
+
+.aboutme__subtitle {
+  font-weight: 500;
+  font-size: 17px;
+  color: #f4f7f5;
+}
+
+.aboutme__subtitle + p {
+  margin-top: 22px;
+}
+
 @media (max-width: 900px) {
   .aboutme__frame {
     gap: 40px;
@@ -208,6 +262,9 @@
 
   .aboutme__portrait-wrap {
     flex-basis: clamp(180px, 30vw, 260px);
+  }
+
+  .aboutme__card {
     height: clamp(260px, 42vh, 360px);
   }
 }
@@ -222,6 +279,9 @@
   .aboutme__portrait-wrap {
     flex-basis: auto;
     width: 52vw;
+  }
+
+  .aboutme__card {
     height: 34vh;
   }
 
