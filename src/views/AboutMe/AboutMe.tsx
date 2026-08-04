@@ -1,7 +1,16 @@
 import { useEffect } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
+import AnimatedLetters from "../../components/AnimatedLetters";
 import "./AboutMe.css";
+
+// ponytail: hardcoded até virar documento no Sanity (client já existe em src/lib/sanity.ts,
+// ainda sem schema) — trocar este objeto por um fetch/props quando o `about` existir lá;
+// só ele alimenta o bloco de infos, então a troca fica contida.
+const about = {
+  local: "São Paulo, Brasil",
+  status: "Aberto pra oportunidades",
+};
 
 export default function AboutMe() {
   useEffect(() => {
@@ -9,55 +18,46 @@ export default function AboutMe() {
     const blockTop = document.getElementById("aboutme-block-top")!;
     const blockBottom = document.getElementById("aboutme-block-bottom")!;
     const backdrop = document.getElementById("aboutme-backdrop")!;
-    const glow = document.getElementById("aboutme-glow")!;
-    const portraitWrap = document.getElementById("aboutme-portrait-wrap")!;
-    const portrait = document.getElementById("aboutme-portrait")!;
-    const content = document.getElementById("aboutme-content")!;
-    const kicker = document.getElementById("aboutme-kicker")!;
-    const divider = document.getElementById("aboutme-divider")!;
-    const text = document.getElementById("aboutme-text")!;
-    const lines = content.querySelectorAll<HTMLElement>(".aboutme__inner");
-    const kickerRevs = kicker.querySelectorAll<HTMLElement>(".aboutme__rev");
+    const ticket = document.getElementById("aboutme-ticket")!;
+    const photo = document.getElementById("aboutme-photo")!;
+    const panel = document.getElementById("aboutme-panel")!;
+    const sub = document.getElementById("aboutme-sub")!;
+    const letters = section.querySelectorAll<HTMLElement>(".aboutme__letter");
+    const marks = section.querySelectorAll<HTMLElement>(".aboutme__mark");
+    const decos = section.querySelectorAll<HTMLElement>(".aboutme__deco");
 
-    const reduceMotion = prefersReducedMotion();
-
-    // ponytail: no reduced-motion branch splitting this setup from the reveal logic below —
-    // .aboutme keeps z-index:20 so its curtain can render above Hero/WhatIDo while they're
-    // still on screen mid-transition (their own natural z-index, assigned by sectionStack.ts,
-    // would otherwise cover it). That only stays correct as long as AboutMe starts hidden like
-    // every other section; jumping straight to opacity:1 here (as reduced motion used to) meant
-    // AboutMe's forced z-index put it on top of Hero/WhatIDo from the very first frame, instead
-    // of waiting its turn. The reveal below is pure gsap.set driven off scroll progress (no
-    // tweening), so it's safe to run unconditionally — same idiom as Hero's own stack:progress
-    // handler, which also updates unconditionally in both motion modes.
+    // ponytail: sem branch de reduced-motion neste setup — .aboutme mantém z-index:20 pra
+    // cortina render acima de Hero/WhatIDo durante a transição, o que só continua correto
+    // enquanto a seção começa escondida como todas as outras. A revelação abaixo é só
+    // gsap.set em cima do progresso de scroll (nada tweenado), então roda nos dois modos.
     gsap.set(blockTop, { xPercent: -100 });
     gsap.set(blockBottom, { xPercent: 100 });
-    gsap.set([backdrop, glow, portraitWrap, content], { opacity: 0 });
-    gsap.set(portraitWrap, { y: 50, scale: 1.05 });
-    gsap.set(content, { y: 32 });
-    gsap.set(portrait, { clipPath: "inset(46% 0% 46% 0%)" });
-    gsap.set(lines, { yPercent: 120 });
-    gsap.set(kickerRevs, { y: 18, opacity: 0 });
-    gsap.set(divider, { scaleX: 0 });
-    gsap.set(text, { y: 18, opacity: 0 });
+    gsap.set([backdrop, ticket, panel], { opacity: 0 });
+    gsap.set(ticket, { x: -40 });
+    gsap.set(panel, { y: 32 });
+    gsap.set(photo, { clipPath: "inset(46% 0% 46% 0%)" });
+    gsap.set(letters, { yPercent: 110, opacity: 0 });
+    gsap.set(marks, { scale: 0.4, opacity: 0 });
+    gsap.set(decos, { opacity: 0 });
+    gsap.set(sub, { y: 18, opacity: 0 });
 
-    // reveals element i of a group across its own slice of the segment (1/count wide),
-    // in order — same manually-scrubbed stand-in for gsap stagger used in WhatIDo.astro,
-    // since this whole reveal is driven off a single continuous progress value.
+    // revela o elemento i de um grupo na sua própria fatia do segmento (1/count),
+    // em ordem — stand-in manual do stagger do GSAP, já que tudo aqui é escrubado
+    // a partir de um único valor contínuo de progresso.
     const seqT = (segT: number, index: number, count: number) =>
       gsap.utils.clamp(0, 1, segT * count - index);
 
+    const stagger = (els: NodeListOf<HTMLElement>, t: number, fn: (el: HTMLElement, k: number) => void) =>
+      els.forEach((el, i) => fn(el, seqT(t, i, els.length)));
+
     const coverEase = gsap.parseEase("power2.out");
 
-    // tracks WhatIDo's own progress so the exit handler below can tell "not entered
-    // yet" (t < 1, p also reads 0 the whole time) apart from "entered and at rest"
-    // (t === 1, p also reads 0) — both clamp p to 0, so p alone can't distinguish them.
+    // guarda o progresso da WhatIDo pro handler de saída distinguir "ainda não entrou"
+    // (t < 1, p também lê 0) de "entrou e está parada" (t === 1, p também lê 0).
     let enteredT = 0;
 
-    // curtain blocks wait offscreen through a short delay, then glide in — easing out as
-    // they approach — until each one fully covers its half of the screen and locks there,
-    // becoming the solid background the content reveals onto. They never exit; revealT
-    // picks up right after coverT completes.
+    // as cortinas esperam fora da tela, entram e travam cobrindo cada metade — viram o
+    // fundo sólido em que o conteúdo aparece. Nunca saem; revealT começa logo após coverT.
     const onWhatIdoProgress = ((e: CustomEvent<{ progress: number }>) => {
       const t = e.detail.progress;
       enteredT = t;
@@ -67,130 +67,82 @@ export default function AboutMe() {
       gsap.set(blockTop, { xPercent: gsap.utils.interpolate(-100, 0, coverT) });
       gsap.set(blockBottom, { xPercent: gsap.utils.interpolate(100, 0, coverT) });
 
-      const backdropT = gsap.utils.clamp(0, 1, revealT / 0.15);
-      gsap.set(backdrop, { opacity: backdropT });
+      gsap.set(backdrop, { opacity: gsap.utils.clamp(0, 1, revealT / 0.15) });
 
-      const glowT = gsap.utils.clamp(0, 1, revealT / 0.35);
-      gsap.set(glow, { opacity: glowT });
+      const ticketT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.5);
+      gsap.set(ticket, { opacity: ticketT, x: gsap.utils.interpolate(-40, 0, ticketT) });
+      const clipInset = gsap.utils.interpolate(46, 0, ticketT);
+      gsap.set(photo, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
+      stagger(marks, gsap.utils.clamp(0, 1, (ticketT - 0.4) / 0.6), (el, k) =>
+        gsap.set(el, { scale: gsap.utils.interpolate(0.4, 1, k), opacity: k }),
+      );
 
-      const portraitT = gsap.utils.clamp(0, 1, (revealT - 0.05) / 0.5);
-      gsap.set(portraitWrap, {
-        opacity: portraitT,
-        y: gsap.utils.interpolate(50, 0, portraitT),
-        scale: gsap.utils.interpolate(1.05, 1, portraitT),
-      });
-      const clipInset = gsap.utils.interpolate(46, 0, portraitT);
-      gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
+      const panelT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.6);
+      gsap.set(panel, { opacity: panelT > 0 ? 1 : 0, y: gsap.utils.interpolate(32, 0, panelT) });
 
-      const contentT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.6);
-      gsap.set(content, {
-        opacity: contentT > 0 ? 1 : 0,
-        y: gsap.utils.interpolate(32, 0, contentT),
-      });
+      stagger(letters, gsap.utils.clamp(0, 1, panelT / 0.6), (el, k) =>
+        gsap.set(el, { yPercent: gsap.utils.interpolate(110, 0, k), opacity: k }),
+      );
+      stagger(decos, gsap.utils.clamp(0, 1, (panelT - 0.3) / 0.7), (el, k) => gsap.set(el, { opacity: k }));
 
-      const kickerT = gsap.utils.clamp(0, 1, contentT / 0.3);
-      kickerRevs.forEach((el, i) => {
-        const kt = seqT(kickerT, i, kickerRevs.length);
-        gsap.set(el, { y: gsap.utils.interpolate(18, 0, kt), opacity: kt });
-      });
-
-      const linesT = gsap.utils.clamp(0, 1, (contentT - 0.2) / 0.5);
-      lines.forEach((el, i) => {
-        const lt = seqT(linesT, i, lines.length);
-        gsap.set(el, { yPercent: gsap.utils.interpolate(120, 0, lt) });
-      });
-
-      const dividerT = gsap.utils.clamp(0, 1, (contentT - 0.55) / 0.3);
-      gsap.set(divider, { scaleX: dividerT });
-
-      const textT = gsap.utils.clamp(0, 1, (contentT - 0.65) / 0.35);
-      gsap.set(text, { opacity: textT, y: gsap.utils.interpolate(18, 0, textT) });
+      const subT = gsap.utils.clamp(0, 1, (panelT - 0.6) / 0.4);
+      gsap.set(sub, { opacity: subT, y: gsap.utils.interpolate(18, 0, subT) });
     }) as EventListener;
     window.addEventListener("whatido:progress", onWhatIdoProgress);
 
     let cleanupMousemove: (() => void) | undefined;
-    if (!reduceMotion) {
-      // subtle mouse parallax across the revealed scene — listens on window (not the
-      // section) since .aboutme keeps pointer-events:none for its whole top-layer curtain.
-      // glow drifts opposite the cursor (background layer), portrait/content drift with
-      // it (foreground) — same layered-opposition idiom as WhatIDo's grid vs. columns.
-      const gX = gsap.quickTo(glow, "x", { duration: 1.3, ease: "power3" });
-      const gY = gsap.quickTo(glow, "y", { duration: 1.3, ease: "power3" });
-      const pX = gsap.quickTo(portraitWrap, "x", { duration: 1.0, ease: "power3" });
-      const pY = gsap.quickTo(portraitWrap, "y", { duration: 1.0, ease: "power3" });
-      const cX = gsap.quickTo(content, "x", { duration: 1.0, ease: "power3" });
-
+    if (!prefersReducedMotion()) {
+      // parallax leve: os dois blocos deslizam em oposição, dando profundidade à "ficha"
+      const tX = gsap.quickTo(ticket, "x", { duration: 1.0, ease: "power3" });
+      const pX = gsap.quickTo(panel, "x", { duration: 1.0, ease: "power3" });
       const onMousemove = (e: MouseEvent) => {
         const dx = e.clientX / window.innerWidth - 0.5;
-        const dy = e.clientY / window.innerHeight - 0.5;
-        gX(-dx * 30);
-        gY(-dy * 24);
-        pX(dx * 16);
-        pY(dy * 12);
-        cX(dx * 10);
+        tX(dx * -14);
+        pX(dx * 10);
       };
       window.addEventListener("mousemove", onMousemove);
       cleanupMousemove = () => window.removeEventListener("mousemove", onMousemove);
     }
 
-    // saída própria da AboutMe: um scroll de respiro (EXIT_HOLD) segura o conteúdo
-    // totalmente visível antes de qualquer saída começar, depois cada elemento sai com
-    // o movimento inverso do que usou pra entrar (kicker/linhas deslizam pra cima,
-    // portrait fecha o clip de volta, divider recolhe a scaleX, etc.), cada um na sua
-    // própria janela de `et` — não um fadeout único. Todo o conteúdo termina de sair
-    // em EXIT_END; só depois disso a
-    // cortina sólida (aboutme__block--top/bottom, que não se move aqui) dissolve pra
-    // revelar Projects — Projects.tsx só começa a revelar seus próprios elementos a
-    // partir desse mesmo ponto (REVEAL_DELAY), então as duas transições nunca se
-    // sobrepõem. data-no-close-clip tira essa seção do fechamento genérico do
-    // sectionStack (que brigaria com esse fade fazendo clip-path ao mesmo tempo).
-    const EXIT_HOLD = 0.25; // scroll "de respiro": conteúdo fica parado, totalmente visível, antes de começar a sair
-    const EXIT_END = 0.7; // mais espaço de scroll pra saída, pra não ficar rápida
-    const exitEase = gsap.parseEase("power2.inOut"); // suaviza começo/fim de cada saída em vez do corte seco do clamp linear
+    // saída própria: EXIT_HOLD segura tudo visível antes de qualquer coisa sair, depois
+    // cada elemento sai pelo inverso do movimento de entrada, cada um na sua janela de `et`
+    // — não um fade único. Tudo termina em EXIT_END; só então a cortina sólida dissolve
+    // revelando a Projects (que começa a revelar a partir do mesmo ponto, REVEAL_DELAY),
+    // então as duas transições nunca se sobrepõem. data-no-close-clip tira esta seção do
+    // fechamento genérico do sectionStack (brigaria com esse fade).
+    const EXIT_HOLD = 0.25;
+    const EXIT_END = 0.7;
+    const exitEase = gsap.parseEase("power2.inOut");
     const exitLocalT = (start: number, span: number, et: number) =>
       exitEase(gsap.utils.clamp(0, 1, (et - start) / span));
 
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
 
-      // p alone reads 0 both "before WhatIDo has handed off" and "just after entering,
-      // at rest" — without this guard, et (0 - 1) - 0 forces opacity back to 1 on
-      // every scroll tick from the very first pixel, even while still inside Hero.
+      // p sozinho lê 0 tanto antes da WhatIDo entregar quanto logo após entrar — sem esse
+      // guard, et força opacity de volta a 1 a cada tick, ainda dentro da Hero.
       if (enteredT >= 1) {
         const et = gsap.utils.clamp(0, 1, (p - EXIT_HOLD) / (EXIT_END - EXIT_HOLD));
 
-        const kickerT = exitLocalT(0, 0.4, et);
-        kickerRevs.forEach((el, i) => {
-          const kt = seqT(kickerT, i, kickerRevs.length);
-          gsap.set(el, { y: gsap.utils.interpolate(0, -18, kt), opacity: 1 - kt });
-        });
+        stagger(letters, exitLocalT(0, 0.45, et), (el, k) =>
+          gsap.set(el, { yPercent: gsap.utils.interpolate(0, -110, k), opacity: 1 - k }),
+        );
+        stagger(decos, exitLocalT(0.1, 0.4, et), (el, k) => gsap.set(el, { opacity: 1 - k }));
 
-        const linesT = exitLocalT(0.05, 0.45, et);
-        lines.forEach((el, i) => {
-          const lt = seqT(linesT, i, lines.length);
-          gsap.set(el, { yPercent: gsap.utils.interpolate(0, -120, lt) });
-        });
+        const subT = exitLocalT(0.2, 0.35, et);
+        gsap.set(sub, { opacity: 1 - subT, y: gsap.utils.interpolate(0, -18, subT) });
 
-        const dividerT = exitLocalT(0.15, 0.3, et);
-        gsap.set(divider, { scaleX: 1 - dividerT });
+        const panelT = exitLocalT(0.35, 0.45, et);
+        gsap.set(panel, { opacity: 1 - panelT, y: gsap.utils.interpolate(0, -32, panelT) });
 
-        const textT = exitLocalT(0.2, 0.35, et);
-        gsap.set(text, { opacity: 1 - textT, y: gsap.utils.interpolate(0, -18, textT) });
+        stagger(marks, exitLocalT(0.25, 0.35, et), (el, k) =>
+          gsap.set(el, { scale: gsap.utils.interpolate(1, 0.4, k), opacity: 1 - k }),
+        );
 
-        const contentT = exitLocalT(0.35, 0.45, et);
-        gsap.set(content, { opacity: 1 - contentT, y: gsap.utils.interpolate(0, -32, contentT) });
-
-        const portraitT = exitLocalT(0.3, 0.5, et);
-        gsap.set(portraitWrap, {
-          opacity: 1 - portraitT,
-          y: gsap.utils.interpolate(0, -50, portraitT),
-          scale: gsap.utils.interpolate(1, 1.05, portraitT),
-        });
-        const clipInset = gsap.utils.interpolate(0, 46, portraitT);
-        gsap.set(portrait, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
-
-        const glowT = exitLocalT(0.45, 0.4, et);
-        gsap.set(glow, { opacity: 1 - glowT });
+        const ticketT = exitLocalT(0.3, 0.5, et);
+        gsap.set(ticket, { opacity: 1 - ticketT, x: gsap.utils.interpolate(0, -40, ticketT) });
+        const clipInset = gsap.utils.interpolate(0, 46, ticketT);
+        gsap.set(photo, { clipPath: `inset(${clipInset}% 0% ${clipInset}% 0%)` });
 
         const backdropT = exitLocalT(0.55, 0.45, et);
         gsap.set(backdrop, { opacity: 1 - backdropT });
@@ -217,64 +169,53 @@ export default function AboutMe() {
       data-stack
       data-no-close-clip
     >
-      {/* solid ground the content reveals onto — without it, the gaps between frame/backdrop
-         would show WhatIDo's own (light) background once the curtain blocks exit */}
+      {/* chão sólido em que o conteúdo aparece — sem ele, as frestas entre os dois blocos
+         mostrariam o fundo (claro) da WhatIDo assim que a cortina para */}
       <div className="aboutme__backdrop" id="aboutme-backdrop" aria-hidden="true"></div>
 
-      <div className="aboutme__frame" id="aboutme-frame">
-        <div className="aboutme__portrait-wrap" id="aboutme-portrait-wrap" aria-hidden="true">
-          <div className="aboutme__card">
-            <div className="aboutme__glow" id="aboutme-glow"></div>
-            <div className="aboutme__portrait" id="aboutme-portrait">
-              <img className="aboutme__portrait-fill" src="/profile-picture.png" alt="" />
+      <div className="aboutme__frame">
+        <aside className="aboutme__ticket" id="aboutme-ticket">
+          <div className="aboutme__stub" aria-hidden="true">
+            <span className="aboutme__arrows">↠</span>
+            <span className="aboutme__stub-text">Matheus Simões</span>
+            <span className="aboutme__arrows">↠</span>
+          </div>
+
+          <div className="aboutme__ticket-body">
+            <span className="aboutme__mark" aria-hidden="true">
+              +
+            </span>
+
+            <div className="aboutme__photo" id="aboutme-photo">
+              <img className="aboutme__photo-img" src="/profile-picture.png" alt="Matheus Simões" />
+              <span className="aboutme__crop aboutme__crop--tl" aria-hidden="true"></span>
+              <span className="aboutme__crop aboutme__crop--br" aria-hidden="true"></span>
+            </div>
+
+            <div className="aboutme__info">
+              <p className="aboutme__deco aboutme__info-line">Residindo em {about.local}</p>
+              <p className="aboutme__deco aboutme__info-line">Status: {about.status}</p>
             </div>
           </div>
+        </aside>
 
-          <div className="aboutme__meta">
-            <span className="aboutme__meta-dot"></span>
-            <span className="aboutme__meta-label">Status</span>
-            <span className="aboutme__meta-value">Disponível para novos projetos</span>
-          </div>
-        </div>
-
-        <div className="aboutme__content" id="aboutme-content">
-          <div className="aboutme__kicker" id="aboutme-kicker">
-            <span className="aboutme__rev aboutme__index">02</span>
-            <span className="aboutme__rev aboutme__label-slash">/</span>
-            <span className="aboutme__rev aboutme__tag">Sobre</span>
-          </div>
+        <div className="aboutme__panel" id="aboutme-panel">
+          {/* mesmas marcas de corte da foto, agora emoldurando o card de texto */}
+          <span className="aboutme__crop aboutme__crop--panel-tl" aria-hidden="true"></span>
+          <span className="aboutme__crop aboutme__crop--panel-br" aria-hidden="true"></span>
 
           <h2 className="aboutme__heading">
-            <span className="aboutme__line"><span className="aboutme__inner">Não desenho telas.</span></span>
-            <span className="aboutme__line"><span className="aboutme__inner">Componho movimento.</span></span>
-            <span className="aboutme__line"
-              ><span className="aboutme__inner"
-                >Vida em cada <em className="aboutme__em">transição<span className="aboutme__accent">;</span></em></span
-              ></span
-            >
+            <AnimatedLetters text="Componho movimento," prefix="aboutme" />
+            <span className="aboutme__heading-break"></span>
+            <AnimatedLetters text="não telas." prefix="aboutme" />
           </h2>
 
-          <div className="aboutme__divider" id="aboutme-divider" aria-hidden="true"></div>
+          <span className="aboutme__deco aboutme__rule" aria-hidden="true"></span>
 
-          <div className="aboutme__rev aboutme__text" id="aboutme-text">
-            <p className="aboutme__subtitle">
-              Desenvolvedor front-end especializado em animação, interação e experiências 3D.
-            </p>
-            <p>
-              <span className="aboutme__tag-inline">&lt;about&gt;</span>Sou o Matheus, desenvolvedor{" "}
-              <em className="aboutme__em">front-end</em> apaixonado por movimento. Dou vida a interfaces com
-              animações, transições e modelagens 3D, sempre buscando fazer a tela deixar de ser estática.
-              Para mim, código é matéria-prima; a <em className="aboutme__em">emoção</em> é o acabamento. Cada
-              detalhe é pensado para ser sentido, não apenas visto.
-            </p>
-            <p>
-              Curto pensar cada interação como um gesto: o peso certo de uma transição, o silêncio entre o
-              clique e a resposta, o instante em que a tela para de ser tela. Não gosto de interface que
-              grita — gosto da que sussurra, guia o olhar e some no fundo pra deixar a experiência falar.
-              Trabalho boa parte do tempo sozinho, mas trato cada projeto como se alguém fosse sentir cada
-              milissegundo dele.
-            </p>
-          </div>
+          <p className="aboutme__sub" id="aboutme-sub">
+            Desenvolvedor front-end especializado em animação, interação e experiências 3D. Código é
+            matéria-prima; a emoção é o acabamento. Cada detalhe pensado pra ser sentido, não só visto.
+          </p>
         </div>
       </div>
 

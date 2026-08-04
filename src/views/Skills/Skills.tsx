@@ -1,104 +1,124 @@
 import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
-import Parallax from "parallax-js";
 import { prefersReducedMotion } from "../../lib/motion";
 import { scrubTimeline } from "../../lib/scrub";
 import "./Skills.css";
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
-// ponytail: categorias/tags placeholder, ajustar conforme stack real evoluir
+// ponytail: stack hardcoded, mesmo motivo do `about` na AboutMe — vira documento
+// do Sanity quando o schema existir; só este array alimenta a coluna direita.
 const categories = [
-  { name: "Frontend", tags: ["Astro", "Tailwind CSS", "TypeScript", "Vite"] },
-  { name: "Animação & 3D", tags: ["GSAP", "Three.js", "WebGL", "Blender"] },
-  { name: "Ferramentas", tags: ["Figma", "Git", "Sanity", "Vercel"] },
-  { name: "Performance", tags: ["Lighthouse", "Core Web Vitals", "Lazy Loading", "A11y"] },
+  { name: "Linguagens", techs: ["TypeScript", "JavaScript", "HTML", "CSS", "SQL", "Python"] },
+  { name: "Frameworks", techs: ["React", "Next.js", "Astro", "Vite", "React Router", "TanStack Query"] },
+  { name: "Interface & Estilo", techs: ["Tailwind CSS", "Sass", "CSS Modules", "Radix UI", "shadcn/ui", "Storybook"] },
+  { name: "Animação", techs: ["GSAP", "ScrollTrigger", "Observer", "SplitText", "Lenis", "Lottie"] },
+  { name: "3D & Shaders", techs: ["Three.js", "React Three Fiber", "WebGL", "GLSL", "Blender", "Spline"] },
+  { name: "Backend & APIs", techs: ["Node.js", "Express", "Fastify", "REST", "GraphQL", "WebSockets"] },
+  { name: "Dados & CMS", techs: ["PostgreSQL", "MongoDB", "Supabase", "Prisma", "Sanity", "Redis"] },
+  { name: "Infra & Deploy", techs: ["Git", "GitHub Actions", "Docker", "Vercel", "Cloudflare", "Nginx"] },
+  { name: "Qualidade & Design", techs: ["Vitest", "Playwright", "ESLint", "Prettier", "Figma", "Lighthouse"] },
+];
+
+const headlineLines = [
+  "Estas são as",
+  "ferramentas com que",
+  "trabalho todo dia.",
+];
+
+const meta = [
+  { term: "Formação", value: "Bacharel em Ciência da Computação" },
+  { term: "Atuação", value: "Desenvolvedor com foco em Front-end" },
 ];
 
 export default function Skills() {
   useEffect(() => {
     const section = document.getElementById("skills-section")!;
-    const grid = document.getElementById("skills-grid")!;
-    const label = document.getElementById("skills-label")!;
-    const panels = Array.from(document.querySelectorAll<HTMLElement>(".skills__panel"));
-    const headings = Array.from(document.querySelectorAll<HTMLElement>(".skills__heading"));
-    const tags = Array.from(document.querySelectorAll<HTMLElement>(".skills__tag"));
+    const rule = document.getElementById("skills-rule")!;
+    const lines = Array.from(section.querySelectorAll<HTMLElement>(".skills__line-inner"));
+    const metaRows = Array.from(section.querySelectorAll<HTMLElement>(".skills__meta-row"));
+    const cats = Array.from(section.querySelectorAll<HTMLElement>(".skills__cat"));
+    const names = Array.from(section.querySelectorAll<HTMLElement>(".skills__cat-name"));
 
     const reduceMotion = prefersReducedMotion();
+    const cleanups: Array<() => void> = [];
 
-    let onProjectsProgress: EventListener | undefined;
-    let parallaxInstance: InstanceType<typeof Parallax> | undefined;
-    const tagCleanups: Array<() => void> = [];
+    // cada categoria só precisa dos próprios nós; resolvidos uma vez aqui pra
+    // não reconsultar o DOM a cada toggle
+    const panels = cats.map((cat) => ({
+      cat,
+      body: cat.querySelector<HTMLElement>(".skills__cat-body")!,
+      head: cat.querySelector<HTMLButtonElement>(".skills__cat-head")!,
+      icon: cat.querySelector<HTMLElement>(".skills__cat-icon")!,
+      techs: Array.from(cat.querySelectorAll<HTMLElement>(".skills__tech")),
+    }));
+
+    gsap.set(panels.map((p) => p.body), { height: 0, overflow: "hidden" });
+    gsap.set(panels.flatMap((p) => p.techs), { opacity: 0, y: -8 });
+
+    // acordeão de abertura única: abrir um fecha o anterior, clicar no aberto fecha tudo
+    let openIndex = -1;
+    const setOpen = (index: number, instant = false) => {
+      const dur = instant || reduceMotion ? 0 : 0.5;
+      panels.forEach((p, i) => {
+        const open = i === index;
+        p.head.setAttribute("aria-expanded", String(open));
+        p.cat.classList.toggle("skills__cat--open", open);
+        gsap.to(p.body, { height: open ? "auto" : 0, duration: dur, ease: "power3.inOut", overwrite: true });
+        gsap.to(p.icon, { rotate: open ? 45 : 0, duration: dur, ease: "power3.inOut", overwrite: true });
+        gsap.to(p.techs, {
+          opacity: open ? 1 : 0,
+          y: open ? 0 : -8,
+          duration: dur * 0.7,
+          stagger: open ? 0.03 : 0,
+          ease: "power2.out",
+          overwrite: true,
+        });
+      });
+      openIndex = index;
+    };
+    setOpen(0, true);
+
+    panels.forEach((p, i) => {
+      const onClick = () => setOpen(openIndex === i ? -1 : i);
+      p.head.addEventListener("click", onClick);
+      cleanups.push(() => p.head.removeEventListener("click", onClick));
+    });
 
     if (reduceMotion) {
-      gsap.set([grid, label, ...panels], { opacity: 1 });
-      gsap.set(tags, { opacity: 1, y: 0 });
+      gsap.set([rule, ...lines, ...metaRows, ...cats], { opacity: 1, y: 0, yPercent: 0 });
     } else {
-      gsap.set(grid, { opacity: 0, scale: 1.08 });
-      gsap.set(label, { opacity: 0 });
-      gsap.set(panels, { opacity: 0, y: 30 });
-      gsap.set(tags, { opacity: 0, y: 14 });
-
-      // scramble-in disparado uma unica vez por titulo, guardado num WeakSet
-      // pra nao repetir a cada tick de progresso escrubado
-      const scrambled = new WeakSet<HTMLElement>();
-      const scrambleIn = (el: HTMLElement) => {
-        if (scrambled.has(el)) return;
-        scrambled.add(el);
-        gsap.to(el, {
-          duration: 0.8,
-          scrambleText: { text: el.dataset.text ?? el.textContent ?? "", chars: "upperAndLowerCase", speed: 0.4 },
-          ease: "none",
-        });
-      };
+      gsap.set(rule, { opacity: 0, scaleX: 0 });
+      gsap.set(lines, { yPercent: 110 });
+      gsap.set(metaRows, { opacity: 0, y: 14 });
+      gsap.set(cats, { opacity: 0, y: 24 });
 
       const reveal = gsap
         .timeline({ paused: true })
-        .to(grid, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }, 0)
-        .to(label, { opacity: 1, duration: 0.4 }, 0.1);
-
-      panels.forEach((panel, i) => {
-        const panelTags = panel.querySelectorAll(".skills__tag");
-        reveal
-          .to(panel, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.15 + i * 0.1)
-          .call(() => scrambleIn(headings[i]), [], 0.15 + i * 0.1)
-          .to(panelTags, { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }, 0.25 + i * 0.1);
-      });
+        .to(lines, { yPercent: 0, duration: 0.7, stagger: 0.06, ease: "power3.out" }, 0)
+        .to(cats, { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power3.out" }, 0.2)
+        .to(rule, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.35)
+        .to(metaRows, { opacity: 1, y: 0, duration: 0.45, stagger: 0.09, ease: "power2.out" }, 0.45);
 
       const setProgress = scrubTimeline(reveal);
-
-      onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
+      const onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
         setProgress(e.detail.progress);
       }) as EventListener;
       window.addEventListener("projects:progress", onProjectsProgress);
+      cleanups.push(() => window.removeEventListener("projects:progress", onProjectsProgress));
 
-      // microinteracao: glitch/scramble ao passar o mouse sobre cada tag
-      tags.forEach((tag) => {
-        const onMouseenter = () => {
-          gsap.to(tag, {
+      // microinteração: scramble no nome da categoria ao passar o mouse
+      names.forEach((name) => {
+        const onEnter = () =>
+          gsap.to(name, {
             duration: 0.5,
-            scrambleText: { text: tag.dataset.text ?? tag.textContent ?? "", chars: "upperAndLowerCase", speed: 0.5 },
-            borderColor: "rgba(52, 211, 153, 0.7)",
+            scrambleText: { text: name.dataset.text ?? "", chars: "upperAndLowerCase", speed: 0.5 },
             ease: "none",
           });
-        };
-        const onMouseleave = () => {
-          gsap.to(tag, { borderColor: "rgba(244, 247, 245, 0.25)", duration: 0.4 });
-        };
-        tag.addEventListener("mouseenter", onMouseenter);
-        tag.addEventListener("mouseleave", onMouseleave);
-        tagCleanups.push(() => {
-          tag.removeEventListener("mouseenter", onMouseenter);
-          tag.removeEventListener("mouseleave", onMouseleave);
-        });
+        name.addEventListener("mouseenter", onEnter);
+        cleanups.push(() => name.removeEventListener("mouseenter", onEnter));
       });
-
-      parallaxInstance = new Parallax(section, { relativeInput: true, hoverOnly: true, selector: "[data-depth]" });
-      // parallax-js força position:relative inline na primeira layer, tirando o
-      // grid do absolute/inset:0 do CSS — ele entra no fluxo do flex e empurra
-      // os painéis pra metade direita da tela
-      gsap.set(grid, { position: "absolute", top: 0, left: 0 });
     }
 
     // saída própria da Skills: dissolve em glitch — os textos viram símbolo por um
@@ -112,7 +132,7 @@ export default function Skills() {
 
       if (!reduceMotion && !glitchTriggered && p > 0.12) {
         glitchTriggered = true;
-        [...headings, ...tags].forEach((el) => {
+        [...names, ...(panels[openIndex]?.techs ?? [])].forEach((el) => {
           gsap.to(el, {
             duration: 0.5,
             scrambleText: { text: el.textContent ?? "", chars: "!<>-_\\/[]{}—=+*^?#", speed: 0.35, revealDelay: 0 },
@@ -122,10 +142,9 @@ export default function Skills() {
       }
 
       const fadeT = reduceMotion ? p : gsap.utils.clamp(0, 1, (p - 0.15) / 0.5);
-      gsap.set(panels, { opacity: 1 - fadeT });
-      gsap.set([grid, label], { opacity: 1 - fadeT });
+      gsap.set([...cats, rule, ...metaRows, ...lines.map((l) => l.parentElement!)], { opacity: 1 - fadeT });
       // mesmo motivo do fade de fundo na Projects, mas começando mais cedo
-      // (0.45, logo após os painéis dissolverem): o reveal da Contact é escrubado
+      // (0.45, logo após o conteúdo dissolver): o reveal da Contact é escrubado
       // na segunda metade da faixa, e com o fundo sumindo só em 0.75+ a entrada
       // dela acontecia inteira atrás do fundo opaco — dessincronizado.
       const bgFadeT = gsap.utils.clamp(0, 1, (p - 0.45) / 0.3);
@@ -136,25 +155,54 @@ export default function Skills() {
     section.addEventListener("stack:progress", onStackProgress);
 
     return () => {
-      if (onProjectsProgress) window.removeEventListener("projects:progress", onProjectsProgress);
-      tagCleanups.forEach((fn) => fn());
-      parallaxInstance?.destroy();
+      cleanups.forEach((fn) => fn());
       section.removeEventListener("stack:progress", onStackProgress);
     };
   }, []);
 
   return (
     <section className="skills fixed inset-0 h-screen w-screen" id="skills-section" data-stack data-no-close-clip>
-      <div className="skills__grid" id="skills-grid" data-depth="0.15" aria-hidden="true"></div>
-      <div className="skills__label" id="skills-label">&lt;Skills <span className="skills__label-slash">/</span>&gt;</div>
-      <div className="skills__panels" id="skills-panels">
+      <div className="skills__intro">
+        <h2 className="skills__headline">
+          {headlineLines.map((line) => (
+            <span className="skills__line" key={line}>
+              <span className="skills__line-inner">{line}</span>
+            </span>
+          ))}
+        </h2>
+
+        <span className="skills__rule" id="skills-rule" aria-hidden="true"></span>
+
+        <dl className="skills__meta">
+          {meta.map((item) => (
+            <div className="skills__meta-row" key={item.term}>
+              <dt className="skills__meta-term">{item.term}</dt>
+              <dd className="skills__meta-value">{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      {/* data-stack-scroll: o Observer do sectionStack captura o wheel na janela
+         inteira, então essa coluna só rola porque ele repassa o delta pra cá */}
+      <div className="skills__list" id="skills-list" data-stack-scroll>
         {categories.map((cat, i) => (
-          <div className="skills__panel" id={`skills-panel-${i}`} key={cat.name}>
-            <h3 className="skills__heading" data-text={cat.name}>{cat.name}</h3>
-            <div className="skills__tags">
-              {cat.tags.map((tag) => (
-                <span className="skills__tag" data-text={tag} key={tag}>{tag}</span>
-              ))}
+          <div className="skills__cat" key={cat.name}>
+            <button
+              className="skills__cat-head"
+              type="button"
+              aria-expanded="false"
+              aria-controls={`skills-cat-body-${i}`}
+            >
+              <span className="skills__cat-name" data-text={cat.name}>{cat.name}</span>
+              <span className="skills__cat-icon" aria-hidden="true">+</span>
+            </button>
+            <div className="skills__cat-body" id={`skills-cat-body-${i}`}>
+              <ul className="skills__techs">
+                {cat.techs.map((tech) => (
+                  <li className="skills__tech" key={tech}>{tech}</li>
+                ))}
+              </ul>
             </div>
           </div>
         ))}

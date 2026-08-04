@@ -4,31 +4,25 @@
   overflow: hidden;
   pointer-events: none;
   will-change: opacity;
-  /* transparent: only the two blocks (and, once revealed, the content below) should
-     ever be visible. sectionStack assigns the last section the lowest z-index
-     (reveal-from-behind default); this section instead curtains its own blocks over
-     whatever's on top, so it needs to sit above Hero/WhatIDo the whole time. The
-     revealed content lives in this same top layer so the curtain-wipe uncovers it
-     directly, without ever needing WhatIDo underneath to hide itself. */
+  /* transparente: só as duas cortinas (e, depois de revelado, o conteúdo) aparecem.
+     O sectionStack dá à última seção o menor z-index (revelar-por-trás); esta aqui
+     em vez disso passa a própria cortina por cima do que estiver na tela, então
+     precisa ficar acima de Hero/WhatIDo o tempo todo. */
   z-index: 20 !important;
 }
 
-/* ---- curtain / backdrop --------------------------------------------- */
+/* ---- cortina / fundo ------------------------------------------------- */
 
 .aboutme__block {
   width: 100%;
   height: 50dvh;
   background: #000;
   will-change: transform;
-  /* now that the blocks lock in place as the reveal's backdrop instead of exiting,
-     they must sit behind the absolutely-positioned content instead of painting last */
   z-index: -1;
 }
 
-/* default off-screen in CSS itself, not just via the script's gsap.set — with this
-   many components now loading JS on the page, waiting on the script to hide these
-   would leave a visible gap where two solid black bars (z-index:20 above everything)
-   flash over the Hero before GSAP ever runs */
+/* fora da tela já no CSS, não só no gsap.set — esperar o JS deixaria duas barras
+   pretas (z-index:20, acima de tudo) piscando sobre a Hero antes do GSAP rodar */
 .aboutme__block--top {
   transform: translateX(-100%);
 }
@@ -40,260 +34,260 @@
 .aboutme__backdrop {
   position: absolute;
   inset: 0;
-  background: #030304;
+  background: #030303;
   opacity: 0;
   will-change: opacity;
 }
 
-/* ---- frame: a portrait + a text column, instead of Hero's screen-wide floating
-   word or WhatIDo's split symmetric columns — this section reads as a quiet,
-   contained "dossier" spread rather than either of those */
+/* ---- dois blocos: uma "ficha" (canhoto perfurado + foto) e o painel de texto.
+   sem bordas: os blocos se separam do fundo pelo próprio tom (#080a09 sobre #030303) --- */
 
 .aboutme__frame {
   position: absolute;
   inset: 0;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(280px, 34%) 1fr;
   align-items: center;
-  gap: clamp(64px, 8vw, 140px);
-  width: min(1200px, 86vw);
+  gap: clamp(24px, 3vw, 56px);
+  width: min(1280px, 88vw);
   margin: 0 auto;
 }
 
-.aboutme__portrait-wrap {
+.aboutme__ticket {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 0 0 clamp(220px, 24vw, 300px);
+  height: clamp(320px, 62vh, 560px);
+  background: #080a09;
   opacity: 0;
   will-change: transform, opacity;
 }
 
-.aboutme__card {
+/* borda picotada do canhoto — repeating-radial recorta o mesmo preto do fundo */
+.aboutme__stub {
   position: relative;
-  width: 100%;
-  height: clamp(300px, 48vh, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  width: clamp(48px, 4.5vw, 68px);
+  padding: 2.2vh 0;
 }
 
-.aboutme__meta {
+.aboutme__stub::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background-image: radial-gradient(circle, #030303 3px, transparent 3.5px);
+  background-size: 8px 11px;
+}
+
+/* linha picotada que separa canhoto e corpo, no lugar do border-right */
+.aboutme__stub::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 6%;
+  bottom: 6%;
+  width: 1px;
+  background-image: linear-gradient(180deg, rgba(244, 247, 245, 0.3) 50%, transparent 50%);
+  background-size: 1px 8px;
+}
+
+.aboutme__stub-text {
+  writing-mode: vertical-rl;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.55);
+}
+
+.aboutme__arrows {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--accent-green) 75%, transparent);
+}
+
+.aboutme__ticket-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.2vh;
+  flex: 1;
+  min-width: 0;
+  padding: 3vh clamp(18px, 2vw, 32px);
+}
+
+/* crosshair de registro (o "+" dentro do círculo da referência) */
+.aboutme__mark {
+  position: absolute;
+  top: 3vh;
+  right: clamp(18px, 2vw, 32px);
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.aboutme__meta-dot {
-  width: 6px;
-  height: 6px;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  outline: 1px solid rgba(244, 247, 245, 0.18);
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px 1px rgba(16, 185, 129, 0.6);
-}
-
-.aboutme__meta-label {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(244, 247, 245, 0.4);
+  font-size: 0.9rem;
+  color: rgba(244, 247, 245, 0.45);
+  will-change: transform, opacity;
 }
 
-.aboutme__meta-value {
+.aboutme__info-line {
+  margin: 0;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 13px;
-  color: rgba(241, 244, 242, 0.8);
+  font-size: clamp(0.78rem, 1vw, 0.9rem);
+  line-height: 1.6;
+  color: rgba(244, 247, 245, 0.6);
 }
 
-.aboutme__glow {
-  position: absolute;
-  inset: -22%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 38%,
-    rgba(16, 185, 129, 0.28),
-    rgba(8, 145, 178, 0.16) 45%,
-    rgba(0, 0, 0, 0) 75%
-  );
-  filter: blur(46px);
-  opacity: 0;
-  will-change: opacity;
-}
-
-/* sem borda/box-shadow — a foto dissolve nas bordas via mask-image em vez de um
-   recorte reto, pra ler como algo solto sobre o fundo, não uma caixa */
-.aboutme__portrait {
+.aboutme__photo {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: clamp(200px, 34vh, 340px);
   overflow: hidden;
-  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 38%, transparent 92%);
-  mask-image: radial-gradient(ellipse at 50% 40%, #000 38%, transparent 92%);
   will-change: clip-path;
 }
 
-.aboutme__portrait-fill {
+.aboutme__photo-img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 32%;
+  object-position: 50% 30%;
   filter: contrast(1.05) saturate(1.05) brightness(0.94);
 }
 
-.aboutme__content {
-  flex: 1;
+/* marcas de corte nos cantos da foto: dois traços em L, sem borda de caixa */
+.aboutme__crop {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background:
+    linear-gradient(#f4f7f5, #f4f7f5) 0 0 / 100% 1px no-repeat,
+    linear-gradient(#f4f7f5, #f4f7f5) 0 0 / 1px 100% no-repeat;
+  opacity: 0.8;
+}
+
+.aboutme__crop--tl {
+  top: 10px;
+  left: 10px;
+}
+
+.aboutme__crop--br {
+  right: 10px;
+  bottom: 10px;
+  transform: rotate(180deg);
+}
+
+.aboutme__crop--panel-tl {
+  top: clamp(20px, 3.5vh, 40px);
+  left: clamp(20px, 3vw, 56px);
+  opacity: 0.35;
+}
+
+.aboutme__crop--panel-br {
+  right: clamp(20px, 3vw, 56px);
+  bottom: clamp(20px, 3.5vh, 40px);
+  transform: rotate(180deg);
+  opacity: 0.35;
+}
+
+.aboutme__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: clamp(320px, 62vh, 560px);
   min-width: 0;
+  padding: 0 clamp(20px, 3vw, 56px);
+  background: #080a09;
   opacity: 0;
   will-change: transform, opacity;
 }
 
-.aboutme__kicker {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.aboutme__accent {
-  color: #10b981;
-}
-
-.aboutme__index {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: rgba(241, 244, 242, 0.4);
-}
-
-.aboutme__tag {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(8, 145, 178, 0.9);
-}
-
-.aboutme__label-slash {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 12px;
-  color: rgba(241, 244, 242, 0.3);
+.aboutme__deco {
+  will-change: opacity;
 }
 
 .aboutme__heading {
-  margin: 0 0 30px;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 600;
-  font-size: clamp(26px, 3.2vw, 46px);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  color: #f4f7f5;
-}
-
-.aboutme__line {
-  display: block;
-  overflow: hidden;
-}
-
-.aboutme__inner {
-  display: block;
-  will-change: transform;
-}
-
-.aboutme__em {
+  margin: 0 0 2vh;
   font-family: "Cormorant Infant", serif;
   font-style: italic;
   font-weight: 500;
-  color: #10b981;
-}
-
-.aboutme__divider {
-  height: 1px;
-  width: 56px;
-  margin-bottom: 30px;
-  background: linear-gradient(100deg, #0891b2, #10b981);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-
-.aboutme__rev {
-  will-change: transform, opacity;
-}
-
-.aboutme__tag-inline {
-  margin-right: 10px;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 12px;
-  color: rgba(8, 145, 178, 0.9);
-}
-
-.aboutme__text {
-  max-width: 44ch;
-  margin: 0;
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 15.5px;
-  line-height: 1.75;
-  letter-spacing: 0.005em;
-  color: rgba(241, 244, 242, 0.75);
-}
-
-.aboutme__text p {
-  margin: 0;
-}
-
-.aboutme__text p + p {
-  margin-top: 14px;
-}
-
-.aboutme__subtitle {
-  font-weight: 500;
-  font-size: 17px;
+  font-size: clamp(2.2rem, 4.6vw, 4.4rem);
+  line-height: 1.02;
   color: #f4f7f5;
 }
 
-.aboutme__subtitle + p {
-  margin-top: 22px;
+.aboutme__heading-break {
+  display: block;
+}
+
+.aboutme__letter-wrap {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.02;
+}
+
+.aboutme__letter {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* fio entre título e subtítulo, mesmo gradiente do underline das rows da Projects */
+.aboutme__rule {
+  display: block;
+  width: clamp(56px, 7vw, 96px);
+  height: 2px;
+  margin-bottom: 2.6vh;
+  background: linear-gradient(90deg, var(--accent-stops));
+}
+
+.aboutme__sub {
+  max-width: 48ch;
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  line-height: 1.7;
+  color: rgba(244, 247, 245, 0.7);
+  will-change: transform, opacity;
 }
 
 @media (max-width: 900px) {
   .aboutme__frame {
-    gap: 40px;
+    grid-template-columns: minmax(200px, 40%) 1fr;
+    gap: 0;
   }
 
-  .aboutme__portrait-wrap {
-    flex-basis: clamp(180px, 30vw, 260px);
-  }
-
-  .aboutme__card {
-    height: clamp(260px, 42vh, 360px);
+  .aboutme__ticket,
+  .aboutme__panel {
+    height: clamp(280px, 56vh, 460px);
   }
 }
 
 @media (max-width: 640px) {
   .aboutme__frame {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 28px;
+    grid-template-columns: 1fr;
+    width: 86vw;
   }
 
-  .aboutme__portrait-wrap {
-    flex-basis: auto;
-    width: 52vw;
+  /* no mobile só o painel de texto fica — a ficha inteira viraria uma tira ilegível */
+  .aboutme__ticket {
+    display: none;
   }
 
-  .aboutme__card {
-    height: 34vh;
-  }
-
-  .aboutme__content {
-    width: 100%;
-  }
-
-  .aboutme__heading {
-    font-size: clamp(22px, 6.5vw, 32px);
-  }
-
-  .aboutme__text {
-    max-width: 100%;
+  .aboutme__panel {
+    height: auto;
+    padding: 5vh clamp(18px, 6vw, 28px);
   }
 }

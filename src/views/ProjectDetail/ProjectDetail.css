@@ -56,7 +56,7 @@
   font-size: clamp(0.7rem, 0.9vw, 0.8rem);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #34d399;
+  color: var(--accent-green);
 }
 
 .projectdetail__title {
@@ -166,7 +166,7 @@
 }
 
 .projectdetail__carousel-dot.is-active {
-  background: linear-gradient(135deg, #34d399, #0891b2);
+  background: linear-gradient(135deg, var(--accent-stops-rev));
 }
 
 .projectdetail__actions {
@@ -180,7 +180,7 @@
   padding: 0.75em 1.6em;
   border-radius: 999px;
   border: 1px solid transparent;
-  background: linear-gradient(#030303, #030303) padding-box, linear-gradient(135deg, #34d399, #0891b2) border-box;
+  background: linear-gradient(#030303, #030303) padding-box, linear-gradient(135deg, var(--accent-stops-rev)) border-box;
   font-family: "Space Grotesk", sans-serif;
   font-size: clamp(0.8rem, 1vw, 0.9rem);
   letter-spacing: 0.04em;

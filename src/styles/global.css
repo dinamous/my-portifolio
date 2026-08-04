@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* paleta de acento: única fonte dos hex do gradiente cyan → verde → lima.
+   Os *-stops são a lista de paradas, não um gradiente pronto — entram dentro
+   do linear-gradient() de quem usa, então cada elemento escolhe o próprio
+   ângulo: linear-gradient(90deg, var(--accent-stops)). */
+:root {
+  --accent-cyan: #0891b2;
+  --accent-green: #34d399;
+  --accent-lime: #a3e635;
+  --accent-stops: var(--accent-cyan), var(--accent-green) 55%, var(--accent-lime);
+  --accent-stops-rev: var(--accent-lime), var(--accent-green) 45%, var(--accent-cyan);
+}
+
 /* ponytail: sections are fixed full-screen panels, page itself never scrolls */
 html,
 body {

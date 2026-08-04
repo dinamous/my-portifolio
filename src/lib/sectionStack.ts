@@ -113,6 +113,23 @@ export function initSectionStack(selector = "[data-stack]") {
     preventDefault: true,
     onChange: (self) => {
       if (!enabled) return;
+      // preventDefault:true mata o scroll nativo de qualquer coisa dentro das
+      // seções, então uma coluna rolável (ex. lista da Skills) recebe o delta
+      // aqui e só devolve o controle pra pilha quando bate na própria borda.
+      // ponytail: scrollTop direto, sem tween — delta de wheel já vem em passos
+      // pequenos; suavizar com quickTo se ficar seco.
+      const scroller = (self.event.target as Element | null)?.closest?.(
+        "[data-stack-scroll]",
+      ) as HTMLElement | null;
+      if (scroller) {
+        const room = scroller.scrollHeight - scroller.clientHeight;
+        const atEdge =
+          self.deltaY > 0 ? scroller.scrollTop >= room - 1 : scroller.scrollTop <= 0;
+        if (room > 0 && !atEdge) {
+          scroller.scrollTop = gsap.utils.clamp(0, room, scroller.scrollTop + self.deltaY);
+          return;
+        }
+      }
       target = gsap.utils.clamp(0, max, target + self.deltaY / DISTANCE);
       moveTo(target);
     },

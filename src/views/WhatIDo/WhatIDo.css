@@ -78,7 +78,7 @@
   /* ponytail: background-size/position set inline per letter (see script) so the
      gradient reads as one continuous sweep across the whole word instead of each
      letter rendering its own isolated copy of it */
-  background: linear-gradient(100deg, #0891b2, #10b981);
+  background: linear-gradient(100deg, var(--accent-stops));
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;

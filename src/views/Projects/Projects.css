@@ -101,7 +101,7 @@
   inset: 0;
   transform-origin: top center;
   transform: scaleY(0);
-  background: linear-gradient(180deg, #34d399, #0891b2);
+  background: linear-gradient(180deg, var(--accent-stops-rev));
   will-change: transform;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .projects__row:focus-visible {
-  outline: 1px solid #34d399;
+  outline: 1px solid var(--accent-green);
   outline-offset: -4px;
 }
 
@@ -213,7 +213,7 @@
   bottom: -0.08em;
   height: 2px;
   width: 100%;
-  background: linear-gradient(90deg, #0891b2, #34d399);
+  background: linear-gradient(90deg, var(--accent-stops));
   transform-origin: left center;
   transform: scaleX(0);
   will-change: transform;

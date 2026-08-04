@@ -22,6 +22,13 @@ export default function Hero() {
     const word2 = document.getElementById("hero-word-2")!;
     const words = [word1, word2];
     const semi = document.getElementById("hero-semi")!;
+
+    // ponytail: GSAP interpola cor literal, não var() — os tokens de global.css
+    // são lidos uma vez aqui pra o hex do acento não viver em dois lugares.
+    const rootStyle = getComputedStyle(document.documentElement);
+    const accentCyan = rootStyle.getPropertyValue("--accent-cyan").trim();
+    const accentGreen = rootStyle.getPropertyValue("--accent-green").trim();
+
     let semiBusy = false;
     // easter egg do ";": glitch nas letras do nome com o ScrambleTextPlugin já
     // registrado globalmente em Skills.tsx — "{original}" faz cada letra
@@ -33,7 +40,7 @@ export default function Hero() {
       const nameLetters = [...word1Letters, ...word2Letters];
 
       if (reduceMotion) {
-        gsap.set(semi, { color: "#10b981" });
+        gsap.set(semi, { color: accentGreen });
         setTimeout(() => {
           gsap.set(semi, { color: "#1a1a1a" });
           semiBusy = false;
@@ -43,7 +50,7 @@ export default function Hero() {
 
       gsap
         .timeline({ onComplete: () => (semiBusy = false) })
-        .to(semi, { color: "#10b981", duration: 0.3 })
+        .to(semi, { color: accentGreen, duration: 0.3 })
         .to(
           nameLetters,
           {
@@ -208,8 +215,8 @@ export default function Hero() {
         (p - COLOR_START_T) / (COLOR_END_T - COLOR_START_T),
       );
       const colorT = gsap.parseEase("power2.inOut")(colorLinearT);
-      const barStop1 = gsap.utils.interpolate("#000000", "#0891b2", colorT);
-      const barStop2 = gsap.utils.interpolate("#000000", "#10b981", colorT);
+      const barStop1 = gsap.utils.interpolate("#000000", accentCyan, colorT);
+      const barStop2 = gsap.utils.interpolate("#000000", accentGreen, colorT);
       // 190deg (not the brand's 100deg) because by this point the section's
       // clip-path has already narrowed it to a strip that's thin horizontally
       // but full height (inset only ever touches left/right, see sectionStack) —
