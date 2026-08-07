@@ -84,23 +84,30 @@ export default function ProjectDetail() {
       if (reduceMotionRef.current) {
         gsap.set(overlay, { clipPath: "circle(150% at 50% 50%)", autoAlpha: 1 });
       } else {
-        gsap.set(overlay, { clipPath: `circle(0% at ${x}px ${y}px)`, autoAlpha: 1 });
-        gsap.to(overlay, { clipPath: `circle(150% at ${x}px ${y}px)`, duration: 0.9, ease: "power3.inOut" });
+        // o que suaviza a íris é ela não aparecer sozinha: o overlay entra por opacity
+        // ao mesmo tempo, então a borda dura do circle() nunca fica exposta.
+        // ponytail: sem scale no #projectdetail-inner — ele é o conteúdo do container
+        // que rola, e qualquer escala > 1 estoura os dois eixos e pisca scrollbar.
+        gsap.set(overlay, { clipPath: `circle(0% at ${x}px ${y}px)`, autoAlpha: 0 });
+        gsap
+          .timeline()
+          .to(overlay, { clipPath: `circle(150% at ${x}px ${y}px)`, duration: 1.1, ease: "power2.inOut" }, 0)
+          .to(overlay, { autoAlpha: 1, duration: 0.45, ease: "power1.out" }, 0);
       }
     } else if (project) {
       if (reduceMotionRef.current) {
         gsap.set(overlay, { autoAlpha: 0 });
         setProject(null);
       } else {
-        gsap.to(overlay, {
-          clipPath: `circle(0% at ${x}px ${y}px)`,
-          duration: 0.6,
-          ease: "power3.inOut",
-          onComplete: () => {
-            gsap.set(overlay, { autoAlpha: 0 });
-            setProject(null);
-          },
-        });
+        gsap
+          .timeline({
+            onComplete: () => {
+              gsap.set(overlay, { autoAlpha: 0 });
+              setProject(null);
+            },
+          })
+          .to(overlay, { clipPath: `circle(0% at ${x}px ${y}px)`, duration: 0.75, ease: "power2.inOut" }, 0)
+          .to(overlay, { autoAlpha: 0, duration: 0.4, ease: "power1.in" }, 0.35);
       }
     }
   }, [isOpen, project]);

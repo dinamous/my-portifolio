@@ -7,18 +7,21 @@ export default function RegMark({
   shape = "circle",
   tone,
   size,
+  id,
   className = "",
 }: {
   glyph?: ReactNode;
   shape?: "circle" | "square" | "bare";
   tone?: "accent" | "solid";
   size?: string;
+  id?: string;
   className?: string;
 }) {
   return (
     <span
       className={`gfx-mark gfx-mark--${shape}${tone ? ` gfx-mark--${tone}` : ""} ${className}`}
       style={size ? ({ "--gfx-mark-size": size } as CSSProperties) : undefined}
+      id={id}
       aria-hidden="true"
     >
       {glyph}

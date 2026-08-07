@@ -4,6 +4,7 @@ import { prefersReducedMotion } from "../../lib/motion";
 import { projects } from "../../lib/projects";
 import { projectPath } from "../../lib/router";
 import AnimatedLetters from "../../components/AnimatedLetters";
+import { CropMarks, RegMark } from "../../components/graphics";
 import "./Projects.css";
 
 // tags reais viram o conteúdo do marquee do header — sem lista redundante hardcoded
@@ -65,6 +66,7 @@ export default function Projects() {
     const rowCleanups: Array<() => void> = [];
     let marqueeTween: gsap.core.Tween | undefined;
     let pillTl: gsap.core.Timeline | undefined;
+    let pillFocus: gsap.core.Timeline | undefined;
     let reveal: gsap.core.Timeline | undefined;
     let revealFired = false;
     let hasEntered = false;
@@ -126,7 +128,7 @@ export default function Projects() {
           .to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.02, ease: "power2.out" }, "<");
       });
 
-      // seta que segue o cursor no hover — um único elemento compartilhado
+      // marca de registro que segue o cursor no hover — um único elemento compartilhado
       // por todas as rows (não um por row), seguindo via quickTo (retarget contínuo,
       // não gsap.to() novo por mousemove) e mostrado/escondido pela mesma técnica de
       // play/reverse usada abaixo pro thumb, para não herdar o bug de hover "preso".
@@ -134,13 +136,73 @@ export default function Projects() {
       let pillX: gsap.QuickToFunc | undefined;
       let pillY: gsap.QuickToFunc | undefined;
       if (pill) {
+        // os colchetes esperam afastados nas diagonais e fecham sobre a marca: o cursor
+        // "trava" no projeto como um visor, em vez de só aparecer. Ordem dos cantos vem
+        // do CropMarks (tl, tr, br, bl), então a diagonal de cada um é indexada.
+        const corners = pill.querySelectorAll<HTMLElement>(".gfx-crop");
+        const arrow = pill.querySelector<HTMLElement>(".projects__cursor-arrow");
+        const cornerX = [-1, 1, 1, -1];
+        const cornerY = [-1, -1, 1, 1];
+        // a rotação de cada canto vem do CSS do CropMarks (i * 90deg); reescrita aqui
+        // porque quem tweena x/y passa a ser dono do transform inteiro — deixar o GSAP
+        // decompor a matriz existente é o que costuma virar canto apontando pro lado
+        gsap.set(corners, {
+          rotate: (i: number) => i * 90,
+          x: (i: number) => cornerX[i] * 10,
+          y: (i: number) => cornerY[i] * 10,
+          opacity: 0,
+        });
+
         // xPercent/yPercent centralizam no próprio tamanho (setado uma vez só);
         // x/y (abaixo) seguem o cursor em px puro — misturar isso com um
         // transform:translate(-50%,-50%) do CSS confundiria o parse do GSAP
-        gsap.set(pill, { autoAlpha: 0, scale: 0.6, xPercent: -50, yPercent: -50 });
+        gsap.set(pill, { autoAlpha: 0, scale: 0.6, rotate: -45, xPercent: -50, yPercent: -50 });
         pillX = gsap.quickTo(pill, "x", { duration: 0.35, ease: "power3" });
         pillY = gsap.quickTo(pill, "y", { duration: 0.35, ease: "power3" });
-        pillTl = gsap.timeline({ paused: true }).to(pill, { autoAlpha: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 0);
+        pillTl = gsap
+          .timeline({ paused: true })
+          // back.out passa da marca dos 0° e volta — o quadrado assenta no lugar em vez
+          // de parar seco, mesmo idiom do slingshot das rows
+          .to(pill, { autoAlpha: 1, scale: 1, rotate: 0, duration: 0.42, ease: "back.out(2)" }, 0)
+          .to(corners, { x: 0, y: 0, opacity: 0.85, duration: 0.34, ease: "power3.out" }, 0.1)
+          .fromTo(arrow, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, 0.14);
+
+        // clique: a marca "foca" antes de sair — os colchetes fecham sobre o centro e a
+        // caixa encolhe no ponto clicado, que é de onde a íris do ProjectDetail abre.
+        // Timeline própria (não um gsap.to por clique, e sem overwrite) porque overwrite
+        // mataria os tweens-filhos da pillTl e a deixaria corrompida pro próximo hover.
+        pillFocus = gsap
+          .timeline({
+            paused: true,
+            onStart: () => pillTl?.pause(),
+            // devolve a marca ao estado inicial da pillTl: sem isso o próximo hover
+            // tweenaria a partir do estado focado (encolhido e transparente)
+            onComplete: () => pillTl?.pause(0),
+          })
+          .to(
+            corners,
+            {
+              x: (i: number) => cornerX[i] * 3,
+              y: (i: number) => cornerY[i] * 3,
+              opacity: 1,
+              duration: 0.24,
+              ease: "power2.in",
+            },
+            0,
+          )
+          .to(pill, { scale: 0.66, duration: 0.5, ease: "power2.inOut" }, 0)
+          .to(pill, { autoAlpha: 0, duration: 0.32, ease: "power1.in" }, 0.2);
+
+        // escuta o mesmo evento que abre o detalhe (em vez de um onClick separado) pra
+        // foco e íris partirem do mesmo x/y, no mesmo frame
+        const onFocusOpen = ((e: CustomEvent<{ x: number; y: number }>) => {
+          // retarget do quickTo: a marca ainda pode estar a caminho do ponto clicado
+          pillX?.(e.detail.x);
+          pillY?.(e.detail.y);
+          pillFocus?.restart();
+        }) as EventListener;
+        window.addEventListener("project:open", onFocusOpen);
+        rowCleanups.push(() => window.removeEventListener("project:open", onFocusOpen));
       }
 
       // microinteracoes: pull magnetico na linha, thumb com wipe + scan no hover,
@@ -185,7 +247,9 @@ export default function Projects() {
         const onMouseleave = () => {
           moveX(0);
           hover.reverse();
-          pillTl?.reverse();
+          // o clique tira o ponteiro da row (o overlay entra na frente) e dispara este
+          // leave — reverter a pillTl aqui atropelaria o foco no meio
+          if (!pillFocus?.isActive()) pillTl?.reverse();
         };
 
         row.addEventListener("mousemove", onMousemove);
@@ -309,6 +373,7 @@ export default function Projects() {
       exit.kill();
       marqueeTween?.kill();
       pillTl?.kill();
+      pillFocus?.kill();
       section.removeEventListener("stack:progress", onStackProgress);
     };
   }, []);
@@ -368,7 +433,17 @@ export default function Projects() {
                   <span className="projects__title-underline" aria-hidden="true"></span>
                 </h3>
                 <div className="projects__thumb" aria-hidden="true">
-                  <img className="projects__thumb-img" src={p.images[0]} alt="" loading="lazy" />
+                  {/* sem loading="lazy": a seção é fixed e monta junto com a Hero, então
+                     o lazy só adiava a busca pro momento do hover — era ali que a
+                     imagem aparecia pintando. Eager em prioridade baixa carrega durante
+                     o scroll das seções anteriores, sem disputar banda com a Hero. */}
+                  <img
+                    className="projects__thumb-img"
+                    src={p.images[0]}
+                    alt=""
+                    decoding="async"
+                    fetchPriority="low"
+                  />
                   <div className="projects__thumb-overlay"></div>
                   <div className="projects__thumb-scan"></div>
                 </div>
@@ -378,12 +453,25 @@ export default function Projects() {
           ))}
         </ul>
       </div>
-      <div className="projects__cursor-pill" id="projects-cursor-pill" aria-hidden="true">
-        <svg className="projects__cursor-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 18 18 6" />
-          <path d="M8.5 6H18v9.5" />
-        </svg>
-      </div>
+      {/* o cursor é a mesma marca de registro dos grafismos, não uma pill à parte:
+         quadrado com fio de acento em vez de esfera com borda branca */}
+      <RegMark
+        id="projects-cursor-pill"
+        className="projects__cursor-pill"
+        shape="square"
+        size="clamp(34px, 2.6vw, 42px)"
+        glyph={
+          <>
+            {/* colchetes por fora da caixa: o cursor vira visor de enquadramento.
+               Offsets negativos os jogam pra fora da marca, não pra dentro dela */}
+            <CropMarks corners="all" x="-7px" size="7px" />
+            <svg className="projects__cursor-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 18 18 6" />
+              <path d="M8.5 6H18v9.5" />
+            </svg>
+          </>
+        }
+      />
     </section>
   );
 }

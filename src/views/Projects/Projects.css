@@ -149,26 +149,23 @@
   outline-offset: -4px;
 }
 
-/* substitui o cursor no hover das rows — esfera verde com uma seta inclinada,
-   sinalizando "abre outra página"; ver quickTo no efeito. Escondida em telas
-   sem hover real (touch), onde não faz sentido. */
+/* substitui o cursor no hover das rows, sinalizando "abre outra página"; ver quickTo
+   no efeito. É um RegMark (components/graphics) — caixa, fio e cor vêm de lá, aqui só
+   o que a marca não tem: sair do fluxo pro cursor e ganhar fundo pra ficar legível
+   sobre a thumb. Escondido em telas sem hover real (touch), onde não faz sentido. */
 .projects__cursor-pill {
   position: fixed;
   top: 0;
   left: 0;
   z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(46px, 3.6vw, 58px);
-  height: clamp(46px, 3.6vw, 58px);
-  border-radius: 50%;
   background: #0b1013;
-  border: 1px solid rgba(244, 247, 245, 0.7);
   box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.8);
-  color: #f4f7f5;
   pointer-events: none;
   will-change: transform, opacity;
+  /* fio e seta em branco, não no acento: o verde já é da faixa sob o título e da
+     barra de progresso — no cursor competia com os dois */
+  outline-color: rgba(244, 247, 245, 0.5);
+  color: #f4f7f5;
 }
 
 .projects__cursor-arrow {
@@ -180,6 +177,18 @@
 @media (hover: none) {
   .projects__cursor-pill {
     display: none;
+  }
+}
+
+/* o setup da marca (autoAlpha 0 inicial) vive no branch animado do efeito, então em
+   reduced-motion ela ficaria congelada e visível no canto — e o cursor nativo, sumido */
+@media (prefers-reduced-motion: reduce) {
+  .projects__cursor-pill {
+    display: none;
+  }
+
+  .projects__list--active .projects__row {
+    cursor: pointer;
   }
 }
 
@@ -234,10 +243,14 @@
    hover não causa reflow nem vaza sobre a linha vizinha. */
 .projects__thumb {
   position: relative;
-  width: clamp(140px, 16vw, 260px);
-  height: clamp(90px, 10vw, 165px);
+  width: clamp(190px, 21vw, 340px);
+  height: clamp(118px, 13vw, 212px);
   overflow: hidden;
-  border-radius: 6px;
+  /* moldura reta em vez do canto arredondado — a thumb lê como frame de contato.
+     border (não outline) porque o clip-path do hover precisa recortá-la junto com a
+     imagem; box-sizing: border-box do reset mantém a caixa no tamanho declarado. */
+  border: 1px solid rgba(244, 247, 245, 0.28);
+  border-radius: 1px;
   clip-path: inset(50% 0% 50% 0%);
   pointer-events: none;
   will-change: clip-path;
@@ -283,8 +296,10 @@
   padding-bottom: 2vh;
 }
 
+/* min-height acompanha a thumb compacta abaixo: menor que ela, a row cresce e o
+   cálculo de quantas cabem na viewport (maxScroll) passa a mentir */
 .projects[data-density="compact"] .projects__row {
-  min-height: clamp(64px, 8vh, 112px);
+  min-height: clamp(84px, 10.2vh, 142px);
   padding: 0.9vh 0;
 }
 
@@ -293,8 +308,8 @@
 }
 
 .projects[data-density="compact"] .projects__thumb {
-  width: clamp(96px, 11vw, 176px);
-  height: clamp(52px, 6.8vh, 96px);
+  width: clamp(134px, 15vw, 232px);
+  height: clamp(74px, 9vh, 128px);
 }
 
 @media (max-width: 640px) {
