@@ -15,7 +15,10 @@
 
 .aboutme__block {
   width: 100%;
-  height: 50dvh;
+  /* 1px de sobra: com 50dvh exatos os dois blocos deixam uma fresta em DPR fracionário,
+     e a WhatIDo aparece por ela entre a cortina fechar (t=0.6) e o backdrop subir */
+  height: calc(50dvh + 1px);
+  flex-shrink: 0;
   background: #000;
   will-change: transform;
   z-index: -1;
@@ -239,9 +242,11 @@
   line-height: 1.02;
 }
 
+/* sem will-change aqui de propósito: são ~30 spans, e promover cada um a layer
+   próprio custa mais (e treme mais) do que repintar o texto. O will-change fica
+   nos poucos elementos grandes (ticket, panel, photo, backdrop, blocks, sub). */
 .aboutme__letter {
   display: inline-block;
-  will-change: transform, opacity;
 }
 
 /* fio entre título e subtítulo, mesmo gradiente do underline das rows da Projects */

@@ -55,12 +55,18 @@ export default function AboutMe() {
     // guarda o progresso da WhatIDo pro handler de saída distinguir "ainda não entrou"
     // (t < 1, p também lê 0) de "entrou e está parada" (t === 1, p também lê 0).
     let enteredT = 0;
+    // entrada e saída mexem nos mesmos elementos e o stack dispara os dois no mesmo
+    // tick (WhatIDo vem antes desta seção no array), então sem esse flag as duas
+    // escreviam as mesmas props no mesmo frame — dobro de trabalho e tremida na borda.
+    let exiting = false;
 
     // as cortinas esperam fora da tela, entram e travam cobrindo cada metade — viram o
     // fundo sólido em que o conteúdo aparece. Nunca saem; revealT começa logo após coverT.
     const onWhatIdoProgress = ((e: CustomEvent<{ progress: number }>) => {
       const t = e.detail.progress;
       enteredT = t;
+      if (exiting) return; // a saída já é dona desses elementos
+
       const coverT = coverEase(gsap.utils.clamp(0, 1, (t - 0.15) / 0.45));
       const revealT = gsap.utils.clamp(0, 1, (t - 0.6) / 0.4);
 
@@ -78,7 +84,12 @@ export default function AboutMe() {
       );
 
       const panelT = gsap.utils.clamp(0, 1, (revealT - 0.25) / 0.6);
-      gsap.set(panel, { opacity: panelT > 0 ? 1 : 0, y: gsap.utils.interpolate(32, 0, panelT) });
+      // rampa curta em vez de flip binário: o fundo sólido do painel chega quase
+      // imediato (era a intenção do `> 0 ? 1 : 0`) mas sem o pop de um frame
+      gsap.set(panel, {
+        opacity: gsap.utils.clamp(0, 1, panelT / 0.12),
+        y: gsap.utils.interpolate(32, 0, panelT),
+      });
 
       stagger(letters, gsap.utils.clamp(0, 1, panelT / 0.6), (el, k) =>
         gsap.set(el, { yPercent: gsap.utils.interpolate(110, 0, k), opacity: k }),
@@ -92,15 +103,21 @@ export default function AboutMe() {
 
     let cleanupMousemove: (() => void) | undefined;
     if (!prefersReducedMotion()) {
-      // parallax leve: os dois blocos deslizam em oposição, dando profundidade à "ficha"
-      const tX = gsap.quickTo(ticket, "x", { duration: 1.0, ease: "power3" });
-      const pX = gsap.quickTo(panel, "x", { duration: 1.0, ease: "power3" });
+      // parallax leve: os dois blocos deslizam em oposição, dando profundidade à "ficha".
+      // xPercent, não x: o `x` do ticket é reescrito pelo scroll a cada tick (entrada e
+      // saída) — dois donos da mesma prop era a tremida. O GSAP soma x e xPercent no
+      // mesmo translate, então cada fonte fica com o seu canal e ninguém sobrescreve
+      // ninguém. Valores em % da largura do próprio bloco (~14px e ~10px no desktop).
+      const tX = gsap.quickTo(ticket, "xPercent", { duration: 1.2, ease: "power3" });
+      const pX = gsap.quickTo(panel, "xPercent", { duration: 1.2, ease: "power3" });
       const onMousemove = (e: MouseEvent) => {
+        // só com a seção parada na tela: durante entrada/saída o movimento já é do scroll
+        if (enteredT < 1 || exiting) return;
         const dx = e.clientX / window.innerWidth - 0.5;
-        tX(dx * -14);
-        pX(dx * 10);
+        tX(dx * -3);
+        pX(dx * 1.2);
       };
-      window.addEventListener("mousemove", onMousemove);
+      window.addEventListener("mousemove", onMousemove, { passive: true });
       cleanupMousemove = () => window.removeEventListener("mousemove", onMousemove);
     }
 
@@ -149,8 +166,13 @@ export default function AboutMe() {
       }
 
       const fadeT = gsap.utils.clamp(0, 1, (p - EXIT_END) / (1 - EXIT_END));
-      gsap.set(section, { opacity: 1 - fadeT, display: p >= 1 ? "none" : "" });
+      // visibility, não display: o valor de p vem do quickTo do sectionStack, que
+      // assenta/ultrapassa em volta de 1 — um flip de display nessa borda pisca. Aqui a
+      // opacity já é 0 quando fadeT chega a 1, então a troca é invisível (e ainda tira a
+      // seção do paint, que é o único motivo de esconder: .aboutme já é pointer-events:none)
+      gsap.set(section, { opacity: 1 - fadeT, visibility: fadeT >= 1 ? "hidden" : "visible" });
 
+      exiting = p > 0;
       window.dispatchEvent(new CustomEvent("aboutme:progress", { detail: { progress: p } }));
     }) as EventListener;
     section.addEventListener("stack:progress", onStackProgress);

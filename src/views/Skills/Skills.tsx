@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { prefersReducedMotion } from "../../lib/motion";
-import { scrubTimeline } from "../../lib/scrub";
 import "./Skills.css";
 
 gsap.registerPlugin(ScrambleTextPlugin);
@@ -86,29 +85,164 @@ export default function Skills() {
       cleanups.push(() => p.head.removeEventListener("click", onClick));
     });
 
-    if (reduceMotion) {
-      gsap.set([rule, ...lines, ...metaRows, ...cats], { opacity: 1, y: 0, yPercent: 0 });
-    } else {
-      gsap.set(rule, { opacity: 0, scaleX: 0 });
-      gsap.set(lines, { yPercent: 110 });
-      gsap.set(metaRows, { opacity: 0, y: 14 });
-      gsap.set(cats, { opacity: 0, y: 24 });
+    // mesmo idiom da AboutMe: entrada e saída da seção não têm timeline nem tween —
+    // cada elemento ganha a sua fatia de um único valor contínuo de progresso e é
+    // escrito com gsap.set. Por isso também não há branch de reduced-motion aqui
+    // (nada anima sozinho; tudo segue o scroll), só no scramble mais abaixo.
+    // SPREAD é a fatia da janela gasta escalonando os starts; o resto (1 - SPREAD) é a
+    // duração de cada elemento, então eles se sobrepõem. Sem isso cada um teria só
+    // 1/count do trecho — com 9 categorias vira um piscar em vez de uma cascata.
+    const SPREAD = 0.55;
+    const seqT = (segT: number, index: number, count: number) => {
+      const start = count > 1 ? (index / (count - 1)) * SPREAD : 0;
+      return gsap.utils.clamp(0, 1, (segT - start) / (1 - SPREAD));
+    };
 
-      const reveal = gsap
-        .timeline({ paused: true })
-        .to(lines, { yPercent: 0, duration: 0.7, stagger: 0.06, ease: "power3.out" }, 0)
-        .to(cats, { opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power3.out" }, 0.2)
-        .to(rule, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 0.35)
-        .to(metaRows, { opacity: 1, y: 0, duration: 0.45, stagger: 0.09, ease: "power2.out" }, 0.45);
+    const stagger = (els: HTMLElement[], t: number, fn: (el: HTMLElement, k: number) => void) =>
+      els.forEach((el, i) => fn(el, seqT(t, i, els.length)));
 
-      const setProgress = scrubTimeline(reveal);
-      const onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
-        setProgress(e.detail.progress);
-      }) as EventListener;
-      window.addEventListener("projects:progress", onProjectsProgress);
-      cleanups.push(() => window.removeEventListener("projects:progress", onProjectsProgress));
+    const enterEase = gsap.parseEase("power3.out");
 
-      // microinteração: scramble no nome da categoria ao passar o mouse
+    // decodificação escrubada: os caracteres à esquerda do cursor já são os reais, o
+    // resto é símbolo. Versão em gsap.set do que o ScrambleTextPlugin faz tweenando —
+    // aqui precisa andar e voltar com o scroll, e um tween por tick não faria isso.
+    const GLYPHS = "!<>-_\\/[]{}—=+*^?#";
+    const decode = (el: HTMLElement, k: number) => {
+      const text = el.dataset.text ?? "";
+      const shown = Math.round(k * text.length);
+      if (shown >= text.length) {
+        if (el.textContent !== text) el.textContent = text;
+        return;
+      }
+      let out = text.slice(0, shown);
+      for (let i = shown; i < text.length; i++) {
+        // semeado pelo cursor, não pelo frame: os símbolos só trocam quando um caractere
+        // novo entra — semear no tempo faria a coluna inteira tremer parada
+        out += text[i] === " " ? " " : GLYPHS[(i * 7 + shown * 3) % GLYPHS.length];
+      }
+      // sendo semeado pelo cursor, a string se repete entre os frames em que ele não
+      // anda; escrever mesmo assim invalidaria o layout do texto à toa
+      if (el.textContent !== out) el.textContent = out;
+    };
+
+    // cada categoria é revelada por uma cortina que corre da esquerda pra direita (leva a
+    // borda inferior junto, então a linha se desenha) enquanto o nome decodifica. Na saída
+    // a cortina continua no mesmo sentido, saindo pela direita — entra e sai atravessando.
+    // `names` já está em ordem de documento, então names[i] é o nome de cats[i].
+
+    gsap.set(lines, { yPercent: 110 });
+    gsap.set(rule, { opacity: 0, scaleX: 0 });
+    gsap.set(metaRows, { opacity: 0, y: 14 });
+    gsap.set(cats, { opacity: 0, clipPath: "inset(0 100% 0 0)" });
+
+    // guarda o progresso da Projects pro handler de saída distinguir "ainda não entrou"
+    // (t < 1, p também lê 0) de "entrou e está parada" (t === 1, p também lê 0).
+    let enteredT = 0;
+    // entrada e saída mexem nos mesmos elementos e o stack dispara os dois no mesmo
+    // tick, então sem esse flag as duas escreviam as mesmas props no mesmo frame.
+    let exiting = false;
+
+    // ENTER_START alinhado ao ponto em que a Projects começa a dissolver o próprio
+    // fundo opaco: antes disso qualquer coisa animada aqui acontece atrás do preto —
+    // era por isso que a seção "chegava montada", sem entrada visível.
+    const ENTER_START = 0.38;
+
+    const onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
+      const t = e.detail.progress;
+      enteredT = t;
+      if (exiting) return; // a saída já é dona desses elementos
+
+      const revealT = gsap.utils.clamp(0, 1, (t - ENTER_START) / (1 - ENTER_START));
+
+      // a manchete sobe linha a linha; a coluna de categorias começa logo em seguida e
+      // corre em paralelo, então as duas colunas se constroem juntas em vez de uma
+      // esperar a outra terminar
+      stagger(lines, gsap.utils.clamp(0, 1, revealT / 0.5), (el, k) =>
+        gsap.set(el, { yPercent: gsap.utils.interpolate(110, 0, enterEase(k)) }),
+      );
+
+      stagger(cats, gsap.utils.clamp(0, 1, (revealT - 0.12) / 0.88), (el, k) => {
+        const e = enterEase(k);
+        gsap.set(el, {
+          opacity: gsap.utils.clamp(0, 1, e / 0.2),
+          clipPath: `inset(0 ${(1 - e) * 100}% 0 0)`,
+        });
+      });
+      // o nome decodifica atrás da cortina, terminando depois dela: o texto ainda está
+      // se resolvendo quando a linha já apareceu inteira
+      cats.forEach((_, i) =>
+        decode(names[i], reduceMotion ? 1 : seqT(gsap.utils.clamp(0, 1, (revealT - 0.2) / 0.8), i, cats.length)),
+      );
+
+      const ruleT = enterEase(gsap.utils.clamp(0, 1, (revealT - 0.42) / 0.28));
+      gsap.set(rule, { opacity: ruleT, scaleX: ruleT });
+
+      stagger(metaRows, gsap.utils.clamp(0, 1, (revealT - 0.55) / 0.45), (el, k) => {
+        const e = enterEase(k);
+        gsap.set(el, { opacity: e, y: gsap.utils.interpolate(14, 0, e) });
+      });
+    }) as EventListener;
+    window.addEventListener("projects:progress", onProjectsProgress);
+    cleanups.push(() => window.removeEventListener("projects:progress", onProjectsProgress));
+
+    // saída própria: EXIT_HOLD segura tudo visível antes de qualquer coisa sair, depois
+    // cada elemento sai pelo inverso da própria entrada, na sua janela de `et` — não um
+    // fade único. Tudo termina em EXIT_END; só então o fundo sólido dissolve revelando a
+    // Contact. data-no-close-clip tira esta seção do fechamento genérico do sectionStack.
+    // HOLD curto porque o sectionStack já aplica o dele (HOLD = 0.25) antes de `local`
+    // começar a andar — este é só a margem extra antes do primeiro elemento sair.
+    const EXIT_HOLD = 0.05;
+    const EXIT_END = 0.58;
+    const exitEase = gsap.parseEase("power2.inOut");
+    const exitLocalT = (start: number, span: number, et: number) =>
+      exitEase(gsap.utils.clamp(0, 1, (et - start) / span));
+
+    const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
+      const p = e.detail.progress;
+
+      // p sozinho lê 0 tanto antes da Projects entregar quanto logo após entrar — sem
+      // esse guard, et força tudo de volta ao estado final a cada tick, ainda na Projects.
+      if (enteredT >= 1) {
+        const et = gsap.utils.clamp(0, 1, (p - EXIT_HOLD) / (EXIT_END - EXIT_HOLD));
+
+        // ordem inversa da entrada: a coluna de categorias sai primeiro, a manchete por último.
+        // as janelas terminam em et = 1 pra saída ocupar toda a faixa até EXIT_END;
+        // encurtá-las deixava um vão parado antes do fundo dissolver
+        stagger(cats, exitLocalT(0, 0.62, et), (el, k) =>
+          // a cortina sai pelo mesmo lado por onde entrou: entra e sai atravessando,
+          // em vez de voltar por onde veio
+          gsap.set(el, {
+            opacity: 1 - gsap.utils.clamp(0, 1, (k - 0.8) / 0.2),
+            clipPath: `inset(0 0 0 ${k * 100}%)`,
+          }),
+        );
+        // o nome se desfaz em símbolo antes de a cortina chegar nele — a leitura some
+        // primeiro, a linha depois
+        cats.forEach((_, i) =>
+          decode(names[i], reduceMotion ? 1 : 1 - seqT(exitLocalT(0, 0.45, et), i, cats.length)),
+        );
+        stagger(metaRows, exitLocalT(0.2, 0.45, et), (el, k) =>
+          gsap.set(el, { opacity: 1 - k, y: gsap.utils.interpolate(0, -14, k) }),
+        );
+        const ruleT = exitLocalT(0.3, 0.4, et);
+        gsap.set(rule, { opacity: 1 - ruleT, scaleX: 1 - ruleT });
+        stagger(lines, exitLocalT(0.35, 0.65, et), (el, k) =>
+          gsap.set(el, { yPercent: gsap.utils.interpolate(0, -110, k) }),
+        );
+      }
+
+      // visibility, não display: p vem do quickTo do sectionStack, que assenta/ultrapassa
+      // em volta de 1 — flip de display nessa borda pisca. A opacity já é 0 antes disso.
+      const fadeT = gsap.utils.clamp(0, 1, (p - EXIT_END) / 0.27);
+      gsap.set(section, { opacity: 1 - fadeT, visibility: fadeT >= 1 ? "hidden" : "visible" });
+
+      exiting = p > 0;
+      window.dispatchEvent(new CustomEvent("skills:progress", { detail: { progress: p } }));
+    }) as EventListener;
+    section.addEventListener("stack:progress", onStackProgress);
+
+    // microinteração: scramble no nome da categoria ao passar o mouse
+    if (!reduceMotion) {
       names.forEach((name) => {
         const onEnter = () =>
           gsap.to(name, {
@@ -120,39 +254,6 @@ export default function Skills() {
         cleanups.push(() => name.removeEventListener("mouseenter", onEnter));
       });
     }
-
-    // saída própria da Skills: dissolve em glitch — os textos viram símbolo por um
-    // instante (reaproveitando o ScrambleTextPlugin já carregado aqui) antes do
-    // fade, identidade "digital" distinta do fade da AboutMe e da cascata da
-    // Projects. Disparado uma única vez (guard), não a cada tick de progresso.
-    // data-no-close-clip tira essa seção do fechamento genérico do sectionStack.
-    let glitchTriggered = false;
-    const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
-      const p = e.detail.progress;
-
-      if (!reduceMotion && !glitchTriggered && p > 0.12) {
-        glitchTriggered = true;
-        [...names, ...(panels[openIndex]?.techs ?? [])].forEach((el) => {
-          gsap.to(el, {
-            duration: 0.5,
-            scrambleText: { text: el.textContent ?? "", chars: "!<>-_\\/[]{}—=+*^?#", speed: 0.35, revealDelay: 0 },
-            ease: "none",
-          });
-        });
-      }
-
-      const fadeT = reduceMotion ? p : gsap.utils.clamp(0, 1, (p - 0.15) / 0.5);
-      gsap.set([...cats, rule, ...metaRows, ...lines.map((l) => l.parentElement!)], { opacity: 1 - fadeT });
-      // mesmo motivo do fade de fundo na Projects, mas começando mais cedo
-      // (0.45, logo após o conteúdo dissolver): o reveal da Contact é escrubado
-      // na segunda metade da faixa, e com o fundo sumindo só em 0.75+ a entrada
-      // dela acontecia inteira atrás do fundo opaco — dessincronizado.
-      const bgFadeT = gsap.utils.clamp(0, 1, (p - 0.45) / 0.3);
-      gsap.set(section, { opacity: 1 - bgFadeT, display: p >= 1 ? "none" : "" });
-
-      window.dispatchEvent(new CustomEvent("skills:progress", { detail: { progress: p } }));
-    }) as EventListener;
-    section.addEventListener("stack:progress", onStackProgress);
 
     return () => {
       cleanups.forEach((fn) => fn());

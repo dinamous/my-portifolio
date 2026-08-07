@@ -252,10 +252,17 @@ export default function Projects() {
       // slingshot de saída: back.in recua um instante antes de arremessar a row
       exit.to(row, { x: -140, opacity: 0, duration: 0.55, ease: "back.in(1.6)" }, i * rowExitStagger);
     });
-    // a lista some em cascata primeiro; só no fim o próprio fundo sólido da seção
-    // desvanece — sem isso o fundo ficaria opaco até o display:none, escondendo a
-    // Skills por baixo até o último instante.
-    exit.to(section, { opacity: 0, duration: 0.4 }, ">-0.2");
+    // a lista some em cascata primeiro; o fundo sólido da seção dissolve por cima do
+    // fim dela. Começa junto com a última row (não depois): a entrada da Skills é
+    // escrubada nesse mesmo trecho, e com o fundo opaco até o fim ela se montava
+    // escondida atrás dele e só aparecia pronta.
+    exit.to(section, { opacity: 0, duration: 0.7 }, ">-0.45");
+    // ponytail: tween vazio só pra estender a duração. A Skills escruba a entrada dela
+    // em `projects:progress`, que acaba junto com esta timeline — sem esta cauda a
+    // revelação dela teria que caber inteira dentro do fade acima, ou seja, atrás de um
+    // fundo ainda opaco. É também o botão de ritmo da entrada da Skills: é aqui que se
+    // alonga ou encurta a cascata dela, não nas janelas de progresso do outro arquivo.
+    exit.to({}, { duration: 1.1 });
 
     const EXIT_TRIGGER = Math.max(LIST_T, 0.06);
     let exitFired = false;

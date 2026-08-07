@@ -2,132 +2,467 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
 import { scrubTimeline } from "../../lib/scrub";
-import AnimatedLetters from "../../components/AnimatedLetters";
+import { contact } from "../../lib/contact";
+import ScannerBackground from "../../components/ScannerBackground";
 import "./Contact.css";
 
-const socials = [
-  { label: "LinkedIn", href: "#" },
-  { label: "GitHub", href: "#" },
-  { label: "Email", href: "mailto:dinamous.dev@gmail.com" },
+const projectTypes = ["Site / Landing", "Web App", "Motion / 3D", "Outro"];
+
+const textFields = [
+  { name: "nome", label: "Como te chamo", placeholder: "Seu nome", type: "text", autoComplete: "name" },
+  { name: "email", label: "E-mail", placeholder: "voce@empresa.com", type: "email", autoComplete: "email" },
 ];
-const headline = "Vamos criar movimento";
 
 export default function Contact() {
   useEffect(() => {
-    const glow = document.getElementById("contact-glow")!;
-    const headlineEl = document.getElementById("contact-headline")!;
-    const mail = document.getElementById("contact-mail")!;
-    const mailUnderline = mail.querySelector<HTMLElement>(".contact__mail-underline")!;
-    const social = document.getElementById("contact-social")!;
-    const tag = document.getElementById("contact-tag")!;
-    const letters = headlineEl.querySelectorAll<HTMLElement>(".contact__letter");
-    const accent = headlineEl.querySelector<HTMLElement>(".contact__accent")!;
-    const revealTargets = [mail, social, tag];
+    const section = document.getElementById("contact-section")!;
+    const q = <T extends HTMLElement>(sel: string) => section.querySelector<T>(sel)!;
+    const qa = <T extends HTMLElement>(sel: string) => Array.from(section.querySelectorAll<T>(sel));
+
+    const words = qa(".contact__word-inner");
+    const dot = q("#contact-dot");
+    const bar = q("#contact-bar");
+    const sub = q("#contact-sub");
+    const channels = qa(".contact__channel");
+    const socials = qa(".contact__social");
+    const card = q("#contact-card");
+    const divider = q("#contact-divider");
+    const rows = qa(".contact__row");
+
+    const form = q<HTMLFormElement>("#contact-form");
+    const body = q("#contact-body");
+    const rail = q("#contact-rail");
+    const meterFill = q("#contact-meter-fill");
+    const chips = qa<HTMLButtonElement>(".contact__chip");
+    const sent = q("#contact-sent");
+    const submit = q<HTMLButtonElement>("#contact-submit");
+    const submitFill = q("#contact-submit-fill");
+    const submitText = q(".contact__submit-text");
+    const inputs = qa<HTMLInputElement | HTMLTextAreaElement>(".contact__input");
 
     const reduceMotion = prefersReducedMotion();
-
     const cleanups: Array<() => void> = [];
+    // registra o listener e já enfileira a remoção: o `return` do efeito é uma
+    // linha só, sem par manual de add/remove por evento
+    const on = <K extends keyof HTMLElementEventMap>(
+      el: HTMLElement,
+      type: K,
+      fn: (e: HTMLElementEventMap[K]) => void,
+    ) => {
+      el.addEventListener(type, fn as EventListener);
+      cleanups.push(() => el.removeEventListener(type, fn as EventListener));
+    };
+    const onWindow = (type: string, fn: EventListener, opts?: AddEventListenerOptions) => {
+      window.addEventListener(type, fn, opts);
+      cleanups.push(() => window.removeEventListener(type, fn));
+    };
+
+    // ---------------------------------------------------------------- entrada
+    // estado inicial: tudo fora de quadro. A Contact é a última da pilha (nunca
+    // fecha), então só existe entrada — escrubada pelo progresso da Skills.
+    gsap.set([sub, dot], { opacity: 0 });
+    gsap.set(words, { yPercent: 115 });
+    gsap.set(bar, { scaleX: 0 });
+    gsap.set([...channels, ...socials], { opacity: 0, y: 18 });
+    gsap.set(card, { opacity: 0, yPercent: 8, rotateX: 12 });
+    gsap.set(divider, { scaleY: 0 });
+    gsap.set(rows, { opacity: 0, y: 22 });
+    gsap.set(sent, { autoAlpha: 0 });
+    gsap.set(rail, { scaleY: 0, opacity: 0 });
+    gsap.set(meterFill, { scaleX: 0 });
+    gsap.set(submitFill, { scaleX: 0 });
+
+    const reveal = gsap
+      .timeline({ paused: true })
+      .to(words, { yPercent: 0, duration: 0.9, stagger: 0.09, ease: "power4.out" }, 0.2)
+      .to(dot, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(3.5)" }, 0.62)
+      .to(bar, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, 0.55)
+      .to(sub, { opacity: 1, duration: 0.45 }, 0.6)
+      .to(divider, { scaleY: 1, duration: 0.7, ease: "power2.inOut" }, 0.3)
+      .to(card, { opacity: 1, yPercent: 0, rotateX: 0, duration: 0.85, ease: "power3.out" }, 0.35)
+      .to(rows, { opacity: 1, y: 0, duration: 0.55, stagger: 0.07, ease: "power2.out" }, 0.55)
+      .to(channels, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }, 0.7)
+      .to(socials, { opacity: 1, y: 0, duration: 0.45, stagger: 0.06, ease: "power2.out" }, 0.85);
 
     if (reduceMotion) {
-      gsap.set(letters, { y: 0, opacity: 1 });
-      gsap.set(accent, { opacity: 1, scale: 1 });
-      gsap.set(revealTargets, { opacity: 1, y: 0 });
-      gsap.set(glow, { opacity: 1 });
+      reveal.progress(1);
     } else {
-      gsap.set(letters, { yPercent: 110, opacity: 0 });
-      gsap.set(accent, { opacity: 0, scale: 0.4 });
-      gsap.set(revealTargets, { opacity: 0, y: 16 });
-      gsap.set(glow, { opacity: 0 });
-
-      const reveal = gsap
-        .timeline({ paused: true })
-        .to(glow, { opacity: 1, duration: 0.8, ease: "power2.out" }, 0)
-        .to(letters, { yPercent: 0, opacity: 1, duration: 0.7, stagger: 0.02, ease: "power3.out" }, 0.1)
-        .to(accent, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(3)" }, "-=0.2")
-        .to(revealTargets, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }, "-=0.2");
-
       const setProgress = scrubTimeline(reveal);
-
-      // o reveal só roda na segunda metade da transição (p 0.45→1), janela em
-      // que o fundo da Skills já desvaneceu — escrubar em 0→1 fazia a entrada
-      // inteira acontecer escondida atrás do fundo opaco da Skills
-      const onSkillsProgress = ((e: CustomEvent<{ progress: number }>) => {
+      // o reveal só roda na segunda metade da transição (p 0.45→1), janela em que
+      // o fundo da Skills já desvaneceu — escrubar em 0→1 faria a entrada inteira
+      // acontecer escondida atrás do fundo opaco dela
+      onWindow("skills:progress", ((e: CustomEvent<{ progress: number }>) => {
         setProgress(gsap.utils.clamp(0, 1, (e.detail.progress - 0.45) / 0.55));
-      }) as EventListener;
-      window.addEventListener("skills:progress", onSkillsProgress);
-      cleanups.push(() => window.removeEventListener("skills:progress", onSkillsProgress));
+      }) as EventListener);
+    }
 
-      // ultima secao da pilha: sem stack:progress/finale — sectionStack nunca
-      // fecha a ultima (mesmo guard que a AboutMe usava antes da Task 2)
+    // ------------------------------------------------------------- ambiente
+    if (!reduceMotion) {
+      // paralaxe de mouse por camada: cada uma declara sua profundidade no HTML,
+      // então acrescentar um elemento novo não exige tocar neste efeito.
+      // x/y aqui, yPercent/rotate na entrada e no loop — canais separados, sem
+      // dois donos da mesma prop (mesmo motivo documentado na AboutMe)
+      const layers = qa("[data-depth]").map((el) => ({
+        depth: Number(el.dataset.depth),
+        x: gsap.quickTo(el, "x", { duration: 1.2, ease: "power3" }),
+        y: gsap.quickTo(el, "y", { duration: 1.2, ease: "power3" }),
+      }));
+      onWindow(
+        "mousemove",
+        ((e: MouseEvent) => {
+          const dx = e.clientX / window.innerWidth - 0.5;
+          const dy = e.clientY / window.innerHeight - 0.5;
+          layers.forEach((l) => {
+            l.x(dx * l.depth);
+            l.y(dy * l.depth * 0.6);
+          });
+        }) as EventListener,
+        { passive: true },
+      );
 
-      // loop ambiente (cena de repouso final): respiracao do glow + paralaxe
-      // sutil no mousemove, mesmo idiom que AboutMe.astro ja usa
-      const breathe = gsap.to(glow, { scale: 1.08, duration: 4, yoyo: true, repeat: -1, ease: "sine.inOut" });
-      cleanups.push(() => breathe.kill());
-
-      const glowX = gsap.quickTo(glow, "x", { duration: 1.2, ease: "power3" });
-      const glowY = gsap.quickTo(glow, "y", { duration: 1.2, ease: "power3" });
-      const onMousemove = (e: MouseEvent) => {
-        const dx = e.clientX / window.innerWidth - 0.5;
-        const dy = e.clientY / window.innerHeight - 0.5;
-        glowX(-dx * 40);
-        glowY(-dy * 30);
-      };
-      window.addEventListener("mousemove", onMousemove);
-      cleanups.push(() => window.removeEventListener("mousemove", onMousemove));
-
-      // microinteracao: pull magnetico + underline wipe no mail/socials
-      const onMailEnter = () => gsap.to(mailUnderline, { scaleX: 1, duration: 0.3, ease: "power2.out" });
-      const onMailLeave = () => gsap.to(mailUnderline, { scaleX: 0, duration: 0.25, ease: "power2.inOut" });
-      mail.addEventListener("mouseenter", onMailEnter);
-      mail.addEventListener("mouseleave", onMailLeave);
-      cleanups.push(() => {
-        mail.removeEventListener("mouseenter", onMailEnter);
-        mail.removeEventListener("mouseleave", onMailLeave);
-      });
-
-      [mail, ...Array.from(social.querySelectorAll<HTMLElement>("a"))].forEach((el) => {
-        const moveX = gsap.quickTo(el, "x", { duration: 0.4, ease: "power3" });
-        const moveY = gsap.quickTo(el, "y", { duration: 0.4, ease: "power3" });
-        const onElMousemove = (e: MouseEvent) => {
-          const rect = el.getBoundingClientRect();
-          moveX(((e.clientX - (rect.left + rect.width / 2)) / rect.width) * 10);
-          moveY(((e.clientY - (rect.top + rect.height / 2)) / rect.height) * 6);
-        };
-        const onElMouseleave = () => {
-          moveX(0);
-          moveY(0);
-        };
-        el.addEventListener("mousemove", onElMousemove);
-        el.addEventListener("mouseleave", onElMouseleave);
-        cleanups.push(() => {
-          el.removeEventListener("mousemove", onElMousemove);
-          el.removeEventListener("mouseleave", onElMouseleave);
+      // pull magnético nos alvos clicáveis
+      qa("[data-magnetic]").forEach((el) => {
+        const mx = gsap.quickTo(el, "x", { duration: 0.4, ease: "power3" });
+        const my = gsap.quickTo(el, "y", { duration: 0.4, ease: "power3" });
+        on(el, "mousemove", (e) => {
+          const r = el.getBoundingClientRect();
+          mx(((e.clientX - (r.left + r.width / 2)) / r.width) * 16);
+          my(((e.clientY - (r.top + r.height / 2)) / r.height) * 10);
+        });
+        on(el, "mouseleave", () => {
+          mx(0);
+          my(0);
         });
       });
     }
+
+    // ------------------------------------------------------------ formulário
+    // trilho luminoso: acompanha o campo em foco. scaleY sobre uma base fixa de
+    // 100px em vez de height — transform não dispara layout
+    const RAIL_BASE = 100;
+    const railY = gsap.quickTo(rail, "y", { duration: 0.45, ease: "power3" });
+    const railS = gsap.quickTo(rail, "scaleY", { duration: 0.45, ease: "power3" });
+    const meterTo = gsap.quickTo(meterFill, "scaleX", { duration: 0.6, ease: "power2.out" });
+
+    const moveRail = (row: HTMLElement) => {
+      const r = row.getBoundingClientRect();
+      const c = body.getBoundingClientRect();
+      gsap.to(rail, { opacity: 1, duration: 0.25 });
+      railY(r.top - c.top);
+      railS(r.height / RAIL_BASE);
+    };
+
+    let selectedType = projectTypes[0];
+
+    const values = () => {
+      const data = new FormData(form);
+      return {
+        nome: String(data.get("nome") ?? "").trim(),
+        email: String(data.get("email") ?? "").trim(),
+        mensagem: String(data.get("mensagem") ?? "").trim(),
+      };
+    };
+
+    // medidor de preenchimento: sinal de progresso pra quem está respondendo
+    const updateMeter = () => {
+      const v = values();
+      const filled = [v.nome, v.email, v.mensagem].filter(Boolean).length;
+      meterTo(filled / 3);
+    };
+
+    // o erro vive no row: classe pro visual, texto pro que fazer, aria-invalid pro
+    // leitor de tela. Sem isso o campo só ficava vermelho, sem dizer o motivo
+    const clearError = (row: HTMLElement) => {
+      row.classList.remove("contact__row--error");
+      row.querySelector(".contact__err")!.textContent = "";
+      row.querySelector(".contact__input")?.removeAttribute("aria-invalid");
+    };
+
+    inputs.forEach((input) => {
+      const row = input.closest<HTMLElement>(".contact__row")!;
+      const line = row.querySelector<HTMLElement>(".contact__line")!;
+      const label = row.querySelector<HTMLElement>(".contact__label")!;
+      gsap.set(line, { scaleX: 0 });
+
+      // o erro não sai no foco: o submit inválido já joga o foco no primeiro campo
+      // errado, e limpar aqui apagaria a mensagem antes de ela ser lida
+      on(input, "focus", () => {
+        gsap.to(line, { scaleX: 1, duration: 0.45, ease: "power3.out" });
+        gsap.to(label, { color: "#f4f7f5", x: 4, duration: 0.3, ease: "power2.out" });
+        moveRail(row);
+      });
+      on(input, "blur", () => {
+        gsap.to(line, { scaleX: 0, duration: 0.35, ease: "power2.inOut", transformOrigin: "right center" })
+          .eventCallback("onComplete", () => gsap.set(line, { transformOrigin: "left center" }));
+        gsap.to(label, { color: "rgba(244,247,245,0.45)", x: 0, duration: 0.3, ease: "power2.out" });
+      });
+      // o erro sai assim que a pessoa começa a corrigir, não só ao refocar
+      on(input, "input", () => {
+        clearError(row);
+        updateMeter();
+      });
+    });
+
+    // chips: o fundo de cada um escala em vez de um indicador compartilhado —
+    // sobrevive à quebra de linha sem remedir nada
+    const setType = (index: number) => {
+      selectedType = projectTypes[index];
+      chips.forEach((chip, i) => {
+        const active = i === index;
+        chip.setAttribute("aria-pressed", String(active));
+        gsap.to(chip.querySelector(".contact__chip-bg"), {
+          scaleX: active ? 1 : 0,
+          duration: reduceMotion ? 0 : 0.4,
+          ease: "power3.out",
+          overwrite: true,
+        });
+        gsap.to(chip, { color: active ? "#04120c" : "rgba(244,247,245,0.6)", duration: 0.3, overwrite: "auto" });
+      });
+    };
+    chips.forEach((chip, i) => on(chip, "click", () => setType(i)));
+    setType(0);
+
+    // preenchimento do botão: wipe da esquerda no hover, transform-only. A cor do
+    // texto acompanha o wipe (overwrite pra não empilhar ao entrar/sair rápido)
+    const hoverSubmit = (over: boolean) => {
+      gsap.to(submitFill, {
+        scaleX: over ? 1 : 0,
+        duration: over ? 0.5 : 0.4,
+        ease: over ? "power3.out" : "power2.inOut",
+        overwrite: true,
+      });
+      gsap.to(submitText, {
+        color: over ? "#04120c" : "#f4f7f5",
+        duration: 0.3,
+        overwrite: "auto",
+      });
+    };
+    on(submit, "mouseenter", () => hoverSubmit(true));
+    on(submit, "mouseleave", () => hoverSubmit(false));
+
+    const shake = (row: HTMLElement, msg: string) => {
+      row.classList.add("contact__row--error");
+      row.querySelector(".contact__err")!.textContent = msg;
+      row.querySelector(".contact__input")!.setAttribute("aria-invalid", "true");
+      if (reduceMotion) return;
+      gsap.fromTo(
+        row,
+        { x: -9 },
+        { x: 0, duration: 0.6, ease: "elastic.out(1.6, 0.3)", clearProps: "x" },
+      );
+    };
+
+    const message = ({ nome, email, mensagem }: ReturnType<typeof values>) =>
+      [
+        `Olá Matheus! Aqui é ${nome}.`,
+        `Tipo de projeto: ${selectedType}`,
+        "",
+        mensagem,
+        email ? `\nMeu e-mail: ${email}` : "",
+      ].join("\n");
+
+    const onSubmit = (e: Event) => {
+      e.preventDefault();
+      const v = values();
+
+      // validação no clique, não a cada tecla: erro só depois que a pessoa
+      // disse "terminei" incomoda menos do que rabiscar o campo enquanto digita
+      const invalid = [
+        !v.nome && ["nome", "Me diz como te chamar."],
+        !v.mensagem && ["mensagem", "Escreve duas linhas sobre o projeto."],
+        v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email) && ["email", "Esse e-mail parece incompleto."],
+      ].filter(Boolean) as [string, string][];
+
+      if (invalid.length) {
+        invalid.forEach(([name, msg]) => {
+          const el = form.querySelector<HTMLElement>(`[name="${name}"]`)!;
+          shake(el.closest<HTMLElement>(".contact__row")!, msg);
+        });
+        form.querySelector<HTMLElement>(`[name="${invalid[0][0]}"]`)?.focus();
+        return;
+      }
+
+      window.open(
+        `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(message(v))}`,
+        "_blank",
+        "noopener",
+      );
+
+      gsap
+        .timeline()
+        .to(rows, { opacity: 0, y: -18, duration: 0.35, stagger: 0.05, ease: "power2.in" })
+        .to(rail, { opacity: 0, duration: 0.2 }, "<")
+        // inert e não pointer-events: o form some pro mouse E pro teclado, senão dava
+        // pra tabular pelos campos escondidos atrás do painel de enviado
+        .call(() => body.setAttribute("inert", ""))
+        .fromTo(
+          sent,
+          { autoAlpha: 0, y: 24 },
+          { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          "-=0.1",
+        );
+    };
+    on(form, "submit", onSubmit);
+
+    const onReset = () => {
+      form.reset();
+      qa(".contact__row--error").forEach(clearError);
+      setType(0);
+      updateMeter();
+      gsap
+        .timeline()
+        .to(sent, { autoAlpha: 0, y: 16, duration: 0.3, ease: "power2.in" })
+        .call(() => body.removeAttribute("inert"))
+        .to(rows, { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: "power2.out" })
+        .call(() => inputs[0].focus());
+    };
+    on(q("#contact-again"), "click", onReset);
 
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
   return (
     <section className="contact fixed inset-0 h-screen w-screen" id="contact-section" data-stack>
-      <div className="contact__glow" id="contact-glow" aria-hidden="true"></div>
-      <div className="contact__inner">
-        <h2 className="contact__headline" id="contact-headline">
-          <AnimatedLetters text={headline} prefix="contact" /><span className="contact__accent">;</span>
+      <ScannerBackground />
+
+      <span className="contact__divider" id="contact-divider" aria-hidden="true"></span>
+
+      <div className="contact__left" data-depth="-14">
+        <h2 className="contact__headline">
+          <span className="contact__line-row">
+            <span className="contact__word contact__word--serif">
+              <span className="contact__word-inner">é só</span>
+            </span>
+          </span>
+          <span className="contact__line-row">
+            <span className="contact__word">
+              <span className="contact__word-inner">mandar</span>
+            </span>
+            <span className="contact__dot" id="contact-dot" aria-hidden="true">
+              .
+            </span>
+          </span>
         </h2>
-        <a className="contact__mail" id="contact-mail" href="mailto:dinamous.dev@gmail.com">
-          dinamous.dev@gmail.com
-          <span className="contact__mail-underline" aria-hidden="true"></span>
-        </a>
-        <ul className="contact__social" id="contact-social">
-          {socials.map((s) => (
-            <li key={s.label}><a href={s.href} target={s.href.startsWith("mailto:") ? undefined : "_blank"} rel="noopener">{s.label}</a></li>
+
+        <span className="contact__bar" id="contact-bar" aria-hidden="true"></span>
+
+        <p className="contact__sub" id="contact-sub">
+          Conta em duas linhas o que você quer construir. {contact.replyTime}, {contact.availability},
+          direto de {contact.location}.
+        </p>
+
+        <div className="contact__channels">
+          <a
+            className="contact__channel"
+            href={`https://wa.me/${contact.whatsapp}`}
+            target="_blank"
+            rel="noopener"
+            data-magnetic
+          >
+            <span className="contact__channel-term">WhatsApp</span>
+            <span className="contact__channel-value">{contact.phoneLabel}</span>
+          </a>
+          <a className="contact__channel" href={`mailto:${contact.email}`} data-magnetic>
+            <span className="contact__channel-term">E-mail</span>
+            <span className="contact__channel-value">{contact.email}</span>
+          </a>
+        </div>
+
+        <ul className="contact__socials">
+          {contact.socials.map((s) => (
+            <li className="contact__social" key={s.label}>
+              <a href={s.href} target="_blank" rel="noopener" data-magnetic>
+                {s.label}
+                <span className="contact__social-handle">{s.handle}</span>
+              </a>
+            </li>
           ))}
         </ul>
       </div>
-      <div className="contact__tag" id="contact-tag">{"{ eof }"}</div>
+
+      <div className="contact__card" id="contact-card" data-depth="12">
+        <div className="contact__meter" aria-hidden="true">
+          <span className="contact__meter-fill" id="contact-meter-fill"></span>
+        </div>
+
+        <div className="contact__stub" aria-hidden="true">
+          <span>↠ Briefing</span>
+          <span>Nº 04</span>
+        </div>
+
+        <form className="contact__form" id="contact-form" noValidate>
+          <span className="contact__crop contact__crop--tl" aria-hidden="true"></span>
+          <span className="contact__crop contact__crop--br" aria-hidden="true"></span>
+          <span className="contact__mark" aria-hidden="true">
+            +
+          </span>
+
+          <div className="contact__body" id="contact-body">
+            <span className="contact__rail" id="contact-rail" aria-hidden="true"></span>
+
+            {textFields.map((f) => (
+              <label className="contact__row" key={f.name}>
+                <span className="contact__label">{f.label}</span>
+                <input
+                  className="contact__input"
+                  name={f.name}
+                  type={f.type}
+                  placeholder={f.placeholder}
+                  autoComplete={f.autoComplete}
+                  enterKeyHint="next"
+                />
+                <span className="contact__line" aria-hidden="true"></span>
+                <span className="contact__err" role="alert"></span>
+              </label>
+            ))}
+
+            <div className="contact__row contact__row--chips">
+              <span className="contact__label">O que você precisa</span>
+              <div className="contact__chips">
+                {projectTypes.map((t) => (
+                  <button className="contact__chip" type="button" key={t} aria-pressed="false">
+                    <span className="contact__chip-bg" aria-hidden="true"></span>
+                    <span className="contact__chip-text">{t}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <label className="contact__row">
+              <span className="contact__label">Sobre o projeto</span>
+              <textarea
+                className="contact__input contact__input--area"
+                name="mensagem"
+                rows={3}
+                placeholder="Prazo, referência, o que já existe…"
+              />
+              <span className="contact__line" aria-hidden="true"></span>
+              <span className="contact__err" role="alert"></span>
+            </label>
+
+            <div className="contact__row contact__row--actions">
+              <button className="contact__submit" id="contact-submit" type="submit" data-magnetic>
+                <span className="contact__submit-fill" id="contact-submit-fill" aria-hidden="true"></span>
+                <span className="contact__submit-text">Mandar no WhatsApp ↠</span>
+              </button>
+              <a className="contact__alt" href={`mailto:${contact.email}?subject=Projeto novo`}>
+                prefiro e-mail
+              </a>
+            </div>
+          </div>
+
+          <div className="contact__sent" id="contact-sent" role="status">
+            <p className="contact__sent-title">Mensagem pronta.</p>
+            <p className="contact__sent-text">
+              Abri o WhatsApp com tudo preenchido, é só apertar enviar por lá. Se a janela não abriu,
+              chama em <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+            </p>
+            <button className="contact__again" id="contact-again" type="button">
+              escrever outra
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

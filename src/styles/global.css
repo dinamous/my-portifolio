@@ -10,6 +10,11 @@
   --accent-lime: #a3e635;
   --accent-stops: var(--accent-cyan), var(--accent-green) 55%, var(--accent-lime);
   --accent-stops-rev: var(--accent-lime), var(--accent-green) 45%, var(--accent-cyan);
+  /* mesma lista rebaixada, pra borda de gradiente que não deve competir com o
+     conteúdo — evita repetir três color-mix em cada elemento */
+  --accent-stops-dim: color-mix(in srgb, var(--accent-cyan) 40%, transparent),
+    color-mix(in srgb, var(--accent-green) 40%, transparent) 55%,
+    color-mix(in srgb, var(--accent-lime) 40%, transparent);
 }
 
 /* ponytail: sections are fixed full-screen panels, page itself never scrolls */
