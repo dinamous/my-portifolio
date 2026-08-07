@@ -1,0 +1,41 @@
+/* régua: traços regulares em repeating-linear-gradient — um elemento só, sem N spans */
+.gfx-ticks {
+  position: absolute;
+  --gfx-ticks-ink: rgba(244, 247, 245, var(--gfx-ticks-alpha, 0.3));
+}
+
+.gfx-ticks--h {
+  height: var(--gfx-ticks-len, 8px);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--gfx-ticks-ink) 0 1px,
+    transparent 1px var(--gfx-ticks-step, 10px)
+  );
+}
+
+.gfx-ticks--v {
+  width: var(--gfx-ticks-len, 8px);
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--gfx-ticks-ink) 0 1px,
+    transparent 1px var(--gfx-ticks-step, 10px)
+  );
+}
+
+/* escala de código de barras: mesma técnica, passo irregular sobreposto */
+.gfx-ticks--bars {
+  --gfx-ticks-len: 22px;
+  --gfx-ticks-alpha: 0.55;
+}
+
+.gfx-ticks--bars.gfx-ticks--h {
+  background-image:
+    repeating-linear-gradient(90deg, var(--gfx-ticks-ink) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(90deg, var(--gfx-ticks-ink) 0 1px, transparent 1px 4px);
+}
+
+.gfx-ticks--bars.gfx-ticks--v {
+  background-image:
+    repeating-linear-gradient(180deg, var(--gfx-ticks-ink) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(180deg, var(--gfx-ticks-ink) 0 1px, transparent 1px 4px);
+}

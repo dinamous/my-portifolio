@@ -4,6 +4,7 @@ import { prefersReducedMotion } from "../../lib/motion";
 import { scrubTimeline } from "../../lib/scrub";
 import { contact } from "../../lib/contact";
 import ScannerBackground from "../../components/ScannerBackground";
+import { AccentRule, CropMarks, DashedLine, RegMark } from "../../components/graphics";
 import "./Contact.css";
 
 const projectTypes = ["Site / Landing", "Web App", "Motion / 3D", "Outro"];
@@ -325,7 +326,7 @@ export default function Contact() {
     <section className="contact fixed inset-0 h-screen w-screen" id="contact-section" data-stack>
       <ScannerBackground />
 
-      <span className="contact__divider" id="contact-divider" aria-hidden="true"></span>
+      <DashedLine vertical id="contact-divider" className="contact__divider" />
 
       <div className="contact__left" data-depth="-14">
         <h2 className="contact__headline">
@@ -344,7 +345,7 @@ export default function Contact() {
           </span>
         </h2>
 
-        <span className="contact__bar" id="contact-bar" aria-hidden="true"></span>
+        <AccentRule id="contact-bar" className="contact__bar" />
 
         <p className="contact__sub" id="contact-sub">
           Conta em duas linhas o que você quer construir. {contact.replyTime}, {contact.availability},
@@ -388,14 +389,12 @@ export default function Contact() {
         <div className="contact__stub" aria-hidden="true">
           <span>↠ Briefing</span>
           <span>Nº 04</span>
+          <DashedLine className="contact__stub-edge" />
         </div>
 
         <form className="contact__form" id="contact-form" noValidate>
-          <span className="contact__crop contact__crop--tl" aria-hidden="true"></span>
-          <span className="contact__crop contact__crop--br" aria-hidden="true"></span>
-          <span className="contact__mark" aria-hidden="true">
-            +
-          </span>
+          <CropMarks x="8px" opacity={0.32} />
+          <RegMark className="contact__mark" />
 
           <div className="contact__body" id="contact-body">
             <span className="contact__rail" id="contact-rail" aria-hidden="true"></span>

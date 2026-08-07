@@ -63,13 +63,7 @@
 }
 
 .contact__bar {
-  display: block;
-  width: clamp(56px, 7vw, 96px);
-  height: 2px;
   margin: 2rem 0 1.6rem;
-  background: linear-gradient(90deg, var(--accent-stops));
-  transform-origin: left center;
-  will-change: transform;
 }
 
 .contact__sub {
@@ -177,46 +171,10 @@
   will-change: transform, opacity;
 }
 
-/* marcas de corte, selo e picote: mesma linguagem gráfica da ficha da AboutMe.
-   ponytail: regras copiadas em vez de promovidas a classe global — são poucas, e
-   compartilhar acoplaria duas seções que hoje não se conhecem. Vira utilitária
-   global no dia em que uma terceira seção precisar. Nada disso entra no JS: tudo
-   vive dentro do cartão, que já é animado como bloco único */
-.contact__crop {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  background:
-    linear-gradient(#f4f7f5, #f4f7f5) 0 0 / 100% 1px no-repeat,
-    linear-gradient(#f4f7f5, #f4f7f5) 0 0 / 1px 100% no-repeat;
-  opacity: 0.32;
-}
-
-.contact__crop--tl {
-  top: 8px;
-  left: 8px;
-}
-
-.contact__crop--br {
-  right: 8px;
-  bottom: 8px;
-  transform: rotate(180deg);
-}
-
+/* marcas de corte, selo e picote vêm de components/graphics — aqui só onde ancoram */
 .contact__mark {
-  position: absolute;
   top: 10px;
   right: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  outline: 1px solid rgba(244, 247, 245, 0.18);
-  border-radius: 50%;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.9rem;
-  color: rgba(244, 247, 245, 0.45);
 }
 
 /* canhoto do cartão, picotado embaixo em vez de um border-bottom reto */
@@ -234,28 +192,19 @@
   color: rgba(244, 247, 245, 0.38);
 }
 
-.contact__stub::after {
-  content: "";
-  position: absolute;
+.contact__stub-edge {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 1px;
-  background-image: linear-gradient(90deg, rgba(244, 247, 245, 0.26) 50%, transparent 50%);
-  background-size: 8px 1px;
 }
 
 /* picote vertical na calha entre as colunas: 7vw de padding + 42.5vw da coluna
    esquerda + metade do gap de 5vw */
 .contact__divider {
-  position: absolute;
   left: 52vw;
   top: 16vh;
   bottom: 16vh;
   z-index: 1;
-  width: 1px;
-  background-image: linear-gradient(180deg, rgba(244, 247, 245, 0.22) 50%, transparent 50%);
-  background-size: 1px 9px;
   transform-origin: center top;
   will-change: transform, opacity;
 }

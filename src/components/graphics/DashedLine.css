@@ -1,0 +1,51 @@
+/* picote: linha tracejada como background de 1px (border-style: dashed não deixa
+   controlar o passo). Offsets ficam na seção — aqui só o traço */
+.gfx-dash {
+  position: absolute;
+  --gfx-dash-ink: rgba(244, 247, 245, var(--gfx-dash-alpha, 0.26));
+}
+
+.gfx-dash--v {
+  width: var(--gfx-dash-thick, 1px);
+  background-image: linear-gradient(180deg, var(--gfx-dash-ink) 50%, transparent 50%);
+  background-size: 100% var(--gfx-dash-gap, 8px);
+}
+
+.gfx-dash--h {
+  height: var(--gfx-dash-thick, 1px);
+  background-image: linear-gradient(90deg, var(--gfx-dash-ink) 50%, transparent 50%);
+  background-size: var(--gfx-dash-gap, 8px) 100%;
+}
+
+/* pontilhado: precisa de espessura pra o ponto ser redondo, senão vira o mesmo traço */
+.gfx-dash--dots {
+  --gfx-dash-thick: 2px;
+}
+
+.gfx-dash--dots.gfx-dash--v {
+  background-image: radial-gradient(circle, var(--gfx-dash-ink) 1px, transparent 1.2px);
+}
+
+.gfx-dash--dots.gfx-dash--h {
+  background-image: radial-gradient(circle, var(--gfx-dash-ink) 1px, transparent 1.2px);
+}
+
+/* picote em acento: o traço some e sobra o gradiente recortado pela máscara */
+.gfx-dash--accent {
+  background-color: transparent;
+  background-image: linear-gradient(90deg, var(--accent-stops));
+  -webkit-mask-image: var(--gfx-dash-mask);
+  mask-image: var(--gfx-dash-mask);
+}
+
+.gfx-dash--accent.gfx-dash--v {
+  --gfx-dash-mask: linear-gradient(180deg, #000 50%, transparent 50%);
+  -webkit-mask-size: 100% var(--gfx-dash-gap, 8px);
+  mask-size: 100% var(--gfx-dash-gap, 8px);
+}
+
+.gfx-dash--accent.gfx-dash--h {
+  --gfx-dash-mask: linear-gradient(90deg, #000 50%, transparent 50%);
+  -webkit-mask-size: var(--gfx-dash-gap, 8px) 100%;
+  mask-size: var(--gfx-dash-gap, 8px) 100%;
+}

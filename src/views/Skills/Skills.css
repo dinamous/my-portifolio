@@ -39,12 +39,7 @@
 }
 
 .skills__rule {
-  display: block;
-  width: clamp(56px, 7vw, 96px);
-  height: 2px;
   margin: 2.6rem 0 2rem;
-  background: linear-gradient(90deg, var(--accent-stops));
-  transform-origin: left center;
   opacity: 0;
   will-change: transform, opacity;
 }

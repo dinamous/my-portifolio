@@ -1,0 +1,37 @@
+/* crosshair de registro: só o desenho. O posicionamento vem da seção, via className
+   — cada card ancora o seu num canto diferente */
+.gfx-mark {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--gfx-mark-size, 30px);
+  height: var(--gfx-mark-size, 30px);
+  outline: 1px solid rgba(244, 247, 245, 0.18);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  /* fonte proporcional ao selo: 0.9rem no tamanho padrão, sem prop extra */
+  font-size: calc(var(--gfx-mark-size, 30px) * 0.48);
+  line-height: 1;
+  color: rgba(244, 247, 245, 0.45);
+}
+
+.gfx-mark--circle {
+  border-radius: 50%;
+}
+
+/* sem moldura: só o glifo, pra quando o card já tem borda demais */
+.gfx-mark--bare {
+  outline: none;
+}
+
+.gfx-mark--accent {
+  outline-color: color-mix(in srgb, var(--accent-green) 55%, transparent);
+  color: var(--accent-lime);
+}
+
+/* invertido: o selo vira o sólido e o glifo abre nele */
+.gfx-mark--solid {
+  outline: none;
+  background: linear-gradient(120deg, var(--accent-stops));
+  color: #04120c;
+}

@@ -1,0 +1,40 @@
+/* dois traços em L, sem borda de caixa — o pai precisa ser position: relative */
+.gfx-crop {
+  position: absolute;
+  width: var(--gfx-crop-size, 16px);
+  height: var(--gfx-crop-size, 16px);
+  background:
+    linear-gradient(#f4f7f5, #f4f7f5) 0 0 / 100% 1px no-repeat,
+    linear-gradient(#f4f7f5, #f4f7f5) 0 0 / 1px 100% no-repeat;
+  opacity: var(--gfx-crop-opacity, 0.8);
+}
+
+/* cada canto é o mesmo L girado — um desenho só, quatro posições */
+.gfx-crop--tl {
+  top: var(--gfx-crop-y, 10px);
+  left: var(--gfx-crop-x, 10px);
+}
+
+.gfx-crop--tr {
+  top: var(--gfx-crop-y, 10px);
+  right: var(--gfx-crop-x, 10px);
+  transform: rotate(90deg);
+}
+
+.gfx-crop--br {
+  right: var(--gfx-crop-x, 10px);
+  bottom: var(--gfx-crop-y, 10px);
+  transform: rotate(180deg);
+}
+
+.gfx-crop--bl {
+  bottom: var(--gfx-crop-y, 10px);
+  left: var(--gfx-crop-x, 10px);
+  transform: rotate(270deg);
+}
+
+/* variante fina: traço de 1px vira meia opacidade e L menor, pra cards densos */
+.gfx-crop--hair {
+  --gfx-crop-size: 10px;
+  --gfx-crop-opacity: 0.4;
+}

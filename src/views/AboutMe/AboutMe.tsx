@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
 import AnimatedLetters from "../../components/AnimatedLetters";
+import { AccentRule, CropMarks, DashedLine, Perforation, RegMark } from "../../components/graphics";
 import "./AboutMe.css";
 
 // ponytail: hardcoded até virar documento no Sanity (client já existe em src/lib/sanity.ts,
@@ -198,20 +199,19 @@ export default function AboutMe() {
       <div className="aboutme__frame">
         <aside className="aboutme__ticket" id="aboutme-ticket">
           <div className="aboutme__stub" aria-hidden="true">
+            <Perforation vertical className="aboutme__stub-holes" />
             <span className="aboutme__arrows">↠</span>
             <span className="aboutme__stub-text">Matheus Simões</span>
             <span className="aboutme__arrows">↠</span>
+            <DashedLine vertical className="aboutme__stub-edge" />
           </div>
 
           <div className="aboutme__ticket-body">
-            <span className="aboutme__mark" aria-hidden="true">
-              +
-            </span>
+            <RegMark className="aboutme__mark" />
 
             <div className="aboutme__photo" id="aboutme-photo">
               <img className="aboutme__photo-img" src="/profile-picture.png" alt="Matheus Simões" />
-              <span className="aboutme__crop aboutme__crop--tl" aria-hidden="true"></span>
-              <span className="aboutme__crop aboutme__crop--br" aria-hidden="true"></span>
+              <CropMarks />
             </div>
 
             <div className="aboutme__info">
@@ -223,8 +223,7 @@ export default function AboutMe() {
 
         <div className="aboutme__panel" id="aboutme-panel">
           {/* mesmas marcas de corte da foto, agora emoldurando o card de texto */}
-          <span className="aboutme__crop aboutme__crop--panel-tl" aria-hidden="true"></span>
-          <span className="aboutme__crop aboutme__crop--panel-br" aria-hidden="true"></span>
+          <CropMarks x="clamp(20px, 3vw, 56px)" y="clamp(20px, 3.5vh, 40px)" opacity={0.35} />
 
           <h2 className="aboutme__heading">
             <AnimatedLetters text="Componho movimento," prefix="aboutme" />
@@ -232,7 +231,7 @@ export default function AboutMe() {
             <AnimatedLetters text="não telas." prefix="aboutme" />
           </h2>
 
-          <span className="aboutme__deco aboutme__rule" aria-hidden="true"></span>
+          <AccentRule className="aboutme__deco aboutme__rule" />
 
           <p className="aboutme__sub" id="aboutme-sub">
             Desenvolvedor front-end especializado em animação, interação e experiências 3D. Código é

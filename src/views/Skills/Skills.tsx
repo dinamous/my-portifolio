@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { prefersReducedMotion } from "../../lib/motion";
+import { AccentRule } from "../../components/graphics";
 import "./Skills.css";
 
 gsap.registerPlugin(ScrambleTextPlugin);
@@ -272,7 +273,7 @@ export default function Skills() {
           ))}
         </h2>
 
-        <span className="skills__rule" id="skills-rule" aria-hidden="true"></span>
+        <AccentRule id="skills-rule" className="skills__rule" />
 
         <dl className="skills__meta">
           {meta.map((item) => (

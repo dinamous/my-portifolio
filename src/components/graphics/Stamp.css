@@ -1,0 +1,33 @@
+/* carimbo: caixa em mono com letra espaçada, torta de propósito. Herda o tom das
+   legendas de canhoto (contact__stub / aboutme__stub-text) */
+.gfx-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.32rem 0.7rem;
+  outline: 1px solid rgba(244, 247, 245, 0.22);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(244, 247, 245, 0.42);
+  transform: rotate(var(--gfx-stamp-tilt, -6deg));
+}
+
+.gfx-stamp--accent {
+  outline-color: color-mix(in srgb, var(--accent-green) 55%, transparent);
+  color: var(--accent-lime);
+}
+
+.gfx-stamp--solid {
+  outline: none;
+  background: linear-gradient(120deg, var(--accent-stops));
+  color: #04120c;
+}
+
+/* sem caixa: o carimbo vira só a legenda torta, pra cantos apertados */
+.gfx-stamp--bare {
+  padding: 0;
+  outline: none;
+}
