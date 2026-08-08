@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { prefersReducedMotion } from "../../lib/motion";
+import { scrubValue } from "../../lib/scrub";
 import { AccentRule } from "../../components/graphics";
 import "./Skills.css";
 
@@ -148,9 +149,7 @@ export default function Skills() {
     // era por isso que a seção "chegava montada", sem entrada visível.
     const ENTER_START = 0.38;
 
-    const onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
-      const t = e.detail.progress;
-      enteredT = t;
+    const applyReveal = (t: number) => {
       if (exiting) return; // a saída já é dona desses elementos
 
       const revealT = gsap.utils.clamp(0, 1, (t - ENTER_START) / (1 - ENTER_START));
@@ -182,6 +181,15 @@ export default function Skills() {
         const e = enterEase(k);
         gsap.set(el, { opacity: e, y: gsap.utils.interpolate(14, 0, e) });
       });
+    };
+
+    // escrubado com lag (mesmo scrub da Contact): sem isso a cascata acompanha o notch do
+    // wheel 1:1 e chega seca. `enteredT` fica fora do scrub — é o guard da saída e precisa
+    // do valor cru, não do atrasado.
+    const setReveal = reduceMotion ? applyReveal : scrubValue(applyReveal);
+    const onProjectsProgress = ((e: CustomEvent<{ progress: number }>) => {
+      enteredT = e.detail.progress;
+      setReveal(enteredT);
     }) as EventListener;
     window.addEventListener("projects:progress", onProjectsProgress);
     cleanups.push(() => window.removeEventListener("projects:progress", onProjectsProgress));

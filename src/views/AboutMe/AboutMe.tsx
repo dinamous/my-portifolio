@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
+import { scrubValue } from "../../lib/scrub";
 import AnimatedLetters from "../../components/AnimatedLetters";
 import { AccentRule, CropMarks, DashedLine, Perforation, RegMark } from "../../components/graphics";
 import "./AboutMe.css";
@@ -63,9 +64,7 @@ export default function AboutMe() {
 
     // as cortinas esperam fora da tela, entram e travam cobrindo cada metade — viram o
     // fundo sólido em que o conteúdo aparece. Nunca saem; revealT começa logo após coverT.
-    const onWhatIdoProgress = ((e: CustomEvent<{ progress: number }>) => {
-      const t = e.detail.progress;
-      enteredT = t;
+    const applyReveal = (t: number) => {
       if (exiting) return; // a saída já é dona desses elementos
 
       const coverT = coverEase(gsap.utils.clamp(0, 1, (t - 0.15) / 0.45));
@@ -99,6 +98,15 @@ export default function AboutMe() {
 
       const subT = gsap.utils.clamp(0, 1, (panelT - 0.6) / 0.4);
       gsap.set(sub, { opacity: subT, y: gsap.utils.interpolate(18, 0, subT) });
+    };
+
+    // escrubado com lag (mesmo scrub da Contact): sem isso a cortina e a cascata acompanham
+    // o notch do wheel 1:1 e chegam secas. `enteredT` fica fora do scrub — é o guard da
+    // saída e do paralaxe, e precisa do valor cru, não do atrasado.
+    const setReveal = prefersReducedMotion() ? applyReveal : scrubValue(applyReveal);
+    const onWhatIdoProgress = ((e: CustomEvent<{ progress: number }>) => {
+      enteredT = e.detail.progress;
+      setReveal(enteredT);
     }) as EventListener;
     window.addEventListener("whatido:progress", onWhatIdoProgress);
 

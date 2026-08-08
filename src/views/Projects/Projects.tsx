@@ -1,9 +1,17 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
 import { PROJECT_FILTERS, filterProjects, projects } from "../../lib/projects";
 import { projectPath } from "../../lib/router";
-import { TRANSITION_DISTANCE, refreshSectionStack, sectionEnter } from "../../lib/sectionStack";
+import { TRANSITION_DISTANCE, refreshSectionStack } from "../../lib/sectionStack";
+import { scrubTimeline } from "../../lib/scrub";
 import AnimatedLetters from "../../components/AnimatedLetters";
 import { CropMarks, RegMark } from "../../components/graphics";
 import "./Projects.css";
@@ -34,7 +42,34 @@ export default function Projects() {
   // filtro) a cada clique seria um flash gratuito
   const enteredRef = useRef(false);
   const [filter, setFilter] = useState(PROJECT_FILTERS[0]);
-  const visible = useMemo(() => filterProjects(filter), [filter]);
+  // dois estados de propósito: `filter` é o botão (responde no clique) e `listFilter` é a
+  // lista, que só troca depois das linhas atuais saírem. Com um estado só, o React
+  // remontava as linhas no mesmo frame do clique — as antigas sumiam de uma vez, sem
+  // saída, e as que sobreviviam ao filtro piscavam no estado final antes de recascatar.
+  const [listFilter, setListFilter] = useState(filter);
+  const visible = useMemo(() => filterProjects(listFilter), [listFilter]);
+
+  const pickFilter = (f: string) => {
+    if (f === filter) return;
+    setFilter(f);
+    const rows = gsap.utils.toArray<HTMLElement>(".projects__row");
+    // sem entrada feita ainda não há nada em cena pra tirar
+    if (!enteredRef.current || prefersReducedMotion() || !rows.length) {
+      setListFilter(f);
+      return;
+    }
+    // overwrite: um segundo clique durante a cascata mata este tween, e tween morto não
+    // dispara onComplete — só o último filtro clicado chega na lista
+    gsap.to(rows, {
+      x: -80,
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in",
+      stagger: Math.min(0.04, 0.24 / rows.length),
+      overwrite: true,
+      onComplete: () => setListFilter(f),
+    });
+  };
 
   // efeito próprio (deps []) de propósito: no efeito de [filter] cada clique num
   // filtro matava e recriava o tween em xPercent:0 — era isso que fazia o loop
@@ -53,22 +88,21 @@ export default function Projects() {
     };
   }, []);
 
-  useEffect(() => {
+  // useLayoutEffect, não useEffect: na troca de filtro o React comita as linhas novas e o
+  // navegador PINTA antes de um efeito passivo rodar — as linhas que sobreviveram ao
+  // filtro apareciam um frame no estado final (styles inline da cascata anterior) e só
+  // então eram escondidas pra recascatar. Era esse o flash.
+  useLayoutEffect(() => {
     const section = document.getElementById("projects-section")!;
     const header = document.getElementById("projects-header")!;
     const headerLetters = document.querySelectorAll<HTMLElement>("#projects-heading .projects__letter");
     const listViewport = document.getElementById("projects-list-viewport")!;
     const list = document.getElementById("projects-list")!;
-    const progress = section.querySelector<HTMLElement>(".projects__progress");
-    const progressTrack = section.querySelector<HTMLElement>(".projects__progress-track");
+    const progress = section.querySelector<HTMLElement>(".projects__progress")!;
+    const progressTrack = section.querySelector<HTMLElement>(".projects__progress-track")!;
     const progressFill = document.getElementById("projects-progress-fill");
     const progressIndex = document.getElementById("projects-progress-index");
     const rows = Array.from(document.querySelectorAll<HTMLElement>(".projects__row"));
-    // cascata de entrada/saída se estica por linha (i * delay); com muitas linhas
-    // isso empurraria a reveal das últimas pra quase o fim do scrub — encurta o
-    // delay conforme a lista cresce pra manter a cascata inteira legível.
-    const rowRevealStagger = Math.min(0.12, 1.6 / rows.length);
-    const rowExitStagger = Math.min(0.08, 1.2 / rows.length);
 
     // o passo do scroll da lista é uma row: a viewport é dividida num número inteiro
     // de rows (--projects-row-h), então nenhuma parada deixa meia row cortada no topo
@@ -98,6 +132,19 @@ export default function Projects() {
       listT = maxStep > 0 ? gsap.utils.clamp(1 / 3, 0.75, (maxStep * rowH) / TRANSITION_DISTANCE) : 0;
     };
     measure();
+
+    // a cascata (entrada e saída) só conta as linhas que estão em cena: as abaixo da
+    // dobra na entrada, e as que a lista já rolou pra fora do topo na saída, gastariam
+    // slot de stagger sem ninguém ver — com lista longa era isso que empurrava a cascata
+    // visível pra quase o fim do curso. Quem está fora de cena anda junto com a linha de
+    // borda mais próxima, então nada fica pra trás sem animar.
+    // ponytail: contagem congelada aqui; um resize que mude quantas linhas cabem só
+    // desalinha a ordem da cascata, nada quebra — não vale reconstruir a timeline.
+    const rowsOnScreen = Math.max(1, rows.length - maxStep);
+    const rowRevealStagger = Math.min(0.12, 1.6 / rowsOnScreen);
+    const rowExitStagger = Math.min(0.08, 1.2 / rowsOnScreen);
+    const revealSlot = (i: number) => Math.min(i, rowsOnScreen - 1);
+    const exitSlot = (i: number) => Math.max(0, i - maxStep);
 
     // respiro: fatia do curso em que o scroll não move nada, entre a lista chegar
     // ao fim e a cascata de saída disparar. Sem ele um notch a mais na última linha
@@ -160,7 +207,6 @@ export default function Projects() {
     let pillTl: gsap.core.Timeline | undefined;
     let pillFocus: gsap.core.Timeline | undefined;
     let reveal: gsap.core.Timeline | undefined;
-    let revealFired = false;
     let hasEntered = false;
     let exitStarted = false;
 
@@ -196,16 +242,7 @@ export default function Projects() {
         opacity: 0,
       });
 
-      reveal = gsap.timeline({
-        paused: true,
-        // hover/clique liberam pelo fim da própria timeline, não por um limiar de
-        // scroll — é o que tira a dependência de "rolar até tal ponto"
-        onComplete: () => {
-          hasEntered = true;
-          enteredRef.current = true;
-          syncActive();
-        },
-      });
+      reveal = gsap.timeline({ paused: true });
 
       if (refilter) {
         gsap.set(header, { opacity: 1, y: 0 });
@@ -231,7 +268,11 @@ export default function Projects() {
         reveal!
           // slingshot: back.out passa do alvo e volta — a row é "atirada" pra dentro
           // em vez de deslizar; x junto com y dá a diagonal do estilingue
-          .to(row, { opacity: 1, y: 0, x: 0, duration: 0.7, ease: "back.out(1.7)" }, 0.1 + i * rowRevealStagger)
+          .to(
+            row,
+            { opacity: 1, y: 0, x: 0, duration: 0.7, ease: "back.out(1.7)" },
+            0.1 + revealSlot(i) * rowRevealStagger,
+          )
           .to(letters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.02, ease: "power2.out" }, "<");
       });
 
@@ -371,34 +412,26 @@ export default function Projects() {
       });
     }
 
-    // a entrada é ancorada no mesmo preenchimento da barra de "Trabalhos" da navbar
-    // (sectionEnter, a fonte única da fórmula), pra que o scroll da seção e o que a barra
-    // mostra sejam a mesma coisa. Pontos estratégicos, com histerese: entra quando a barra
-    // está quase cheia (a seção acabou de assentar no lugar) e só reverte quando ela zera —
-    // um limiar único ficava piscando ida e volta no easing do quickTo da pilha.
-    // ponytail: gatilho, não scrub — cruzou o ponto, a entrada roda inteira sozinha,
-    // então o hover fica disponível sem exigir rolar até um ponto exato.
-    const stackIndex = Array.from(document.querySelectorAll<HTMLElement>("[data-stack]")).indexOf(section);
-    const onStackValue = ((e: CustomEvent<{ value: number }>) => {
-      const bar = sectionEnter(e.detail.value, stackIndex);
-      const past = revealFired ? bar > 0 : bar >= 0.9;
-      if (past === revealFired) return;
-      revealFired = past;
-      if (past) {
-        if (reveal) reveal.play();
-        else {
-          hasEntered = true; // reduced motion: nada pra animar, libera direto
-          enteredRef.current = true;
-          syncActive();
-        }
-      } else {
-        hasEntered = false;
-        enteredRef.current = false;
-        syncActive();
-        reveal?.reverse();
-      }
+    // entrada escrubada pela saída da AboutMe, igual à da Contact: timeline pausada +
+    // scrubTimeline (o lag do quickTo é o que dá o glide) na segunda metade da transição.
+    // REVEAL_START é o ponto em que a cortina da AboutMe começa a dissolver (backdropT,
+    // p 0.5→0.7) — antes disso a cascata rodaria escondida atrás do fundo sólido dela.
+    const REVEAL_START = 0.5;
+    const setRevealProgress = reveal ? scrubTimeline(reveal) : undefined;
+    const onAboutmeProgress = ((e: CustomEvent<{ progress: number }>) => {
+      const t = gsap.utils.clamp(0, 1, (e.detail.progress - REVEAL_START) / (1 - REVEAL_START));
+      setRevealProgress?.(t);
+
+      // hover/clique liberam pelo fim do curso, não pelo onComplete da timeline: .progress()
+      // não dispara callback. Histerese porque o quickTo da pilha assenta/ultrapassa em volta
+      // de 1 — um limiar único ficava piscando ida e volta nessa borda.
+      const entered = hasEntered ? t > 0.6 : t >= 0.98;
+      if (entered === hasEntered) return;
+      hasEntered = entered;
+      enteredRef.current = entered;
+      syncActive();
     }) as EventListener;
-    window.addEventListener("stack:value", onStackValue);
+    window.addEventListener("aboutme:progress", onAboutmeProgress);
 
     // saída própria da Projects: é uma lista, então sair "in cascata" (linhas
     // atiradas pra fora em sequência) tem mais identidade que um fade genérico —
@@ -409,27 +442,59 @@ export default function Projects() {
     // acontecia num ponto qualquer da barra da navbar — quem parasse de rolar via a
     // seção trocar sozinha. Escrubada, a cascata daqui, a entrada da Skills e a barra
     // são o mesmo valor: a saída termina exatamente quando "Trabalhos" enche.
-    const emitProgress = () =>
-      window.dispatchEvent(new CustomEvent("projects:progress", { detail: { progress: exit.progress() } }));
+    const emitProgress = (progress: number) =>
+      window.dispatchEvent(new CustomEvent("projects:progress", { detail: { progress } }));
 
-    const exit = gsap
-      .timeline({ paused: true })
-      .to(header, { opacity: 0, y: -16, duration: 0.3 }, 0);
+    // fromTo com immediateRender:false, não to(): um `to` captura o valor de partida no
+    // primeiro render da timeline, e quem manda nesse instante é o scroll — na montagem
+    // ela era renderizada em progress 0 com as linhas ainda escondidas, então a "saída"
+    // partia de opacity 0 e as linhas simplesmente sumiam de uma vez em vez de cascatar
+    // (e o header, capturado em opacity 0, nunca saía). Aqui a partida é declarada, então
+    // não importa quando a timeline é tocada pela primeira vez.
+    const exit = gsap.timeline({ paused: true });
     rows.forEach((row, i) => {
       // slingshot de saída: back.in recua um instante antes de arremessar a row
-      exit.to(row, { x: -140, opacity: 0, duration: 0.55, ease: "back.in(1.6)" }, i * rowExitStagger);
+      exit.fromTo(
+        row,
+        { x: 0, opacity: 1 },
+        { x: -140, opacity: 0, duration: 0.55, ease: "back.in(1.6)", immediateRender: false },
+        exitSlot(i) * rowExitStagger,
+      );
     });
-    // a lista some em cascata primeiro; o fundo sólido da seção dissolve por cima do
-    // fim dela. Começa junto com a última row (não depois): a entrada da Skills é
-    // escrubada nesse mesmo trecho, e com o fundo opaco até o fim ela se montava
-    // escondida atrás dele e só aparecia pronta.
-    exit.to(section, { opacity: 0, duration: 0.7 }, ">-0.45");
+    const cascadeEnd = (rowsOnScreen - 1) * rowExitStagger + 0.55;
+    // ordem de saída: primeiro as linhas, depois o chrome que as emoldura (header e
+    // marcador de progresso juntos, como entraram) — sair no mesmo instante da primeira
+    // linha deixava a lista órfã em cena, sem título nem contador, durante toda a cascata.
+    const chromeStart = cascadeEnd * 0.55;
+    const chromeEnd = chromeStart + 0.4;
+    exit.fromTo(
+      [header, progress],
+      { opacity: 1, y: 0 },
+      { opacity: 0, y: -16, duration: 0.4, ease: "power2.in", immediateRender: false },
+      chromeStart,
+    );
+    // por último o fundo sólido da seção dissolve, sobrepondo o fim do chrome (não antes
+    // dele): a entrada da Skills é escrubada nesse mesmo trecho, e com o fundo opaco até
+    // o fim ela se montava escondida atrás dele e só aparecia pronta. Ancorar só no fim
+    // da cascata das linhas invertia a ordem com lista curta (um filtro de 1 projeto dá
+    // cascata de 0.55s) — aí o fundo largava na frente do header.
+    exit.fromTo(
+      section,
+      { opacity: 1 },
+      { opacity: 0, duration: 0.7, immediateRender: false },
+      Math.max(cascadeEnd - 0.45, chromeEnd - 0.25),
+    );
     // ponytail: tween vazio só pra estender a duração. A Skills escruba a entrada dela
     // em `projects:progress`, que acaba junto com esta timeline — sem esta cauda a
     // revelação dela teria que caber inteira dentro do fade acima, ou seja, atrás de um
     // fundo ainda opaco. É também o botão de ritmo da entrada da Skills: é aqui que se
     // alonga ou encurta a cascata dela, não nas janelas de progresso do outro arquivo.
     exit.to({}, { duration: 1.1 });
+
+    // 0 e não -1: na montagem (e a cada troca de filtro) o refreshSectionStack abaixo já
+    // chega com exitT 0, e aplicar isso renderizaria a timeline de saída antes da entrada
+    // — a reveal passaria a partir do estado revelado que ela acabou de escrever
+    let lastExitT = 0;
 
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
@@ -443,10 +508,18 @@ export default function Projects() {
       // do curso, terminando em p = 1 — que é onde a Skills assenta e a barra enche
       const exitStart = Math.min(listT + BREATHE_T, 0.9);
       const exitT = gsap.utils.clamp(0, 1, (p - exitStart) / (1 - exitStart));
-      exit.progress(exitT);
-      emitProgress();
-      // fora do paint só no fim: display no meio do curso mataria a cascata em cena
-      gsap.set(section, { display: exitT >= 1 ? "none" : "" });
+      // só toca a timeline quando o valor muda de fato. Parada em 0 ela reescrevia o
+      // estado revelado das linhas a cada tick, e ao sair da seção pra trás (voltando pra
+      // AboutMe) isso brigava com a reveal, que aí roda em reverse no próprio relógio: uma
+      // escrevia "visível" no mesmo frame em que a outra escrevia "saindo". Era o piscar
+      // ao sair e voltar. De quebra deixa a timeline intocada até a saída começar de fato.
+      if (exitT !== lastExitT) {
+        lastExitT = exitT;
+        exit.progress(exitT);
+        // fora do paint só no fim: display no meio do curso mataria a cascata em cena
+        gsap.set(section, { display: exitT >= 1 ? "none" : "" });
+      }
+      emitProgress(exitT);
 
       if (exitStarted !== (exitT > 0)) {
         exitStarted = exitT > 0;
@@ -459,7 +532,7 @@ export default function Projects() {
     refreshSectionStack();
 
     return () => {
-      window.removeEventListener("stack:value", onStackValue);
+      window.removeEventListener("aboutme:progress", onAboutmeProgress);
       ro.disconnect();
       rowCleanups.forEach((fn) => fn());
       reveal?.kill();
@@ -468,7 +541,7 @@ export default function Projects() {
       pillFocus?.kill();
       section.removeEventListener("stack:progress", onStackProgress);
     };
-  }, [filter]);
+  }, [listFilter]);
 
   return (
     <section
@@ -489,7 +562,7 @@ export default function Projects() {
                 type="button"
                 className={`projects__filter${f === filter ? " projects__filter--active" : ""}`}
                 aria-pressed={f === filter}
-                onClick={() => setFilter(f)}
+                onClick={() => pickFilter(f)}
               >
                 {f}
               </button>
