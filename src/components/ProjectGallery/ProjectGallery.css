@@ -1,0 +1,268 @@
+/* galeria da ficha de projeto: mesma linguagem de impresso da ficha (canhoto,
+   picote, marcas de corte). Nada arredondado — todo canto é reto de propósito */
+.gallery {
+  border: 1px solid rgba(244, 247, 245, 0.1);
+  background: #080a09;
+  will-change: transform, opacity;
+}
+
+/* canhoto do quadro, picotado embaixo em vez de um border-bottom reto */
+.gallery__stub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.1rem;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.38);
+}
+
+.gallery__stub-edge {
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.gallery__counter {
+  margin-left: auto;
+  color: rgba(244, 247, 245, 0.6);
+}
+
+.gallery__nav {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.gallery__nav button {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid rgba(244, 247, 245, 0.16);
+  background: none;
+  color: rgba(244, 247, 245, 0.7);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  will-change: transform;
+}
+
+/* borda em gradiente: duas camadas de background, o sólido no padding-box tapa o
+   miolo e sobra só a moldura (mesmo truque da ficha) */
+.gallery__nav button:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(#080a09, #080a09) padding-box,
+    linear-gradient(120deg, var(--accent-stops)) border-box;
+  color: #f4f7f5;
+}
+
+.gallery__frame {
+  position: relative;
+  padding: 14px;
+}
+
+/* altura fixa + contain: screenshot de dashboard e print de app vertical cabem
+   inteiros no mesmo quadro. cover recortava metade da interface */
+.gallery__viewport {
+  overflow: hidden;
+  height: min(66vh, 44vw);
+  background: #050706;
+}
+
+.gallery__track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
+.gallery__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  will-change: transform, opacity;
+}
+
+.gallery__slide--zoomable {
+  cursor: zoom-in;
+}
+
+.gallery__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 14px;
+}
+
+.gallery__thumb {
+  position: relative;
+  width: clamp(64px, 7vw, 96px);
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  border: 1px solid rgba(244, 247, 245, 0.14);
+  background: #050706;
+  cursor: pointer;
+  overflow: hidden;
+  /* a opacity é do GSAP (miniatura ativa); o valor aqui só cobre o primeiro paint */
+  opacity: 0.4;
+  will-change: transform, opacity;
+}
+
+.gallery__thumb img,
+.gallery__thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery__thumb-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 8, 7, 0.45);
+  font-size: 0.7rem;
+  color: #f4f7f5;
+}
+
+.gallery__thumb.is-active {
+  border-color: transparent;
+  padding: 1px;
+  background:
+    linear-gradient(#050706, #050706) padding-box,
+    linear-gradient(120deg, var(--accent-stops)) border-box;
+}
+
+/* --------------------------------------------------------------- cursor de zoom */
+
+/* substitui o ponteiro sobre a mídia ampliável, sinalizando "dá pra ampliar" — é um
+   RegMark (components/graphics), como o cursor da lista de projetos: caixa, fio e cor
+   vêm de lá, aqui só o que a marca não tem (sair do fluxo e ganhar fundo pra ficar
+   legível sobre a imagem). Nasce invisível porque quem o mostra é o GSAP, e ele só
+   entra em cena onde há hover real (ver attachCursor). */
+.gallery__cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  background: #0b1013;
+  box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+  /* fio e glifo em branco, não no acento: o verde já é da moldura da miniatura ativa */
+  outline-color: rgba(244, 247, 245, 0.5);
+  color: #f4f7f5;
+}
+
+.gallery__cursor-glyph {
+  width: 46%;
+  height: 46%;
+  overflow: visible;
+}
+
+/* o cursor do quadro fica sob o lightbox (top layer), mas o fundo dele é 0.94 de
+   alpha e deixava o quadrado vazar como fantasma. display, e não opacity: quem manda
+   na opacity da marca é o GSAP, inline */
+.gallery:has(dialog[open]) ~ .gallery__cursor {
+  display: none;
+}
+
+/* com a mídia já ampliada o + vira −: o próximo clique reduz */
+.gallery__lightbox-stage[data-zoomed="1"] ~ .gallery__cursor .gallery__cursor-plus {
+  opacity: 0;
+}
+
+/* o alvo esconde o cursor nativo só enquanto a marca está montada; o seletor pega os
+   filhos porque o slide tem cursor próprio (zoom-in) */
+.is-cursor-marked,
+.is-cursor-marked * {
+  cursor: none;
+}
+
+/* --------------------------------------------------------------- lightbox */
+
+/* <dialog> modal: fica na top layer, então o clip-path do overlay não o recorta.
+   O display:flex precisa do :not([open]) porque sobrescreve o display:none nativo */
+.gallery__lightbox {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(3, 8, 7, 0.94);
+  color: #f4f7f5;
+}
+
+.gallery__lightbox:not([open]) {
+  display: none;
+}
+
+.gallery__lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.gallery__lightbox-stage {
+  overflow: hidden;
+  line-height: 0;
+  cursor: zoom-in;
+  /* o pan é do Observer: sem isso o toque rola/dá pinch na página por baixo */
+  touch-action: none;
+  will-change: transform, opacity;
+}
+
+/* só quando o cursor customizado não está em cena (touch, reduced motion) */
+.gallery__lightbox-stage[data-zoomed="1"]:not(.is-cursor-marked) {
+  cursor: grab;
+}
+
+.gallery__lightbox-media {
+  display: block;
+  max-width: 92vw;
+  max-height: 78dvh;
+  will-change: transform;
+}
+
+.gallery__lightbox-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.38);
+  will-change: transform, opacity;
+}
+
+.gallery__lightbox-bar .gallery__counter {
+  margin-left: 0;
+}
+
+.gallery__lightbox-hint {
+  letter-spacing: 0.16em;
+}
+
+@media (max-width: 900px) {
+  .gallery__viewport {
+    height: min(54vh, 62vw);
+  }
+}
+
+@media (max-width: 640px) {
+  .gallery__lightbox-hint {
+    display: none;
+  }
+}
