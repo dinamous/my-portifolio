@@ -234,7 +234,9 @@ export default function Skills() {
 
       // visibility, não display: p vem do quickTo do sectionStack, que assenta/ultrapassa
       // em volta de 1 — flip de display nessa borda pisca. A opacity já é 0 antes disso.
-      const fadeT = gsap.utils.clamp(0, 1, (p - EXIT_END) / 0.27);
+      // o fade vai até p = 1 (mesmo idiom da AboutMe): terminar antes deixava a seção
+      // sumir no meio do curso, com a barra de "Skills" na navbar ainda enchendo depois
+      const fadeT = gsap.utils.clamp(0, 1, (p - EXIT_END) / (1 - EXIT_END));
       gsap.set(section, { opacity: 1 - fadeT, visibility: fadeT >= 1 ? "hidden" : "visible" });
 
       exiting = p > 0;

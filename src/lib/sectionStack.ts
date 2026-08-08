@@ -19,7 +19,7 @@ let moveTo: (value: number) => void;
 // fatia inicial do range de cada seção em que o scroll não move nada: a seção
 // acabou de terminar sua entrada, então dá um respiro antes de começar a sair
 const HOLD = 0.25;
-const TRANSITION_DISTANCE = 1800; // px of wheel/touch travel to fully close one section into the next — higher means each wheel notch moves a smaller fraction, so steps between notches read as smooth glide instead of a jump
+export const TRANSITION_DISTANCE = 1800; // px of wheel/touch travel to fully close one section into the next — higher means each wheel notch moves a smaller fraction, so steps between notches read as smooth glide instead of a jump
 // o respiro come parte do range, então o curso total cresce na mesma proporção —
 // sem isso a transição em si ficaria 33% mais rápida por notch de wheel
 const DISTANCE = TRANSITION_DISTANCE / (1 - HOLD);
@@ -58,9 +58,48 @@ function applyState() {
     // without this generic module reaching into section-specific DOM
     el.dispatchEvent(new CustomEvent("stack:progress", { detail: { progress: local } }));
   });
+  updateBars();
   // valor global (0..max) para quem precisa saber "onde" a pilha está sem
   // escutar cada seção — ex. SectionNav decide visibilidade e seção ativa
   window.dispatchEvent(new CustomEvent("stack:value", { detail: { value: state.value } }));
+}
+
+const local = (value: number, i: number) =>
+  gsap.utils.clamp(0, 1, (value - i - HOLD) / (1 - HOLD));
+
+// quanto da barra da seção `index` já encheu: só a SEGUNDA metade da transição que a
+// traz pra cena. A primeira metade pertence à saída da barra anterior (ver barState),
+// então nunca há duas barras em movimento ao mesmo tempo.
+export function sectionEnter(value: number, index: number) {
+  return index === 0 ? 1 : gsap.utils.clamp(0, 1, (local(value, index - 1) - 0.5) / 0.5);
+}
+
+// ciclo de vida da barra: enche (origem à esquerda) → fica cheia enquanto a seção está
+// em cena → esvazia pela esquerda (origem à direita, some no sentido da leitura) na
+// primeira metade da transição que a tira. Entrada e saída ocupam metades disjuntas do
+// mesmo `local`, que é o que garante o encadeamento sem sobreposição.
+function barState(value: number, index: number) {
+  const out =
+    index === sections.length - 1
+      ? 0
+      : gsap.utils.clamp(0, 1, local(value, index) / 0.5);
+  return out > 0
+    ? { scaleX: 1 - out, transformOrigin: "right" }
+    : { scaleX: sectionEnter(value, index), transformOrigin: "left" };
+}
+
+// driver único de todas as barras da página: qualquer <SectionProgress section="..."/>
+// pendurado em qualquer lugar (navbar, dentro de uma seção) é atualizado daqui, sem o
+// consumidor assinar stack:value nem repetir a fórmula.
+// ponytail: querySelectorAll por tick — são poucos elementos e este mesmo laço já
+// escreve clip-path em todas as seções; virar cache se algum dia pesar.
+function updateBars() {
+  document
+    .querySelectorAll<HTMLElement>("[data-section-progress]")
+    .forEach((el) => {
+      const i = sections.findIndex((s) => s.id === el.dataset.sectionProgress);
+      if (i >= 0) gsap.set(el, barState(state.value, i));
+    });
 }
 
 // ponytail: module-level singleton, mirrors the old getSmoother() pattern —
@@ -134,6 +173,13 @@ export function initSectionStack(selector = "[data-stack]") {
       moveTo(target);
     },
   });
+}
+
+// re-emite o estado atual da pilha para quem acabou de (re)assinar os eventos —
+// ex. a Projects, cujo efeito remonta a cada troca de filtro e sem isso ficaria
+// dessincronizada (lista na posição errada, entrada não disparada) até o próximo wheel
+export function refreshSectionStack() {
+  if (sections.length) applyState();
 }
 
 // Sections stay inert until the section revealing them finishes its own

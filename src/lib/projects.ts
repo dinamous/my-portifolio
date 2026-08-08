@@ -8,6 +8,7 @@ export type Project = {
   description: string;
   tag: string;
   techs: string[];
+  categories: string[];
   images: string[];
   actions: ProjectAction[];
 };
@@ -17,8 +18,29 @@ type RawProject = {
   img: string;
   descricao: string;
   techs: string[];
+  categoria?: string[];
   actions?: ProjectAction[];
 };
+
+// o campo `categoria` do JSON tem grafia inconsistente (Front-end / Front-End);
+// normaliza pros rótulos usados no filtro. "Fullstack" não existe no dado — é
+// derivado de o projeto ter as duas pontas.
+const CATEGORY_LABEL: Record<string, string> = {
+  "front-end": "Frontend",
+  frontend: "Frontend",
+  "back-end": "Backend",
+  backend: "Backend",
+  "ui/ux": "UI/UX",
+  mobile: "Mobile",
+};
+
+export const PROJECT_FILTERS = ["Todos", "Fullstack", "Frontend", "Backend", "UI/UX"];
+
+function categoriesOf(raw: string[] = []) {
+  const list = Array.from(new Set(raw.map((c) => CATEGORY_LABEL[c.trim().toLowerCase()] ?? c)));
+  if (list.includes("Frontend") && list.includes("Backend")) list.push("Fullstack");
+  return list;
+}
 
 function slugify(text: string) {
   return text
@@ -38,9 +60,14 @@ export const projects: Project[] = (rawProjects as RawProject[]).map((p) => ({
   description: p.descricao,
   tag: p.techs.join(" / "),
   techs: p.techs,
+  categories: categoriesOf(p.categoria),
   images: [p.img],
   actions: p.actions ?? [],
 }));
+
+export function filterProjects(filter: string) {
+  return filter === "Todos" ? projects : projects.filter((p) => p.categories.includes(filter));
+}
 
 export function getProjectBySlug(slug: string) {
   return projects.find((p) => p.slug === slug);

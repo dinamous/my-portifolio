@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { goToSection } from "../../lib/sectionStack";
 import { prefersReducedMotion } from "../../lib/motion";
+import SectionProgress from "../SectionProgress/SectionProgress";
 import "./SectionNav.css";
 
 // navbar persistente estilo lukebaffait.fr: fixo, minimalista, só aparece
@@ -32,18 +33,6 @@ export default function SectionNav() {
       document.querySelectorAll<HTMLElement>("[data-stack]"),
     ).map((el) => el.id);
 
-    // barra de progresso de cada link, mesmo comportamento do scroll-timeline
-    // do lukebaffait.fr: passadas cheias, futuras vazias e SÓ a barra da seção
-    // visível/ativa carrega. A janela de cada uma é a janela em que o link está
-    // ativo — v de idx-0.5 a idx+0.5 (o round(v) do estado ativo vira nesses
-    // mesmos pontos), então as janelas se emendam sem duas barras andarem juntas.
-    // A última seção (v para no max) tem a janela comprimida em [max-0.5, max].
-    const lastIdx = stackIds.length - 1;
-    const bars = anchors.map((a) => ({
-      el: a.querySelector<HTMLElement>(".sectionnav__progress")!,
-      idx: stackIds.indexOf(a.getAttribute("href")!.slice(1)),
-    }));
-
     const reduceMotion = prefersReducedMotion();
 
     gsap.set(nav, { yPercent: 110, autoAlpha: 0 });
@@ -66,17 +55,15 @@ export default function SectionNav() {
         else reveal.reverse();
       }
 
-      const active = Math.round(v);
+      // floor, não round: o link acende quando a seção assenta em cena (v = idx, meio da
+      // barra dela) e apaga quando a próxima assenta. Com round ele virava meio curso
+      // antes, apontando pra uma seção que ainda nem tinha começado a aparecer.
+      const active = Math.floor(v);
       anchors.forEach((a) => {
         a.classList.toggle(
           "sectionnav__link--active",
           stackIds.indexOf(a.getAttribute("href")!.slice(1)) === active,
         );
-      });
-
-      bars.forEach(({ el, idx }) => {
-        const fill = idx === lastIdx ? (v - idx + 0.5) * 2 : v - idx + 0.5;
-        gsap.set(el, { scaleX: gsap.utils.clamp(0, 1, fill) });
       });
     }) as EventListener;
     window.addEventListener("stack:value", onStackValue);
@@ -96,7 +83,6 @@ export default function SectionNav() {
       anchors.forEach((a) => a.removeEventListener("click", onLinkClick));
       brand.removeEventListener("click", onBrandClick);
       reveal.kill();
-      bars.forEach(({ el }) => gsap.killTweensOf(el));
     };
   }, []);
 
@@ -112,7 +98,7 @@ export default function SectionNav() {
               <a href={`#${l.id}`}>
                 <span className="sectionnav__num">{l.num}</span>
                 {l.label}
-                <span className="sectionnav__progress" aria-hidden="true"></span>
+                <SectionProgress section={l.id} className="sectionnav__progress" />
               </a>
             </li>
           ))}

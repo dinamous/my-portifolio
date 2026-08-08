@@ -62,18 +62,11 @@
   font-size: 0.85em;
 }
 
-/* barra de progresso por seção (estilo lukebaffait.fr): scaleX é escrito via
-   GSAP a cada tick do stack, então nada de transition aqui — o smoothing já
-   vem do quickTo do sectionStack */
+/* só o posicionamento — o desenho e a animação da barra vivem em SectionProgress */
 .sectionnav__progress {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 100%;
-  height: 1px;
-  background: #fff;
-  transform: scaleX(0);
-  transform-origin: left;
 }
 
 .sectionnav__links a:hover,

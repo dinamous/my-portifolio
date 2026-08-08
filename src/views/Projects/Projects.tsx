@@ -1,19 +1,15 @@
-import { useEffect, useRef, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
-import { projects } from "../../lib/projects";
+import { PROJECT_FILTERS, filterProjects, projects } from "../../lib/projects";
 import { projectPath } from "../../lib/router";
+import { TRANSITION_DISTANCE, refreshSectionStack, sectionEnter } from "../../lib/sectionStack";
 import AnimatedLetters from "../../components/AnimatedLetters";
 import { CropMarks, RegMark } from "../../components/graphics";
 import "./Projects.css";
 
 // tags reais viram o conteúdo do marquee do header — sem lista redundante hardcoded
 const marqueeItems = Array.from(new Set(projects.flatMap((p) => p.tag.split(" / "))));
-
-// poucos projetos ficam espaçosos e centralizados ("cozy"); a partir de 5 o
-// layout compacta e o excedente vira scroll interno (ver LIST_T no efeito)
-// em vez de encolher fonte/thumb até ficar ilegível.
-const density = projects.length > 4 ? "compact" : "cozy";
 
 // row é um <a href> de verdade (ctrl/cmd/middle-click abrem em nova aba do jeito
 // normal do navegador); só intercepta o clique simples pra rodar a transição GSAP
@@ -33,6 +29,29 @@ function handleOpenProject(e: ReactMouseEvent<HTMLAnchorElement>, slug: string, 
 
 export default function Projects() {
   const activeRef = useRef(false);
+  // sobrevive à remontagem do efeito na troca de filtro: com a seção já revelada,
+  // só as linhas recascatam — reanimar o header (onde vivem os próprios botões de
+  // filtro) a cada clique seria um flash gratuito
+  const enteredRef = useRef(false);
+  const [filter, setFilter] = useState(PROJECT_FILTERS[0]);
+  const visible = useMemo(() => filterProjects(filter), [filter]);
+
+  // efeito próprio (deps []) de propósito: no efeito de [filter] cada clique num
+  // filtro matava e recriava o tween em xPercent:0 — era isso que fazia o loop
+  // "recomeçar" na cara do usuário. Aqui ele nasce uma vez e nunca reinicia.
+  useEffect(() => {
+    const track = document.getElementById("projects-marquee-track");
+    if (!track || prefersReducedMotion()) return;
+    const tween = gsap.to(track, {
+      xPercent: -50,
+      duration: Math.max(8, marqueeItems.length * 1.8),
+      ease: "none",
+      repeat: -1,
+    });
+    return () => {
+      tween.kill();
+    };
+  }, []);
 
   useEffect(() => {
     const section = document.getElementById("projects-section")!;
@@ -40,7 +59,8 @@ export default function Projects() {
     const headerLetters = document.querySelectorAll<HTMLElement>("#projects-heading .projects__letter");
     const listViewport = document.getElementById("projects-list-viewport")!;
     const list = document.getElementById("projects-list")!;
-    const marqueeTrack = document.getElementById("projects-marquee-track");
+    const progress = section.querySelector<HTMLElement>(".projects__progress");
+    const progressTrack = section.querySelector<HTMLElement>(".projects__progress-track");
     const progressFill = document.getElementById("projects-progress-fill");
     const progressIndex = document.getElementById("projects-progress-index");
     const rows = Array.from(document.querySelectorAll<HTMLElement>(".projects__row"));
@@ -50,21 +70,93 @@ export default function Projects() {
     const rowRevealStagger = Math.min(0.12, 1.6 / rows.length);
     const rowExitStagger = Math.min(0.08, 1.2 / rows.length);
 
-    // quanto da lista fica escondido abaixo da viewport fixa da seção — se
-    // sobrar altura (poucos projetos, "cozy"), não há o que revelar por scroll.
-    const maxScroll = Math.max(0, list.scrollHeight - listViewport.clientHeight);
-    // fração do progresso local desta seção dedicada a revelar as linhas
-    // excedentes antes da cascata de saída começar a mexer no header/linhas.
-    const LIST_T = maxScroll > 0 ? 0.35 : 0;
+    // o passo do scroll da lista é uma row: a viewport é dividida num número inteiro
+    // de rows (--projects-row-h), então nenhuma parada deixa meia row cortada no topo
+    // ou no pé, e a última row termina exatamente no fim do container. Medido (e não
+    // fixo no CSS) porque quantas rows cabem depende da altura da viewport.
+    let rowH = 0;
+    let maxStep = 0;
+    // janela do progresso local dedicada a navegar a lista, antes da cascata de
+    // saída. A barra de "Trabalhos" na navbar enche em local≈1/3 (ver SectionNav),
+    // então esse é o piso: barra cheia = lista no fim = saída na sequência.
+    // ponytail: listas longas esticam a janela pra não virar scroll turbo — aí a
+    // barra satura antes do fim; o mal menor enquanto o stack tem passo fixo.
+    let listT = 0;
 
-    gsap.set(progressFill, { scaleY: maxScroll > 0 ? 0 : 1 });
+    const measure = () => {
+      // sem a var, o li volta pra altura natural do clamp — é dela que sai quantas
+      // rows inteiras cabem na viewport
+      list.style.removeProperty("--projects-row-h");
+      const natural = rows[0]?.getBoundingClientRect().height || 1;
+      // getBoundingClientRect e não clientHeight: clientHeight vem arredondado pro
+      // inteiro, e 1px de erro aqui vira 1px de row sobrando no pé do container
+      const viewportH = listViewport.getBoundingClientRect().height;
+      const perPage = Math.max(1, Math.round(viewportH / natural));
+      rowH = viewportH / perPage;
+      maxStep = Math.max(0, rows.length - perPage);
+      list.style.setProperty("--projects-row-h", `${rowH}px`);
+      listT = maxStep > 0 ? gsap.utils.clamp(1 / 3, 0.75, (maxStep * rowH) / TRANSITION_DISTANCE) : 0;
+    };
+    measure();
+
+    // respiro: fatia do curso em que o scroll não move nada, entre a lista chegar
+    // ao fim e a cascata de saída disparar. Sem ele um notch a mais na última linha
+    // já arremessava a seção fora, sem dar tempo de ler o último projeto — e vale
+    // também sem overflow, onde a lista inteira aparece de cara.
+    const BREATHE_T = 0.2;
+
+    gsap.set(list, { y: 0 });
+    gsap.set(progressFill, { scaleY: maxStep > 0 ? 0 : 1 });
     if (progressIndex) progressIndex.textContent = "01";
 
     const reduceMotion = prefersReducedMotion();
 
-    let onAboutmeProgress: EventListener | undefined;
+    // o scroll chega contínuo do stack e sai daqui em passos de row; o glide entre um
+    // passo e o outro é do quickTo (retarget contínuo), não do scroll — é o que evita
+    // o salto seco a cada notch que cruza um limiar.
+    const listY = reduceMotion
+      ? (v: number) => void gsap.set(list, { y: v })
+      : gsap.quickTo(list, "y", { duration: 0.45, ease: "power3" });
+
+    // ease do snap: patamar largo em volta de cada row e travessia curta no meio do
+    // passo. É o que mantém a garantia de row inteira (parar o scroll fora da faixa
+    // central deixa resto ~0) sem o degrau de um Math.round.
+    const snapEase = gsap.parseEase("power4.inOut");
+
+    // último progresso local recebido do stack: é a fonte da posição da lista, então
+    // uma remedição (resize) reaplica ele em vez de voltar a lista pro começo
+    let lastP = 0;
+    const applyBrowse = (p: number) => {
+      lastP = p;
+      const browseT = maxStep > 0 ? gsap.utils.clamp(0, 1, p / listT) : 1;
+      const raw = browseT * maxStep;
+      // snap contínuo: em vez de arredondar (o alvo pulava uma row inteira de uma vez,
+      // e o quickTo só disfarçava o degrau), a parte fracionária passa por um ease
+      // in/out — a lista descansa em cima de cada row e desliza entre uma e outra sem
+      // nenhum salto no alvo. Índice e trilho seguem o mesmo valor, então continuam
+      // batendo com o que está em cena.
+      const base = Math.floor(raw);
+      const snapped = base + snapEase(raw - base);
+      const snapT = maxStep > 0 ? snapped / maxStep : 1;
+      listY(-snapped * rowH);
+      gsap.set(progressFill, { scaleY: snapT });
+      if (progressIndex) {
+        const activeIndex = Math.min(rows.length, Math.max(1, Math.round(1 + snapT * (rows.length - 1))));
+        progressIndex.textContent = String(activeIndex).padStart(2, "0");
+      }
+    };
+
+    // sem isto o número inteiro de rows medido acima vira mentira assim que a viewport
+    // muda de altura, e volta a sobrar meia row no pé. Observer na caixa em vez de
+    // resize da janela porque a primeira medição cai antes das fontes assentarem — o
+    // header muda de altura depois dela, e só o RO enxerga isso.
+    const ro = new ResizeObserver(() => {
+      measure();
+      applyBrowse(lastP);
+    });
+    ro.observe(listViewport);
+
     const rowCleanups: Array<() => void> = [];
-    let marqueeTween: gsap.core.Tween | undefined;
     let pillTl: gsap.core.Timeline | undefined;
     let pillFocus: gsap.core.Timeline | undefined;
     let reveal: gsap.core.Timeline | undefined;
@@ -88,36 +180,51 @@ export default function Projects() {
     };
     syncActive();
 
-    if (marqueeTrack && !reduceMotion) {
-      marqueeTween = gsap.to(marqueeTrack, {
-        xPercent: -50,
-        duration: Math.max(8, marqueeItems.length * 1.8),
-        ease: "none",
-        repeat: -1,
-      });
-    }
+    // troca de filtro remonta o efeito com a seção já em cena: só as linhas novas
+    // cascatam, o header (e os botões de filtro nele) fica onde está
+    const refilter = enteredRef.current;
 
     if (reduceMotion) {
       gsap.set(header, { opacity: 1, y: 0 });
       gsap.set(rows, { opacity: 1, y: 0 });
       gsap.set(section.querySelectorAll(".projects__letter"), { y: 0, opacity: 1 });
+      gsap.set([progress, progressTrack], { opacity: 1, scaleY: 1 });
     } else {
-      gsap.set(header, { opacity: 0, y: -16 });
       gsap.set(rows, { opacity: 0, y: 40, x: -24 });
-      gsap.set(section.querySelectorAll(".projects__letter"), { yPercent: 100, opacity: 0 });
+      gsap.set(rows.flatMap((r) => Array.from(r.querySelectorAll(".projects__letter"))), {
+        yPercent: 100,
+        opacity: 0,
+      });
 
-      reveal = gsap
-        .timeline({
-          paused: true,
-          // hover/clique liberam pelo fim da própria timeline, não por um limiar de
-          // scroll — é o que tira a dependência de "rolar até tal ponto"
-          onComplete: () => {
-            hasEntered = true;
-            syncActive();
-          },
-        })
-        .to(header, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0)
-        .to(headerLetters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.025, ease: "power2.out" }, 0.05);
+      reveal = gsap.timeline({
+        paused: true,
+        // hover/clique liberam pelo fim da própria timeline, não por um limiar de
+        // scroll — é o que tira a dependência de "rolar até tal ponto"
+        onComplete: () => {
+          hasEntered = true;
+          enteredRef.current = true;
+          syncActive();
+        },
+      });
+
+      if (refilter) {
+        gsap.set(header, { opacity: 1, y: 0 });
+        gsap.set(headerLetters, { yPercent: 0, opacity: 1 });
+        gsap.set([progress, progressTrack], { opacity: 1, scaleY: 1 });
+      } else {
+        gsap.set(header, { opacity: 0, y: -16 });
+        gsap.set(headerLetters, { yPercent: 100, opacity: 0 });
+        // o marcador é chrome como o header: nasce junto com a lista, o trilho
+        // "desenhando" de cima pra baixo enquanto os números aparecem — e não
+        // recascata na troca de filtro (só as rows fazem isso)
+        gsap.set(progress, { opacity: 0 });
+        gsap.set(progressTrack, { scaleY: 0 });
+        reveal
+          .to(header, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0)
+          .to(headerLetters, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.025, ease: "power2.out" }, 0.05)
+          .to(progress, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.25)
+          .to(progressTrack, { scaleY: 1, duration: 0.7, ease: "power3.inOut" }, 0.25);
+      }
 
       rows.forEach((row, i) => {
         const letters = row.querySelectorAll(".projects__letter");
@@ -264,53 +371,49 @@ export default function Projects() {
       });
     }
 
-    // waits until AboutMe's content has fully exited (its own EXIT_END) before this
-    // section's elements start appearing — the two transitions never overlap, this
-    // one only starts as AboutMe's curtain begins to dissolve. Roda em ambos os modos
-    // de motion (não só no else acima) porque também é o que libera o clique/hover.
-    // ponytail: gatilho, não scrub — passou do limiar a entrada roda sozinha até o
-    // fim (e reverte inteira se o usuário voltar), então o hover fica disponível sem
-    // exigir que ele role até o final do range da AboutMe.
-    const REVEAL_DELAY = 0.7;
-    onAboutmeProgress = ((e: CustomEvent<{ progress: number }>) => {
-      const past = e.detail.progress >= REVEAL_DELAY;
+    // a entrada é ancorada no mesmo preenchimento da barra de "Trabalhos" da navbar
+    // (sectionEnter, a fonte única da fórmula), pra que o scroll da seção e o que a barra
+    // mostra sejam a mesma coisa. Pontos estratégicos, com histerese: entra quando a barra
+    // está quase cheia (a seção acabou de assentar no lugar) e só reverte quando ela zera —
+    // um limiar único ficava piscando ida e volta no easing do quickTo da pilha.
+    // ponytail: gatilho, não scrub — cruzou o ponto, a entrada roda inteira sozinha,
+    // então o hover fica disponível sem exigir rolar até um ponto exato.
+    const stackIndex = Array.from(document.querySelectorAll<HTMLElement>("[data-stack]")).indexOf(section);
+    const onStackValue = ((e: CustomEvent<{ value: number }>) => {
+      const bar = sectionEnter(e.detail.value, stackIndex);
+      const past = revealFired ? bar > 0 : bar >= 0.9;
       if (past === revealFired) return;
       revealFired = past;
       if (past) {
         if (reveal) reveal.play();
         else {
           hasEntered = true; // reduced motion: nada pra animar, libera direto
+          enteredRef.current = true;
           syncActive();
         }
       } else {
         hasEntered = false;
+        enteredRef.current = false;
         syncActive();
         reveal?.reverse();
       }
     }) as EventListener;
-    window.addEventListener("aboutme:progress", onAboutmeProgress);
+    window.addEventListener("stack:value", onStackValue);
 
     // saída própria da Projects: é uma lista, então sair "in cascata" (linhas
     // atiradas pra fora em sequência) tem mais identidade que um fade genérico —
-    // distinto do fade da AboutMe e do glitch que a Skills vai usar. Mesmo idiom da
-    // entrada: gatilho, não scrub — cruzou o limiar a cascata roda inteira sozinha,
-    // e voltar o scroll a reverte inteira, sem estado intermediário preso ao wheel.
+    // distinto do fade da AboutMe e do glitch que a Skills vai usar.
     // data-no-close-clip tira essa seção do fechamento genérico do sectionStack.
-    // a Skills escruba a entrada dela no projects:progress, então o que sai daqui é o
-    // progresso da própria timeline (não o do scroll) — as duas ficam em sincronia
-    // mesmo com a saída rodando sozinha.
+    // escrubada pelo scroll (não disparada por limiar): a Skills pendura a entrada dela
+    // no projects:progress, e com a timeline rodando no relógio próprio essa entrada
+    // acontecia num ponto qualquer da barra da navbar — quem parasse de rolar via a
+    // seção trocar sozinha. Escrubada, a cascata daqui, a entrada da Skills e a barra
+    // são o mesmo valor: a saída termina exatamente quando "Trabalhos" enche.
     const emitProgress = () =>
       window.dispatchEvent(new CustomEvent("projects:progress", { detail: { progress: exit.progress() } }));
 
     const exit = gsap
-      .timeline({
-        paused: true,
-        onUpdate: emitProgress,
-        onComplete: () => {
-          gsap.set(section, { display: "none" });
-          emitProgress();
-        },
-      })
+      .timeline({ paused: true })
       .to(header, { opacity: 0, y: -16, duration: 0.3 }, 0);
     rows.forEach((row, i) => {
       // slingshot de saída: back.in recua um instante antes de arremessar a row
@@ -328,55 +431,44 @@ export default function Projects() {
     // alonga ou encurta a cascata dela, não nas janelas de progresso do outro arquivo.
     exit.to({}, { duration: 1.1 });
 
-    const EXIT_TRIGGER = Math.max(LIST_T, 0.06);
-    let exitFired = false;
-
     const onStackProgress = ((e: CustomEvent<{ progress: number }>) => {
       const p = e.detail.progress;
 
       // fase de "navegação": antes de qualquer coisa sair, o excedente da lista
       // (além do que cabe na viewport) desliza pra cima revelado por scroll —
-      // header e linhas visíveis continuam intactos até essa fase acabar. Essa
-      // continua escrubada de propósito: aqui o scroll está navegando a lista.
-      const browseT = maxScroll > 0 ? gsap.utils.clamp(0, 1, p / LIST_T) : 1;
-      gsap.set(list, { y: -maxScroll * browseT });
-      gsap.set(progressFill, { scaleY: browseT });
-      if (progressIndex) {
-        const activeIndex = Math.min(rows.length, Math.max(1, Math.round(1 + browseT * (rows.length - 1))));
-        progressIndex.textContent = String(activeIndex).padStart(2, "0");
-      }
+      // header e linhas visíveis continuam intactos até essa fase acabar.
+      applyBrowse(p);
 
-      const past = p >= EXIT_TRIGGER;
-      if (past === exitFired) return;
-      exitFired = past;
-      exitStarted = past;
-      syncActive();
+      // a saída começa depois do respiro que segue o fim da lista e ocupa todo o resto
+      // do curso, terminando em p = 1 — que é onde a Skills assenta e a barra enche
+      const exitStart = Math.min(listT + BREATHE_T, 0.9);
+      const exitT = gsap.utils.clamp(0, 1, (p - exitStart) / (1 - exitStart));
+      exit.progress(exitT);
+      emitProgress();
+      // fora do paint só no fim: display no meio do curso mataria a cascata em cena
+      gsap.set(section, { display: exitT >= 1 ? "none" : "" });
 
-      if (reduceMotion) {
-        exit.progress(past ? 1 : 0);
-        gsap.set(section, { display: past ? "none" : "" });
-        emitProgress();
-        return;
-      }
-      if (past) exit.play();
-      else {
-        gsap.set(section, { display: "" });
-        exit.reverse();
+      if (exitStarted !== (exitT > 0)) {
+        exitStarted = exitT > 0;
+        syncActive();
       }
     }) as EventListener;
     section.addEventListener("stack:progress", onStackProgress);
+    // acabou de (re)assinar: puxa o estado atual da pilha em vez de esperar o próximo
+    // wheel — é o que faz a troca de filtro já recascatar e reposicionar a lista
+    refreshSectionStack();
 
     return () => {
-      if (onAboutmeProgress) window.removeEventListener("aboutme:progress", onAboutmeProgress);
+      window.removeEventListener("stack:value", onStackValue);
+      ro.disconnect();
       rowCleanups.forEach((fn) => fn());
       reveal?.kill();
       exit.kill();
-      marqueeTween?.kill();
       pillTl?.kill();
       pillFocus?.kill();
       section.removeEventListener("stack:progress", onStackProgress);
     };
-  }, []);
+  }, [filter]);
 
   return (
     <section
@@ -384,13 +476,25 @@ export default function Projects() {
       id="projects-section"
       data-stack
       data-no-close-clip
-      data-density={density}
     >
       <header className="projects__header" id="projects-header">
         <h2 className="projects__heading" id="projects-heading">
           <AnimatedLetters text="Projetos" prefix="projects" />
         </h2>
         <div className="projects__meta">
+          <div className="projects__filters" role="group" aria-label="Filtrar por categoria">
+            {PROJECT_FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                className={`projects__filter${f === filter ? " projects__filter--active" : ""}`}
+                aria-pressed={f === filter}
+                onClick={() => setFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
           <div className="projects__marquee" aria-hidden="true">
             <div className="projects__marquee-track" id="projects-marquee-track">
               {[0, 1].map((copy) => (
@@ -407,20 +511,20 @@ export default function Projects() {
               ))}
             </div>
           </div>
-          <div className="projects__progress">
-            <span className="projects__progress-index" id="projects-progress-index">
-              01
-            </span>
-            <span className="projects__progress-track" aria-hidden="true">
-              <span className="projects__progress-fill" id="projects-progress-fill"></span>
-            </span>
-            <span className="projects__progress-total">{String(projects.length).padStart(2, "0")}</span>
-          </div>
         </div>
       </header>
       <div className="projects__list-viewport" id="projects-list-viewport">
+        <div className="projects__progress">
+          <span className="projects__progress-index" id="projects-progress-index">
+            01
+          </span>
+          <span className="projects__progress-track" aria-hidden="true">
+            <span className="projects__progress-fill" id="projects-progress-fill"></span>
+          </span>
+          <span className="projects__progress-total">{String(visible.length).padStart(2, "0")}</span>
+        </div>
         <ul className="projects__list" id="projects-list">
-          {projects.map((p, i) => (
+          {visible.map((p, i) => (
             <li key={p.slug}>
               <a
                 className="projects__row"
