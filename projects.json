@@ -1,7 +1,7 @@
 [
   {
     "titulo": "pizza.shop",
-    "img": "/projects/pizzashop.png",
+    "img": "/projects/pizzashop.webp",
     "descricao": "Uma aplicação simulando um dashbaord de vendas, inspirado na plataforma Ifood.",
     "techs": ["Vue", "Vite", "Vuelidate", "shadcn/ui"],
     "categoria": ["Front-end"],
@@ -12,7 +12,7 @@
   },
   {
     "titulo": "AutismVogais",
-    "img": "/projects/AutismVogais.png",
+    "img": "/projects/AutismVogais.webp",
     "descricao": "Prototipação de uma Ferramenta digital com o intuito de auxiliar o aprendizado de vogais e alfabetização de crianças no espectro autista.",
     "techs": ["Figma", "Adobe Illustrator"],
     "categoria": ["UI/UX"],
@@ -25,7 +25,7 @@
   },
   {
     "titulo": "EasyLearn",
-    "img": "/projects/EasyLearn.png",
+    "img": "/projects/EasyLearn.webp",
     "descricao": "Protipação de uma plataforma web de Ensino à distância, incentivado pela pandemia da COVID-21. Esta aplicação fez uso de inspiração das ferramentas do Google Classroom e Meet.",
     "techs": ["Figma", "Undraw", "Adobe Illustrator"],
     "categoria": ["UI/UX"],
@@ -38,7 +38,7 @@
   },
   {
     "titulo": "Clone Nubank",
-    "img": "/projects/Nubank.png",
+    "img": "/projects/Nubank.webp",
     "descricao": "Um clone da antiga versão do app do Banco Nubank, em react native. Utilizando o framework Expo e styled componentes, de modo a replicar a interface de forma inteiramente através do CSS",
     "techs": ["React Native", "Expo", "styled-components"],
     "categoria": ["Front-End", "Mobile"],
@@ -46,7 +46,7 @@
   },
   {
     "titulo": "TextToSpeech IBM",
-    "img": "/projects/TextToSpeech.png",
+    "img": "/projects/TextToSpeech.webp",
     "descricao": "Uma aplicação desenvolvida, a fim de explorar a utilização da I.A do IBM de modo a realizar a conversar do input do usuário em 'text to speech'.",
     "techs": ["Node", "SQL", "React", "Sequelize ORM"],
     "categoria": ["Front-End", "Back-End"],
@@ -54,7 +54,7 @@
   },
   {
     "titulo": "Vizionar RA (Fictícia)",
-    "img": "/projects/Vizionar.png",
+    "img": "/projects/Vizionar.webp",
     "descricao": "Um website desenvolvido de modo a exemplificar uma landing page de uma empresa ficticia que oferece serviço de Realidade Aumentada.",
     "techs": ["HTML", "CSS", "Bootstrap"],
     "categoria": ["Front-End"],
@@ -65,7 +65,7 @@
   },
   {
     "titulo": "A 13° Jornada Científica e Tecnológica",
-    "img": "/projects/IFSUL.png",
+    "img": "/projects/IFSUL.webp",
     "descricao": "Evento científico interdisciplinar de nível nacional com expansão internacional, atuando na área de comunicação científica e tecnológica.",
     "techs": ["HTML", "CSS", "Bootstrap"],
     "categoria": ["Front-End"],
@@ -76,7 +76,7 @@
   },
   {
     "titulo": "AUTISMALG",
-    "img": "/projects/autismalg.png",
+    "img": "/projects/autismalg.webp",
     "descricao": "Prototipação de app mobile para Auxiliar no Ensino da Identificação de Algarismos para Crianças com Transtorno do Espectro Autista.",
     "techs": ["Figma"],
     "categoria": ["UI/UX"],

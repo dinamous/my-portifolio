@@ -218,7 +218,7 @@ export default function AboutMe() {
             <RegMark className="aboutme__mark" />
 
             <div className="aboutme__photo" id="aboutme-photo">
-              <img className="aboutme__photo-img" src="/profile-picture.png" alt="Matheus Simões" />
+              <img className="aboutme__photo-img" src="/profile-picture.webp" alt="Matheus Simões" />
               <CropMarks />
             </div>
 

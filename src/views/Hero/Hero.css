@@ -10,6 +10,41 @@
   inset: 0;
   z-index: 3;
   background: #000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hero__loader-readout {
+  position: absolute;
+  bottom: calc(12vh + 1.6em);
+  left: 5vw;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75em;
+  font-family: "Space Grotesk", sans-serif;
+  color: rgba(244, 247, 245, 0.55);
+}
+
+.hero__loader-label {
+  font-size: clamp(0.65rem, 0.85vw, 0.8rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero__loader-count {
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  font-variant-numeric: tabular-nums;
+  color: #f4f7f5;
+}
+
+.hero__loader-track {
+  position: absolute;
+  bottom: 12vh;
+  right: 5vw;
+  left: 5vw;
+  height: 2px;
+  background: rgba(244, 247, 245, 0.15);
 }
 
 .hero__loader-bar {
@@ -22,6 +57,15 @@
   transform-origin: left center;
   transform: scaleX(0);
   will-change: transform;
+}
+
+@media (max-width: 640px) {
+  .hero__loader-readout,
+  .hero__loader-track {
+    left: 6vw;
+    right: 6vw;
+    bottom: 8vh;
+  }
 }
 
 .hero__scan {

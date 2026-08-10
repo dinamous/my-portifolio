@@ -165,11 +165,6 @@ export default function Projects() {
       ? (v: number) => void gsap.set(list, { y: v })
       : gsap.quickTo(list, "y", { duration: 0.45, ease: "power3" });
 
-    // ease do snap: patamar largo em volta de cada row e travessia curta no meio do
-    // passo. É o que mantém a garantia de row inteira (parar o scroll fora da faixa
-    // central deixa resto ~0) sem o degrau de um Math.round.
-    const snapEase = gsap.parseEase("power4.inOut");
-
     // último progresso local recebido do stack: é a fonte da posição da lista, então
     // uma remedição (resize) reaplica ele em vez de voltar a lista pro começo
     let lastP = 0;
@@ -177,18 +172,10 @@ export default function Projects() {
       lastP = p;
       const browseT = maxStep > 0 ? gsap.utils.clamp(0, 1, p / listT) : 1;
       const raw = browseT * maxStep;
-      // snap contínuo: em vez de arredondar (o alvo pulava uma row inteira de uma vez,
-      // e o quickTo só disfarçava o degrau), a parte fracionária passa por um ease
-      // in/out — a lista descansa em cima de cada row e desliza entre uma e outra sem
-      // nenhum salto no alvo. Índice e trilho seguem o mesmo valor, então continuam
-      // batendo com o que está em cena.
-      const base = Math.floor(raw);
-      const snapped = base + snapEase(raw - base);
-      const snapT = maxStep > 0 ? snapped / maxStep : 1;
-      listY(-snapped * rowH);
-      gsap.set(progressFill, { scaleY: snapT });
+      listY(-raw * rowH);
+      gsap.set(progressFill, { scaleY: browseT });
       if (progressIndex) {
-        const activeIndex = Math.min(rows.length, Math.max(1, Math.round(1 + snapT * (rows.length - 1))));
+        const activeIndex = Math.min(rows.length, Math.max(1, Math.round(1 + browseT * (rows.length - 1))));
         progressIndex.textContent = String(activeIndex).padStart(2, "0");
       }
     };

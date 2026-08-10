@@ -6,6 +6,7 @@ import HeroBackground from "../../components/HeroBackground";
 import { enableSectionStack, CLIP_CLOSE_T, getOverlay } from "../../lib/sectionStack";
 import { startTextType } from "../../lib/textType";
 import { prefersReducedMotion } from "../../lib/motion";
+import { CropMarks } from "../../components/graphics";
 import "./Hero.css";
 
 const heroTypePhrases = [
@@ -77,6 +78,7 @@ export default function Hero() {
 
     const loader = document.getElementById("hero-loader")!;
     const loaderBar = document.getElementById("hero-loader-bar")!;
+    const loaderCount = document.getElementById("hero-loader-count")!;
 
     const word1Letters = Array.from(
       document.querySelectorAll<HTMLElement>("#hero-word-1 .hero__letter"),
@@ -123,8 +125,13 @@ export default function Hero() {
           gsap.set(w, { [mainAxis]: wordDeltas[i], scale: 0.8 }),
         );
 
-        const scanHeight = scan.offsetHeight;
-        gsap.set(scan, { y: heroSection.offsetHeight });
+        // ponytail: mesma medida usada pra entrada e saída (offsetHeight da seção, não
+        // do próprio .hero__scan) — 100vh no CSS pode divergir da altura real da seção
+        // (toolbar dinâmica mobile, scrollbar), e usar duas fontes diferentes deixava
+        // a barra saindo -scanHeight sem cobrir de fato heroSection.offsetHeight, então
+        // uma fatia ficava visível no topo em algumas resoluções.
+        const scanHeight = heroSection.offsetHeight;
+        gsap.set(scan, { y: scanHeight });
 
         gsap
           .timeline({ defaults: { ease: "power3.out" } })
@@ -152,10 +159,19 @@ export default function Hero() {
       gsap.set(loader, { autoAlpha: 0 });
       runEntrance();
     } else {
+      // proxy numérico só pra dirigir o contador via onUpdate — a barra em si
+      // anima scaleX direto, sem ler esse valor de volta
+      const counter = { value: 0 };
       const progressTween = gsap.to(loaderBar, {
         scaleX: 0.9,
         duration: 2.5,
         ease: "power1.out",
+      });
+      gsap.to(counter, {
+        value: 90,
+        duration: 2.5,
+        ease: "power1.out",
+        onUpdate: () => (loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0")),
       });
 
       const fontsReady = document.fonts.ready;
@@ -166,6 +182,12 @@ export default function Hero() {
         gsap
           .timeline()
           .to(loaderBar, { scaleX: 1, duration: 0.3, ease: "power2.out" })
+          .to(counter, {
+            value: 100,
+            duration: 0.3,
+            ease: "power2.out",
+            onUpdate: () => (loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0")),
+          }, "<")
           .to(loader, { autoAlpha: 0, duration: 0.4, ease: "power2.out" }, "+=0.15")
           .call(runEntrance);
       });
@@ -260,7 +282,16 @@ export default function Hero() {
       <HeroBackground />
 
       <div className="hero__loader" id="hero-loader" aria-hidden="true">
-        <div className="hero__loader-bar" id="hero-loader-bar"></div>
+        <CropMarks corners="all" x="24px" opacity={0.25} />
+
+        <div className="hero__loader-readout">
+          <span className="hero__loader-label">carregando</span>
+          <span className="hero__loader-count" id="hero-loader-count">00</span>
+        </div>
+
+        <div className="hero__loader-track">
+          <div className="hero__loader-bar" id="hero-loader-bar"></div>
+        </div>
       </div>
 
       <div className="hero__scan" id="hero-scan" aria-hidden="true"></div>
