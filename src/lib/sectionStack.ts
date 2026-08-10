@@ -217,5 +217,25 @@ export function goToSection(idOrIndex: string | number) {
       : sections.findIndex((el) => el.id === idOrIndex);
   if (index < 0 || !moveTo) return;
   target = gsap.utils.clamp(0, max, index);
-  moveTo(target);
+
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  if (reduceMotion) {
+    moveTo(target);
+    return;
+  }
+
+  // clique de navbar pode saltar várias seções de uma vez — o quickTo do wheel
+  // usa duration fixa (pensada pra deltas pequenos) e ficaria igualmente rápido
+  // num salto grande, lendo como abrupto. Aqui a duration escala com a distância
+  // e mata o quickTo em progresso pra não competir com esse tween pelo state.value.
+  gsap.killTweensOf(state);
+  const distance = Math.abs(target - state.value);
+  gsap.to(state, {
+    value: target,
+    duration: gsap.utils.clamp(0.9, 2.6, distance * 0.9),
+    ease: "power2.inOut",
+    onUpdate: applyState,
+  });
 }

@@ -409,10 +409,12 @@ export default function Projects() {
       const t = gsap.utils.clamp(0, 1, (e.detail.progress - REVEAL_START) / (1 - REVEAL_START));
       setRevealProgress?.(t);
 
-      // hover/clique liberam pelo fim do curso, não pelo onComplete da timeline: .progress()
-      // não dispara callback. Histerese porque o quickTo da pilha assenta/ultrapassa em volta
-      // de 1 — um limiar único ficava piscando ida e volta nessa borda.
-      const entered = hasEntered ? t > 0.6 : t >= 0.98;
+      // hover/clique liberam já em 40% da entrada (antes do fim do curso), não no
+      // onComplete da timeline: .progress() não dispara callback. Histerese porque o
+      // quickTo da pilha assenta/ultrapassa em volta de 1 — um limiar único ficava
+      // piscando ida e volta nessa borda; 0.35 fica abaixo do gatilho de entrada (0.4)
+      // pra não reabrir o próprio limiar que acabou de fechar.
+      const entered = hasEntered ? t > 0.35 : t >= 0.4;
       if (entered === hasEntered) return;
       hasEntered = entered;
       enteredRef.current = entered;
