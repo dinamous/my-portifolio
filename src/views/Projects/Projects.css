@@ -421,4 +421,15 @@
   .projects__thumb {
     display: none;
   }
+
+  /* rail fica fina e mais próxima da borda pra abrir espaço real pro título da
+     row, que agora ocupa a largura toda da coluna única */
+  .projects__list-viewport {
+    padding: 0 9vw 0 6vw;
+  }
+
+  .projects__progress {
+    right: 2.5vw;
+    font-size: 0.68rem;
+  }
 }

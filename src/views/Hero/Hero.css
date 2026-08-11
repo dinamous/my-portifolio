@@ -213,13 +213,31 @@
     top: 4vh;
   }
 
-  .hero__bottom {
+  /* nome + navbar entram no fluxo normal de um flex-column comum, em vez de
+     dois position:absolute com bottom próprios adivinhando a altura um do
+     outro — é o que evitava a sobreposição vista em telas ~375-428px */
+  .hero__stack {
+    position: absolute;
     inset: auto 0 3vh 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5vh;
+  }
+
+  .hero__bottom {
+    position: static;
+    inset: auto;
   }
 
   .hero__row {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .hero__word {
+    --hero-size: clamp(2.6rem, 15vw, 4.5rem);
   }
 }

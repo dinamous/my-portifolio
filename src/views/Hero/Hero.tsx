@@ -298,24 +298,26 @@ export default function Hero() {
 
       <div className="hero__type" id="hero-type" aria-hidden="true"></div>
 
-      <div className="hero__bottom">
-        <h1 className="hero__row" id="hero-row">
-          <span className="hero__word hero__word--first" id="hero-word-1">
-            <AnimatedLetters text="Matheus" prefix="hero" />
-          </span>
-          <span className="hero__word hero__word--last" id="hero-word-2">
-            <AnimatedLetters text="Simões" prefix="hero" /><span
-              className="hero__semi"
-              id="hero-semi"
-              role="button"
-              tabIndex={0}
-              aria-label="Easter egg"
-            >;</span>
-          </span>
-        </h1>
-      </div>
+      <div className="hero__stack" id="hero-stack">
+        <div className="hero__bottom">
+          <h1 className="hero__row" id="hero-row">
+            <span className="hero__word hero__word--first" id="hero-word-1">
+              <AnimatedLetters text="Matheus" prefix="hero" />
+            </span>
+            <span className="hero__word hero__word--last" id="hero-word-2">
+              <AnimatedLetters text="Simões" prefix="hero" /><span
+                className="hero__semi"
+                id="hero-semi"
+                role="button"
+                tabIndex={0}
+                aria-label="Easter egg"
+              >;</span>
+            </span>
+          </h1>
+        </div>
 
-      <Navbar />
+        <Navbar />
+      </div>
     </section>
   );
 }
