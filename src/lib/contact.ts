@@ -1,8 +1,7 @@
 export type SocialLink = { label: string; handle: string; href: string };
 
-// ponytail: hardcoded até virar documento no Sanity (client já existe em
-// [sanity.ts](./sanity.ts), ainda sem schema) — este objeto é o único ponto a
-// trocar por um fetch quando o documento `contact` existir lá.
+// ponytail: hardcoded até virar documento no Sanity — este objeto é o único
+// ponto a trocar por um fetch quando o documento `contact` existir lá.
 export const contact = {
   email: "dinamous.dev@gmail.com",
   // wa.me aceita só dígitos (DDI + DDD + número); `phoneLabel` é o que a tela mostra
