@@ -195,7 +195,7 @@ export default function AboutMe() {
 
   return (
     <section
-      className="aboutme fixed inset-0 h-screen w-screen"
+      className="aboutme fixed inset-0 h-dvh w-screen"
       id="aboutme-section"
       data-stack
       data-no-close-clip

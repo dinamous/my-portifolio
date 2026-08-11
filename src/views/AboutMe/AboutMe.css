@@ -219,14 +219,29 @@
 }
 
 @media (max-width: 640px) {
-  .aboutme__frame {
-    grid-template-columns: 1fr;
-    width: 86vw;
+  /* ficha e painel empilhados (ficha em cima) em vez de lado a lado — a seção vira
+     scrollável (como a WhatIDo) porque os dois blocos juntos passam da altura da tela.
+     canhoto continua vertical (Perforation/DashedLine têm orientação fixa via prop) */
+  .aboutme {
+    overflow-y: auto;
   }
 
-  /* no mobile só o painel de texto fica — a ficha inteira viraria uma tira ilegível */
+  .aboutme__frame {
+    position: static;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    width: 86vw;
+    min-height: 100%;
+    margin: 0 auto;
+    padding: 6vh 0;
+  }
+
   .aboutme__ticket {
-    display: none;
+    height: clamp(360px, 64vh, 480px);
+  }
+
+  .aboutme__photo {
+    height: clamp(160px, 30vh, 240px);
   }
 
   .aboutme__panel {

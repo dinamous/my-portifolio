@@ -1,5 +1,13 @@
 [
   {
+    "titulo": "NEXT26 Superlógica",
+    "img": "/projects/next/next-hero.png",
+    "descricao": "Landing page do NEXT26, evento da Superlógica para o mercado de moradia, reunindo marcas como Superlógica, Gruvi e Imobi num festival de conteúdo sobre tecnologia para o setor.",
+    "techs": ["React", "Gatsby", "GraphQL", "Design System"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://next.superlogica.com/" }]
+  },
+  {
     "titulo": "pizza.shop",
     "img": "/projects/pizzashop.webp",
     "descricao": "Uma aplicação simulando um dashbaord de vendas, inspirado na plataforma Ifood.",

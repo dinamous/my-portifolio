@@ -124,29 +124,20 @@
 }
 
 @media (max-width: 900px) {
-  .whatido__col {
-    max-width: 40vw;
-  }
-
-  .whatido__title {
-    font-size: clamp(2rem, 6vw, 3rem);
-  }
-}
-
-@media (max-width: 640px) {
   .whatido {
-    align-items: flex-start;
-    padding: 10vh 0;
+    align-items: stretch;
+    padding: 12vh 0;
     overflow-y: auto;
   }
 
   .whatido__inner {
     flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    min-height: 100%;
     gap: 8vh;
     padding: 0 8vw;
   }
-
-
 
   .whatido__col,
   .whatido__col--right {
@@ -156,6 +147,12 @@
 
   .whatido__title {
     white-space: normal;
+    font-size: clamp(2rem, 6vw, 3rem);
+  }
+
+  .whatido__divider,
+  .whatido__col--right .whatido__divider {
+    transform-origin: left center;
   }
 
   .whatido__text,

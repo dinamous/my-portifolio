@@ -2,7 +2,11 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { goToSection } from "../../lib/sectionStack";
 import { prefersReducedMotion } from "../../lib/motion";
+import { contact } from "../../lib/contact";
 import "./Navbar.css";
+
+const linkedin = contact.socials.find((s) => s.label === "LinkedIn")!;
+const github = contact.socials.find((s) => s.label === "GitHub")!;
 
 export default function Navbar() {
   useEffect(() => {
@@ -57,15 +61,14 @@ export default function Navbar() {
   }, []);
 
   return (
-    // ponytail: LinkedIn/GitHub hrefs are placeholders, swap in real profile URLs
     <div className="navbar">
       <div className="navbar__bar" id="navbar-bar" aria-hidden="true"></div>
       <nav className="navbar__nav" aria-label="Navegação principal">
         <span className="navbar__brand">@dinamous</span>
         <ul className="navbar__social">
-          <li><a href="#" target="_blank" rel="noopener">LinkedIn</a></li>
-          <li><a href="#" target="_blank" rel="noopener">GitHub</a></li>
-          <li><a href="mailto:dinamous.dev@gmail.com">Email</a></li>
+          <li><a href={linkedin.href} target="_blank" rel="noopener">LinkedIn</a></li>
+          <li><a href={github.href} target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href={`mailto:${contact.email}`}>Email</a></li>
         </ul>
         <ul className="navbar__pages">
           <li><a href="#aboutme-section">Sobre</a></li>

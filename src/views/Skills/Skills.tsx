@@ -273,7 +273,7 @@ export default function Skills() {
   }, []);
 
   return (
-    <section className="skills fixed inset-0 h-screen w-screen" id="skills-section" data-stack data-no-close-clip>
+    <section className="skills fixed inset-0 h-dvh w-screen" id="skills-section" data-stack data-no-close-clip>
       <div className="skills__intro">
         <h2 className="skills__headline">
           {headlineLines.map((line) => (

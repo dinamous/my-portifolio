@@ -23,6 +23,9 @@ export const TRANSITION_DISTANCE = 1800; // px of wheel/touch travel to fully cl
 // o respiro come parte do range, então o curso total cresce na mesma proporção —
 // sem isso a transição em si ficaria 33% mais rápida por notch de wheel
 const DISTANCE = TRANSITION_DISTANCE / (1 - HOLD);
+// touch cobre bem menos px por gesto que a soma de notches de wheel — sem isso um
+// swipe inteiro de tela mal empurra o progresso, exigindo vários swipes por seção
+const TOUCH_SENSITIVITY = 2.2;
 export const FINAL_WIDTH_VW = 5; // width (in vw) left uncovered when a section finishes closing
 const MAX_INSET = (100 - FINAL_WIDTH_VW) / 2; // vw per side to shrink down to FINAL_WIDTH_VW
 const FADE_START = 0.25; // fraction of the transition where the black overlay starts appearing
@@ -157,19 +160,30 @@ export function initSectionStack(selector = "[data-stack]") {
       // aqui e só devolve o controle pra pilha quando bate na própria borda.
       // ponytail: scrollTop direto, sem tween — delta de wheel já vem em passos
       // pequenos; suavizar com quickTo se ficar seco.
+      // wheel deltaY já vem no sentido "rolar pra frente = positivo"; touch/pointer
+      // reporta o delta bruto do arrasto (dedo sobe = deltaY negativo), então precisa
+      // inverter pra swipe pra cima avançar — mesma convenção usada pelo próprio
+      // ScrollTrigger.normalizeScroll (scroll = scrollY - deltaY)
+      const isWheel = self.event.type === "wheel";
+      const delta = isWheel ? self.deltaY : -self.deltaY;
+
       const scroller = (self.event.target as Element | null)?.closest?.(
         "[data-stack-scroll]",
       ) as HTMLElement | null;
       if (scroller) {
         const room = scroller.scrollHeight - scroller.clientHeight;
         const atEdge =
-          self.deltaY > 0 ? scroller.scrollTop >= room - 1 : scroller.scrollTop <= 0;
+          delta > 0 ? scroller.scrollTop >= room - 1 : scroller.scrollTop <= 0;
         if (room > 0 && !atEdge) {
-          scroller.scrollTop = gsap.utils.clamp(0, room, scroller.scrollTop + self.deltaY);
+          scroller.scrollTop = gsap.utils.clamp(0, room, scroller.scrollTop + delta);
           return;
         }
       }
-      target = gsap.utils.clamp(0, max, target + self.deltaY / DISTANCE);
+      // um swipe cobre bem menos px de tela do que a soma de notches de wheel que
+      // DISTANCE foi calibrado pra segurar, então touch/pointer ganham um boost de
+      // sensibilidade aqui — só no avanço da pilha, não no scroll do scroller acima
+      const stackDelta = isWheel ? delta : delta * TOUCH_SENSITIVITY;
+      target = gsap.utils.clamp(0, max, target + stackDelta / DISTANCE);
       moveTo(target);
     },
   });

@@ -278,7 +278,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="hero fixed inset-0 h-screen w-screen" id="hero-section" data-stack>
+    <section className="hero fixed inset-0 h-dvh w-screen" id="hero-section" data-stack>
       <HeroBackground />
 
       <div className="hero__loader" id="hero-loader" aria-hidden="true">

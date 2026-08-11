@@ -24,6 +24,10 @@ export default function WhatIDo() {
     const cols = [colLeft, colRight];
 
     const reduceMotion = prefersReducedMotion();
+    // below 900px the columns stack vertically (see WhatIDo.css) — the horizontal
+    // x drift below is choreographed for the desktop side-by-side layout, and in a
+    // single stacked column it just pushes the block off-center instead
+    const isStacked = window.matchMedia("(max-width: 900px)").matches;
 
     // the title's gradient lives per-letter (see .whatido__letter CSS) so each
     // letter can animate independently — this stretches one shared background
@@ -104,8 +108,8 @@ export default function WhatIDo() {
         opacity: 1,
       });
     } else {
-      gsap.set(colLeft, { x: "-3vw", opacity: 0 });
-      gsap.set(colRight, { x: "3vw", opacity: 0 });
+      gsap.set(colLeft, { x: isStacked ? 0 : "-3vw", opacity: 0 });
+      gsap.set(colRight, { x: isStacked ? 0 : "3vw", opacity: 0 });
       gsap.set(grid, { opacity: 0, scale: 1.08 });
 
       const revealLeft = buildRevealTimeline(
@@ -158,11 +162,11 @@ export default function WhatIDo() {
           scale: gsap.utils.interpolate(1.08, 1, colsT),
         });
         gsap.set(colLeft, {
-          x: gsap.utils.interpolate("-3vw", "-4vw", colsT),
+          x: isStacked ? 0 : gsap.utils.interpolate("-3vw", "-4vw", colsT),
           opacity: colsT,
         });
         gsap.set(colRight, {
-          x: gsap.utils.interpolate("3vw", "4vw", colsT),
+          x: isStacked ? 0 : gsap.utils.interpolate("3vw", "4vw", colsT),
           opacity: colsT,
         });
 
@@ -170,11 +174,13 @@ export default function WhatIDo() {
         // deliberate snap-together finish rather than drifting in at the same
         // rate as everything else; overshoots past their natural centered flex
         // position (not just 0vw) so the columns visibly close in on each other.
-        const spinT = spinCloseEase(
-          gsap.utils.clamp(0, 1, (t - CLIP_CLOSE_T) / (1 - CLIP_CLOSE_T)),
-        );
-        gsap.set(colLeft, { x: gsap.utils.interpolate("-4vw", "9vw", spinT) });
-        gsap.set(colRight, { x: gsap.utils.interpolate("4vw", "-9vw", spinT) });
+        if (!isStacked) {
+          const spinT = spinCloseEase(
+            gsap.utils.clamp(0, 1, (t - CLIP_CLOSE_T) / (1 - CLIP_CLOSE_T)),
+          );
+          gsap.set(colLeft, { x: gsap.utils.interpolate("-4vw", "9vw", spinT) });
+          gsap.set(colRight, { x: gsap.utils.interpolate("4vw", "-9vw", spinT) });
+        }
       }) as EventListener;
       window.addEventListener("hero:bar-shrink", onBarShrink);
 
@@ -250,7 +256,7 @@ export default function WhatIDo() {
 
   return (
     <section
-      className="whatido fixed inset-0 h-screen w-screen"
+      className="whatido fixed inset-0 h-dvh w-screen"
       id="whatido-section"
       data-stack
       data-no-close-clip

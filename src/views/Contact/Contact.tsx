@@ -255,11 +255,10 @@ export default function Contact() {
 
     const message = ({ nome, email, mensagem }: ReturnType<typeof values>) =>
       [
-        `Olá Matheus! Aqui é ${nome}.`,
-        `Tipo de projeto: ${selectedType}`,
+        `Oi Matheus, vim pelo seu portfólio. Meu nome é ${nome} e gostaria de tratar de uma ideia de ${selectedType}.`,
         "",
         mensagem,
-        email ? `\nMeu e-mail: ${email}` : "",
+        email ? `\nE-mail para retorno: ${email}` : "",
       ].join("\n");
 
     const onSubmit = (e: Event) => {
@@ -323,7 +322,7 @@ export default function Contact() {
   }, []);
 
   return (
-    <section className="contact fixed inset-0 h-screen w-screen" id="contact-section" data-stack>
+    <section className="contact fixed inset-0 h-dvh w-screen" id="contact-section" data-stack>
       <ScannerBackground />
 
       <DashedLine vertical id="contact-divider" className="contact__divider" />
@@ -451,10 +450,10 @@ export default function Contact() {
           </div>
 
           <div className="contact__sent" id="contact-sent" role="status">
-            <p className="contact__sent-title">Mensagem pronta.</p>
+            <p className="contact__sent-title">Abri o WhatsApp pra você.</p>
             <p className="contact__sent-text">
-              Abri o WhatsApp com tudo preenchido, é só apertar enviar por lá. Se a janela não abriu,
-              chama em <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+              Sua mensagem já está escrita lá, só falta apertar enviar. Não abriu? Manda direto pra{" "}
+              <a href={`mailto:${contact.email}`}>{contact.email}</a>.
             </p>
             <button className="contact__again" id="contact-again" type="button">
               escrever outra

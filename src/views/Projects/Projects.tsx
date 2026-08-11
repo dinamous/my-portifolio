@@ -534,7 +534,7 @@ export default function Projects() {
 
   return (
     <section
-      className="projects fixed inset-0 h-screen w-screen"
+      className="projects fixed inset-0 h-dvh w-screen"
       id="projects-section"
       data-stack
       data-no-close-clip
