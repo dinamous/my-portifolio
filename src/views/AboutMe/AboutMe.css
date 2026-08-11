@@ -214,44 +214,62 @@
 
   .aboutme__ticket,
   .aboutme__panel {
-    height: clamp(280px, 56vh, 460px);
+    height: clamp(280px, 56dvh, 460px);
   }
 }
 
 @media (max-width: 640px) {
-  /* ficha e painel empilhados (ficha em cima) em vez de lado a lado — a seção vira
-     scrollável (como a WhatIDo) porque os dois blocos juntos passam da altura da tela.
-     canhoto continua vertical (Perforation/DashedLine têm orientação fixa via prop) */
-  .aboutme {
-    overflow-y: auto;
-  }
-
+  /* ficha e painel empilhados (ficha em cima) em vez de lado a lado. .aboutme__frame é
+     absolute;inset:0 (herdado do desktop) então não gera scroll no .aboutme mesmo com
+     overflow-y:auto — o conteúdo teria que caber sempre. Por isso as alturas abaixo são
+     apertadas pra ticket+panel somarem menos que 100dvh, não deixadas em scroll.
+     canhoto continua vertical (Perforation/DashedLine têm orientação fixa via prop).
+     padding-bottom reserva a altura do .sectionnav fixo (56px) + folga — sem isso o
+     fim do parágrafo do painel cola/soma embaixo do próprio nav em telas baixas
+     (320x568) */
   .aboutme__frame {
-    position: static;
     grid-template-columns: 1fr;
     align-items: stretch;
+    gap: 1.6dvh;
     width: 86vw;
-    min-height: 100%;
-    margin: 0 auto;
-    padding: 6vh 0;
+    padding: 2dvh 0 calc(56px + 2dvh);
   }
 
   .aboutme__ticket {
-    height: clamp(360px, 64vh, 480px);
+    height: clamp(230px, 40dvh, 340px);
   }
 
   .aboutme__photo {
-    height: clamp(160px, 30vh, 240px);
+    height: clamp(90px, 16dvh, 150px);
+  }
+
+  .aboutme__stub {
+    padding: 1.6dvh 0;
+  }
+
+  .aboutme__ticket-body {
+    gap: 1.4dvh;
+    padding: 2dvh clamp(18px, 6vw, 28px);
   }
 
   .aboutme__panel {
     height: auto;
-    padding: 5vh clamp(18px, 6vw, 28px);
+    padding: 3dvh clamp(18px, 6vw, 28px);
   }
 
   /* clamp padrão não desce o suficiente pra caber "movimento" numa linha em telas
      de ~375-428px — sem isso a palavra quebra no meio */
   .aboutme__heading {
-    font-size: clamp(1.7rem, 8.5vw, 2.2rem);
+    font-size: clamp(1.6rem, 7.5vw, 2rem);
+    margin-bottom: 1.2dvh;
+  }
+
+  .aboutme__rule {
+    margin-bottom: 1.4dvh;
+  }
+
+  .aboutme__sub {
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
 }

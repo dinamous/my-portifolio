@@ -216,7 +216,14 @@
 
 .gallery__lightbox-stage {
   overflow: hidden;
-  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ocupa a área toda do lightbox (não só o tamanho intrínseco da mídia): sem isso o
+     stage encolhia pro tamanho original da imagem e o zoom (scale na mídia, filha)
+     crescia para fora dele, cortado nas bordas do próprio stage */
+  width: 92vw;
+  height: 78dvh;
   cursor: zoom-in;
   /* o pan é do Observer: sem isso o toque rola/dá pinch na página por baixo */
   touch-action: none;
@@ -230,8 +237,14 @@
 
 .gallery__lightbox-media {
   display: block;
-  max-width: 92vw;
-  max-height: 78dvh;
+  width: 100%;
+  height: 100%;
+  /* screenshot fullpage é bem mais alto que largo: object-fit garante que a imagem
+     inteira caiba no stage antes do zoom começar a ampliar, em vez de já nascer
+     recortada pela max-height. width/height 100% (não max-*) porque o cálculo de pan
+     em ProjectGallery.tsx usa offsetWidth/offsetHeight da própria mídia como área de
+     folga — precisa ser o box do stage, não o tamanho intrínseco da imagem. */
+  object-fit: contain;
   will-change: transform;
 }
 

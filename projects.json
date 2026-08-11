@@ -1,7 +1,26 @@
 [
   {
+    "titulo": "Conta Digital — Superlógica",
+    "img": "",
+    "pasta": "conta-digital",
+    "descricao": "Superprática, com serviços financeiros exclusivos para condomínios e integrados ao software de gestão — facilitando a administração condominial.",
+    "techs": ["React", "Gatsby", "Motion"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://superlogica.com/condominios/servicos-financeiros/conta-digital/" }]
+  },
+  {
+    "titulo": "A Síndica — Superlógica",
+    "img": "/projects/asindica/a0-thumb.png",
+    "pasta": "asindica",
+    "descricao": "LP da campanha da Superlógica com o comentarista Chico Felliti, em parceria para o podcast de true crime sobre um condomínio.",
+    "techs": ["React", "Design System"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://superlogica.com/asindica/" }]
+  },
+  {
     "titulo": "NEXT26 Superlógica",
-    "img": "/projects/next/next-hero.png",
+    "img": "/projects/next/a0-thumb.png",
+    "pasta": "next",
     "descricao": "Landing page do NEXT26, evento da Superlógica para o mercado de moradia, reunindo marcas como Superlógica, Gruvi e Imobi num festival de conteúdo sobre tecnologia para o setor.",
     "techs": ["React", "Gatsby", "GraphQL", "Design System"],
     "categoria": ["Front-End"],

@@ -263,12 +263,24 @@ export default function ProjectGallery({ images, title }: { images: string[]; ti
     const duration = reduce ? 0 : 0.35;
     gsap.set(media, { scale: 1, x: 0, y: 0 });
 
+    // área realmente pintada pelo object-fit:contain dentro do box do elemento — sem
+    // isso o clamp/recentro usava media.offsetWidth/Height (o box, não a imagem), e
+    // numa imagem fullpage (bem mais alta que larga) sobrava faixa vazia enorme pra
+    // arrastar em vez de mostrar mais conteúdo real
+    const paintedBox = () => {
+      const img = media as HTMLImageElement;
+      const natural = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1;
+      const box = media.offsetWidth / media.offsetHeight;
+      return box > natural
+        ? { width: media.offsetHeight * natural, height: media.offsetHeight }
+        : { width: media.offsetWidth, height: media.offsetWidth / natural };
+    };
+
     const apply = () => {
-      // ponytail: o limite de pan usa o box do elemento, não a área pintada da imagem
-      // (object-fit deixa faixa vazia) — sobra folga, mas nunca some.
+      const painted = paintedBox();
       const max = (size: number) => (size * (st.scale - 1)) / 2;
-      st.x = gsap.utils.clamp(-max(media.offsetWidth), max(media.offsetWidth), st.x);
-      st.y = gsap.utils.clamp(-max(media.offsetHeight), max(media.offsetHeight), st.y);
+      st.x = gsap.utils.clamp(-max(painted.width), max(painted.width), st.x);
+      st.y = gsap.utils.clamp(-max(painted.height), max(painted.height), st.y);
       gsap.to(media, {
         ...st,
         duration,
@@ -304,7 +316,9 @@ export default function ProjectGallery({ images, title }: { images: string[]; ti
           st.x = st.y = 0;
         } else {
           // leva o ponto clicado pro centro: depois do scale s, um ponto a p do centro
-          // cai em p*s, então o translate que o traz de volta é -p*s
+          // cai em p*s, então o translate que o traz de volta é -p*s. Usa o box do
+          // elemento (não o pintado) porque é ali que o clique acontece de fato — só o
+          // clamp em apply() precisa saber onde a imagem real termina.
           const e = self.event as PointerEvent;
           const r = media.getBoundingClientRect();
           st.scale = 2.4;

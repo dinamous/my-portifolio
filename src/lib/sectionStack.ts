@@ -25,7 +25,7 @@ export const TRANSITION_DISTANCE = 1800; // px of wheel/touch travel to fully cl
 const DISTANCE = TRANSITION_DISTANCE / (1 - HOLD);
 // touch cobre bem menos px por gesto que a soma de notches de wheel — sem isso um
 // swipe inteiro de tela mal empurra o progresso, exigindo vários swipes por seção
-const TOUCH_SENSITIVITY = 2.2;
+const TOUCH_SENSITIVITY = 3.2;
 export const FINAL_WIDTH_VW = 5; // width (in vw) left uncovered when a section finishes closing
 const MAX_INSET = (100 - FINAL_WIDTH_VW) / 2; // vw per side to shrink down to FINAL_WIDTH_VW
 const FADE_START = 0.25; // fraction of the transition where the black overlay starts appearing
