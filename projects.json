@@ -1,5 +1,14 @@
 [
   {
+    "titulo": "Superlógica Design Language",
+    "img": "/projects/superlogica-sdl/a0-thumb.png",
+    "pasta": "superlogica-sdl",
+    "descricao": "Biblioteca de guideline e design system para a Superlógica, usada tanto na criação de conteúdo quanto no apoio ao desenvolvimento das landing pages.",
+    "techs": ["React", "Design System"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://superlogica.design/" }]
+  },
+  {
     "titulo": "Conta Digital — Superlógica",
     "img": "",
     "pasta": "conta-digital",
