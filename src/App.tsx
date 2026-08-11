@@ -1,32 +1,29 @@
-import { ThemeProvider } from "@/components/theme-provider"
-import Navbar from "./components/Navbar"
-import HeroHeader from "./components/HeroHeader"
-import AboutMe from "./components/AboutMe"
-import Footer from "./components/Footer"
-import Contact from "./components/Contact"
-import MyStack from "./components/MyStack"
-import { Toaster } from "./components/ui/sonner"
-import Projects from "./components/Projects"
+import { useEffect } from "react";
+import { initSectionStack } from "./lib/sectionStack";
+import SectionNav from "./components/SectionNav/SectionNav";
+import Hero from "./views/Hero/Hero";
+import WhatIDo from "./views/WhatIDo/WhatIDo";
+import AboutMe from "./views/AboutMe/AboutMe";
+import Projects from "./views/Projects/Projects";
+import Skills from "./views/Skills/Skills";
+import Contact from "./views/Contact/Contact";
+import ProjectDetail from "./views/ProjectDetail/ProjectDetail";
 
-function App() {
+export default function App() {
+  useEffect(() => {
+    initSectionStack();
+  }, []);
+
   return (
-    <div>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <Navbar></Navbar>
-        <div className="flex flex-col justify-between gap-40">
-          <HeroHeader></HeroHeader>
-          <MyStack></MyStack>
-          <AboutMe></AboutMe>
-          <Projects></Projects>
-          <Contact></Contact>
-        </div>
-
-        <Footer></Footer>
-        <Toaster />
-
-      </ThemeProvider>
-    </div>
-  )
+    <>
+      <Hero />
+      <WhatIDo />
+      <AboutMe />
+      <Projects />
+      <Skills />
+      <Contact />
+      <SectionNav />
+      <ProjectDetail />
+    </>
+  );
 }
-
-export default App

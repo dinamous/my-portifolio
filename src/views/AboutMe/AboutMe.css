@@ -1,0 +1,275 @@
+.aboutme {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: opacity;
+  /* transparente: só as duas cortinas (e, depois de revelado, o conteúdo) aparecem.
+     O sectionStack dá à última seção o menor z-index (revelar-por-trás); esta aqui
+     em vez disso passa a própria cortina por cima do que estiver na tela, então
+     precisa ficar acima de Hero/WhatIDo o tempo todo. */
+  z-index: 20 !important;
+}
+
+/* ---- cortina / fundo ------------------------------------------------- */
+
+.aboutme__block {
+  width: 100%;
+  /* 1px de sobra: com 50dvh exatos os dois blocos deixam uma fresta em DPR fracionário,
+     e a WhatIDo aparece por ela entre a cortina fechar (t=0.6) e o backdrop subir */
+  height: calc(50dvh + 1px);
+  flex-shrink: 0;
+  background: #000;
+  will-change: transform;
+  z-index: -1;
+}
+
+/* fora da tela já no CSS, não só no gsap.set — esperar o JS deixaria duas barras
+   pretas (z-index:20, acima de tudo) piscando sobre a Hero antes do GSAP rodar */
+.aboutme__block--top {
+  transform: translateX(-100%);
+}
+
+.aboutme__block--bottom {
+  transform: translateX(100%);
+}
+
+.aboutme__backdrop {
+  position: absolute;
+  inset: 0;
+  background: #030303;
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* ---- dois blocos: uma "ficha" (canhoto perfurado + foto) e o painel de texto.
+   sem bordas: os blocos se separam do fundo pelo próprio tom (#080a09 sobre #030303) --- */
+
+.aboutme__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(280px, 34%) 1fr;
+  align-items: center;
+  gap: clamp(24px, 3vw, 56px);
+  width: min(1280px, 88vw);
+  margin: 0 auto;
+}
+
+.aboutme__ticket {
+  display: flex;
+  height: clamp(320px, 62vh, 560px);
+  background: #080a09;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.aboutme__stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  width: clamp(48px, 4.5vw, 68px);
+  padding: 2.2vh 0;
+}
+
+/* furos na borda externa do canhoto */
+.aboutme__stub-holes {
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+/* linha picotada que separa canhoto e corpo, no lugar do border-right */
+.aboutme__stub-edge {
+  right: 0;
+  top: 6%;
+  bottom: 6%;
+}
+
+.aboutme__stub-text {
+  writing-mode: vertical-rl;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.55);
+}
+
+.aboutme__arrows {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--accent-green) 75%, transparent);
+}
+
+.aboutme__ticket-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.2vh;
+  flex: 1;
+  min-width: 0;
+  padding: 3vh clamp(18px, 2vw, 32px);
+}
+
+.aboutme__mark {
+  top: 3vh;
+  right: clamp(18px, 2vw, 32px);
+  will-change: transform, opacity;
+}
+
+.aboutme__info-line {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.78rem, 1vw, 0.9rem);
+  line-height: 1.6;
+  color: rgba(244, 247, 245, 0.6);
+}
+
+.aboutme__photo {
+  position: relative;
+  width: 100%;
+  height: clamp(200px, 34vh, 340px);
+  overflow: hidden;
+  will-change: clip-path;
+}
+
+.aboutme__photo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  filter: contrast(1.05) saturate(1.05) brightness(0.94);
+}
+
+.aboutme__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: clamp(320px, 62vh, 560px);
+  min-width: 0;
+  padding: 0 clamp(20px, 3vw, 56px);
+  background: #080a09;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.aboutme__deco {
+  will-change: opacity;
+}
+
+.aboutme__heading {
+  margin: 0 0 2vh;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.2rem, 4.6vw, 4.4rem);
+  line-height: 1.02;
+  color: #f4f7f5;
+}
+
+.aboutme__heading-break {
+  display: block;
+}
+
+.aboutme__letter-wrap {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.02;
+}
+
+/* sem will-change aqui de propósito: são ~30 spans, e promover cada um a layer
+   próprio custa mais (e treme mais) do que repintar o texto. O will-change fica
+   nos poucos elementos grandes (ticket, panel, photo, backdrop, blocks, sub). */
+.aboutme__letter {
+  display: inline-block;
+}
+
+.aboutme__rule {
+  margin-bottom: 2.6vh;
+}
+
+.aboutme__sub {
+  max-width: 48ch;
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  line-height: 1.7;
+  color: rgba(244, 247, 245, 0.7);
+  will-change: transform, opacity;
+}
+
+@media (max-width: 900px) {
+  .aboutme__frame {
+    grid-template-columns: minmax(200px, 40%) 1fr;
+    gap: 0;
+  }
+
+  .aboutme__ticket,
+  .aboutme__panel {
+    height: clamp(280px, 56dvh, 460px);
+  }
+}
+
+@media (max-width: 640px) {
+  /* ficha e painel empilhados (ficha em cima) em vez de lado a lado. .aboutme__frame é
+     absolute;inset:0 (herdado do desktop) então não gera scroll no .aboutme mesmo com
+     overflow-y:auto — o conteúdo teria que caber sempre. Por isso as alturas abaixo são
+     apertadas pra ticket+panel somarem menos que 100dvh, não deixadas em scroll.
+     canhoto continua vertical (Perforation/DashedLine têm orientação fixa via prop).
+     padding-bottom reserva a altura do .sectionnav fixo (56px) + folga — sem isso o
+     fim do parágrafo do painel cola/soma embaixo do próprio nav em telas baixas
+     (320x568) */
+  .aboutme__frame {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 1.6dvh;
+    width: 86vw;
+    padding: 2dvh 0 calc(56px + 2dvh);
+  }
+
+  .aboutme__ticket {
+    height: clamp(230px, 40dvh, 340px);
+  }
+
+  .aboutme__photo {
+    height: clamp(90px, 16dvh, 150px);
+  }
+
+  .aboutme__stub {
+    padding: 1.6dvh 0;
+  }
+
+  .aboutme__ticket-body {
+    gap: 1.4dvh;
+    padding: 2dvh clamp(18px, 6vw, 28px);
+  }
+
+  .aboutme__panel {
+    height: auto;
+    padding: 3dvh clamp(18px, 6vw, 28px);
+  }
+
+  /* clamp padrão não desce o suficiente pra caber "movimento" numa linha em telas
+     de ~375-428px — sem isso a palavra quebra no meio */
+  .aboutme__heading {
+    font-size: clamp(1.6rem, 7.5vw, 2rem);
+    margin-bottom: 1.2dvh;
+  }
+
+  .aboutme__rule {
+    margin-bottom: 1.4dvh;
+  }
+
+  .aboutme__sub {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}

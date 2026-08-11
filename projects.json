@@ -1,0 +1,126 @@
+[
+  {
+    "titulo": "Superlógica Design Language",
+    "img": "/projects/superlogica-sdl/a0-thumb.png",
+    "pasta": "superlogica-sdl",
+    "descricao": "Biblioteca de guideline e design system para a Superlógica, usada tanto na criação de conteúdo quanto no apoio ao desenvolvimento das landing pages.",
+    "techs": ["React", "Design System"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://superlogica.design/" }]
+  },
+  {
+    "titulo": "Conta Digital — Superlógica",
+    "img": "",
+    "pasta": "conta-digital",
+    "descricao": "Superprática, com serviços financeiros exclusivos para condomínios e integrados ao software de gestão — facilitando a administração condominial.",
+    "techs": ["React", "Gatsby", "Motion"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://superlogica.com/condominios/servicos-financeiros/conta-digital/" }]
+  },
+  {
+    "titulo": "A Síndica — Superlógica",
+    "img": "/projects/asindica/a0-thumb.png",
+    "pasta": "asindica",
+    "descricao": "LP da campanha da Superlógica com o comentarista Chico Felliti, em parceria para o podcast de true crime sobre um condomínio.",
+    "techs": ["React", "Design System"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://superlogica.com/asindica/" }]
+  },
+  {
+    "titulo": "NEXT26 Superlógica",
+    "img": "/projects/next/a0-thumb.png",
+    "pasta": "next",
+    "descricao": "Landing page do NEXT26, evento da Superlógica para o mercado de moradia, reunindo marcas como Superlógica, Gruvi e Imobi num festival de conteúdo sobre tecnologia para o setor.",
+    "techs": ["React", "Gatsby", "GraphQL", "Design System"],
+    "categoria": ["Front-End"],
+    "actions": [{ "label": "Link", "link": "https://next.superlogica.com/" }]
+  },
+  {
+    "titulo": "pizza.shop",
+    "img": "/projects/pizzashop.webp",
+    "descricao": "Uma aplicação simulando um dashbaord de vendas, inspirado na plataforma Ifood.",
+    "techs": ["Vue", "Vite", "Vuelidate", "shadcn/ui"],
+    "categoria": ["Front-end"],
+    "actions": [
+      { "label": "Repo", "link": "https://github.com/dinamous/pizza-shop/tree/main" },
+      { "label": "Link", "link": "https://pizza-shop-web.vercel.app" }
+    ]
+  },
+  {
+    "titulo": "AutismVogais",
+    "img": "/projects/AutismVogais.webp",
+    "descricao": "Prototipação de uma Ferramenta digital com o intuito de auxiliar o aprendizado de vogais e alfabetização de crianças no espectro autista.",
+    "techs": ["Figma", "Adobe Illustrator"],
+    "categoria": ["UI/UX"],
+    "actions": [
+      {
+        "label": "Link",
+        "link": "https://www.figma.com/proto/78kN9WNYqMmahdnCOZ8WNh/AustimVogais?type=design&node-id=1-247&t=UOjnXN9ryUtW62oq-1&scaling=scale-down&page-id=0%3A1&starting-point-node-id=1%3A98&mode=design"
+      }
+    ]
+  },
+  {
+    "titulo": "EasyLearn",
+    "img": "/projects/EasyLearn.webp",
+    "descricao": "Protipação de uma plataforma web de Ensino à distância, incentivado pela pandemia da COVID-21. Esta aplicação fez uso de inspiração das ferramentas do Google Classroom e Meet.",
+    "techs": ["Figma", "Undraw", "Adobe Illustrator"],
+    "categoria": ["UI/UX"],
+    "actions": [
+      {
+        "label": "Link",
+        "link": "https://www.figma.com/proto/yoTImyT9jVIU8ndAp5zrZ6/IHC?type=design&node-id=17-2&t=G2PRsKH4Bh2o6pdY-1&scaling=min-zoom&page-id=2%3A2&starting-point-node-id=161%3A3026&mode=design"
+      }
+    ]
+  },
+  {
+    "titulo": "Clone Nubank",
+    "img": "/projects/Nubank.webp",
+    "descricao": "Um clone da antiga versão do app do Banco Nubank, em react native. Utilizando o framework Expo e styled componentes, de modo a replicar a interface de forma inteiramente através do CSS",
+    "techs": ["React Native", "Expo", "styled-components"],
+    "categoria": ["Front-End", "Mobile"],
+    "actions": [{ "label": "Repo", "link": "https://github.com/dinamous/clone-nubank-expo" }]
+  },
+  {
+    "titulo": "TextToSpeech IBM",
+    "img": "/projects/TextToSpeech.webp",
+    "descricao": "Uma aplicação desenvolvida, a fim de explorar a utilização da I.A do IBM de modo a realizar a conversar do input do usuário em 'text to speech'.",
+    "techs": ["Node", "SQL", "React", "Sequelize ORM"],
+    "categoria": ["Front-End", "Back-End"],
+    "actions": [{ "label": "Repo", "link": "https://github.com/dinamous/text-to-speech/tree/master" }]
+  },
+  {
+    "titulo": "Vizionar RA (Fictícia)",
+    "img": "/projects/Vizionar.webp",
+    "descricao": "Um website desenvolvido de modo a exemplificar uma landing page de uma empresa ficticia que oferece serviço de Realidade Aumentada.",
+    "techs": ["HTML", "CSS", "Bootstrap"],
+    "categoria": ["Front-End"],
+    "actions": [
+      { "label": "Repo", "link": "https://github.com/dinamous/vizionar" },
+      { "label": "Link", "link": "https://dinamous.github.io/vizionar/index.html" }
+    ]
+  },
+  {
+    "titulo": "A 13° Jornada Científica e Tecnológica",
+    "img": "/projects/IFSUL.webp",
+    "descricao": "Evento científico interdisciplinar de nível nacional com expansão internacional, atuando na área de comunicação científica e tecnológica.",
+    "techs": ["HTML", "CSS", "Bootstrap"],
+    "categoria": ["Front-End"],
+    "actions": [
+      { "label": "Repo", "link": "https://github.com/dinamous/Jornada-Cientifica/" },
+      { "label": "Link", "link": "https://dinamous.github.io/Jornada-Cientifica/" }
+    ]
+  },
+  {
+    "titulo": "AUTISMALG",
+    "img": "/projects/autismalg.webp",
+    "descricao": "Prototipação de app mobile para Auxiliar no Ensino da Identificação de Algarismos para Crianças com Transtorno do Espectro Autista.",
+    "techs": ["Figma"],
+    "categoria": ["UI/UX"],
+    "actions": [
+      {
+        "label": "Link",
+        "link": "https://www.figma.com/proto/dTrNLKDrc3lsftnkA1BOcS/F%C3%A1bio---ALTISMALG?type=design&node-id=381-329&t=HYcQdxBtTDPHzeRU-1&scaling=scale-down&page-id=369%3A122&starting-point-node-id=381%3A225&mode=design"
+      }
+    ]
+  }
+]

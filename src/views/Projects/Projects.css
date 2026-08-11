@@ -1,0 +1,456 @@
+.projects {
+  /* zona morta no pé: a SectionNav é fixed por cima da seção inteira, então o
+     container de rows precisa acabar antes dela */
+  --projects-deadzone: 4.5rem;
+  background: #030303;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  will-change: opacity;
+}
+
+.projects__header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6vh;
+  padding: 9vh 6vw 2.6vh;
+  border-bottom: 1px solid rgba(244, 247, 245, 0.14);
+  will-change: transform, opacity;
+}
+
+.projects__heading {
+  margin: 0;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5.4vw, 5.2rem);
+  line-height: 1;
+  color: #f4f7f5;
+}
+
+.projects__meta {
+  display: flex;
+  align-items: center;
+  gap: 2.4vw;
+}
+
+/* filtro por categoria — mora na mesma linha do marquee/progresso pra não comer
+   altura da lista, que é o recurso escasso da viewport fixa desta seção */
+.projects__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  flex-shrink: 0;
+}
+
+.projects__filter {
+  padding: 0.55em 1em;
+  border: 1px solid rgba(244, 247, 245, 0.18);
+  /* mesmo canto reto da thumb e das marcas de registro — a pílula arredondada era
+     o único elemento de UI fora dessa linguagem */
+  border-radius: 1px;
+  background: transparent;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.62rem, 0.85vw, 0.75rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.5);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.projects__filter:hover {
+  border-color: rgba(244, 247, 245, 0.4);
+  color: #f4f7f5;
+}
+
+.projects__filter--active {
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--accent-stops));
+  color: #030303;
+}
+
+.projects__filter:focus-visible {
+  outline: 1px solid var(--accent-green);
+  outline-offset: 2px;
+}
+
+/* marquee das stacks reais dos projetos — desloca via GSAP xPercent (não
+   @keyframes, ver regra de animação do projeto), duas cópias lado a lado
+   permitem o loop -50% ser perfeitamente contínuo */
+.projects__marquee {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.projects__marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.projects__marquee-row {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.projects__marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.4em;
+  padding: 0 1.4em;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.4);
+}
+
+.projects__marquee-star {
+  font-size: 0.6em;
+  color: rgba(244, 247, 245, 0.4);
+}
+
+/* indicador vertical de progresso da lista — o preenchimento acompanha o
+   curso local da seção (ver BROWSE_T/browseT no efeito), não é decorativo. Fica
+   na lateral direita da viewport, ocupando a altura toda como uma scrollbar. */
+.projects__progress {
+  position: absolute;
+  right: 1.8vw;
+  top: 1.6vh;
+  bottom: 1.6vh;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7em;
+  pointer-events: none;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.75rem, 1vw, 0.9rem);
+  color: rgba(244, 247, 245, 0.45);
+}
+
+/* o índice atual é o único número que muda — a barrinha de acento sob ele o
+   separa do total (fixo) e amarra o contador ao trilho abaixo */
+.projects__progress-index {
+  position: relative;
+  color: #f4f7f5;
+  padding-bottom: 0.4em;
+}
+
+.projects__progress-index::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1.4em;
+  height: 2px;
+  translate: -50% 0;
+  background: linear-gradient(90deg, var(--accent-stops));
+}
+
+.projects__progress-track {
+  position: relative;
+  width: 2px;
+  flex: 1;
+  min-height: 0;
+  background: rgba(244, 247, 245, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  /* o trilho é desenhado de cima pra baixo na entrada (scaleY, ver reveal) */
+  transform-origin: top center;
+  will-change: transform;
+}
+
+.projects__progress-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top center;
+  transform: scaleY(0);
+  background: linear-gradient(180deg, var(--accent-stops-rev));
+  will-change: transform;
+}
+
+/* o container termina acima da SectionNav (margin, não padding: encurta a caixa
+   de verdade, e é a altura dela que as rows dividem entre si) */
+.projects__list-viewport {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow: hidden;
+  padding: 0 6vw;
+  margin-bottom: var(--projects-deadzone);
+}
+
+/* sempre a partir do topo: com filtro aplicado a lista encurta, e centralizar
+   fazia as linhas "descerem" pro meio da viewport a cada troca de filtro. */
+.projects__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  will-change: transform;
+}
+
+/* --projects-row-h é escrita pelo efeito: a altura da viewport dividida num número
+   inteiro de rows (o clamp aqui é só a altura natural de partida, que o efeito mede
+   pra decidir quantas cabem). É o que faz o snap fechar — cada parada do scroll é um
+   múltiplo dessa altura, então nunca sobra meia row no topo nem no pé.
+   flex-shrink:0 porque, como item de flex column, o li encolheria abaixo dela quando
+   a lista passa da viewport — e aí o cálculo de overflow passaria a mentir.
+   container-type: size expõe a altura final como cqh pro título e a thumb. */
+.projects__list > li {
+  height: var(--projects-row-h, clamp(98px, 10.4vw, 168px));
+  flex-shrink: 0;
+  container-type: size;
+}
+
+.projects__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 2vw;
+  height: 100%;
+  padding: 0.8vh 0;
+  border-bottom: 1px solid rgba(244, 247, 245, 0.12);
+  opacity: 0;
+  color: inherit;
+  text-decoration: none;
+  will-change: transform, opacity;
+}
+
+/* coluna 1fr do grid: sem isso um item de grid não encolhe abaixo do seu
+   conteúdo intrínseco, e é isso que deixa o título estourar a row */
+.projects__row > .projects__title {
+  min-width: 0;
+}
+
+/* cursor nativo só some quando a row está de fato interativa (mesma janela em
+   que a pill pode aparecer) — sem essa classe, o cursor sumia (cursor:none)
+   mesmo nos momentos em que a pill ainda não tinha permissão de aparecer,
+   deixando o mouse "invisível" sem nada no lugar. */
+.projects__list--active .projects__row {
+  cursor: none;
+}
+
+.projects__row:focus-visible {
+  outline: 1px solid var(--accent-green);
+  outline-offset: -4px;
+}
+
+/* substitui o cursor no hover das rows, sinalizando "abre outra página"; ver quickTo
+   no efeito. É um RegMark (components/graphics) — caixa, fio e cor vêm de lá, aqui só
+   o que a marca não tem: sair do fluxo pro cursor e ganhar fundo pra ficar legível
+   sobre a thumb. Escondido em telas sem hover real (touch), onde não faz sentido. */
+.projects__cursor-pill {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  background: #0b1013;
+  box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  will-change: transform, opacity;
+  /* fio e seta em branco, não no acento: o verde já é da faixa sob o título e da
+     barra de progresso — no cursor competia com os dois */
+  outline-color: rgba(244, 247, 245, 0.5);
+  color: #f4f7f5;
+}
+
+.projects__cursor-arrow {
+  width: 42%;
+  height: 42%;
+  overflow: visible;
+}
+
+@media (hover: none) {
+  .projects__cursor-pill {
+    display: none;
+  }
+}
+
+/* o setup da marca (autoAlpha 0 inicial) vive no branch animado do efeito, então em
+   reduced-motion ela ficaria congelada e visível no canto — e o cursor nativo, sumido */
+@media (prefers-reduced-motion: reduce) {
+  .projects__cursor-pill {
+    display: none;
+  }
+
+  .projects__list--active .projects__row {
+    cursor: pointer;
+  }
+}
+
+.projects__title {
+  position: relative;
+  margin: 0;
+  display: flex;
+  max-width: 100%;
+  overflow: hidden;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  /* cqh = altura da row (ver container-type no li): quando a lista aperta pra
+     caber, o título encolhe junto em vez de estourar a linha */
+  font-size: min(clamp(2.2rem, 4.6vw, 4.2rem), 46cqh);
+  line-height: 1;
+  color: #f4f7f5;
+  /* nome maior que a coluna: a borda direita se dissolve em vez de estourar o
+     grid. AnimatedLetters quebra o texto em spans por letra, então
+     text-overflow: ellipsis (exige texto contínuo) não é opção — a máscara
+     funciona igual em cima de spans. Quando o título cabe, os 15% finais do
+     gradiente não têm o que cortar e nada muda visualmente. */
+  mask-image: linear-gradient(90deg, #000 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent 100%);
+}
+
+.projects__letter-wrap {
+  display: inline-block;
+  flex-shrink: 0;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.projects__letter {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.projects__title-underline {
+  position: absolute;
+  left: 0;
+  bottom: -0.08em;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--accent-stops));
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+.projects__tag {
+  justify-self: end;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  color: rgba(244, 247, 245, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* thumb vive na própria coluna do grid (entre título e tag) em vez de
+   position:absolute sobre a linha — evita sobrepor a tag e, como o clip-path
+   só recorta o desenho e não a caixa, a coluna já reserva o espaço final e o
+   hover não causa reflow nem vaza sobre a linha vizinha. */
+.projects__thumb {
+  position: relative;
+  width: clamp(120px, 12.6vw, 200px);
+  /* mesmo cqh do título: a thumb é o elemento mais alto da row, então é ela que
+     estouraria primeiro quando a lista aperta. object-fit: cover no <img> absorve
+     a mudança de proporção. */
+  height: min(clamp(74px, 7.8vw, 124px), 74cqh);
+  overflow: hidden;
+  /* moldura reta em vez do canto arredondado — a thumb lê como frame de contato.
+     border (não outline) porque o clip-path do hover precisa recortá-la junto com a
+     imagem; box-sizing: border-box do reset mantém a caixa no tamanho declarado. */
+  border: 1px solid rgba(244, 247, 245, 0.28);
+  border-radius: 1px;
+  clip-path: inset(50% 0% 50% 0%);
+  pointer-events: none;
+  will-change: clip-path;
+}
+
+.projects__thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.projects__thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, rgba(15, 59, 52, 0.4), rgba(3, 8, 7, 0.55));
+  mix-blend-mode: multiply;
+}
+
+.projects__thumb-scan {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  mix-blend-mode: difference;
+  opacity: 0;
+}
+
+/* espremido entre filtro e progresso o marquee virava um borrão de 3
+   palavras — em vez de sumir, desce pra linha própria abaixo dos filtros */
+@media (max-width: 1100px) {
+  .projects__meta {
+    flex-wrap: wrap;
+    row-gap: 1.4vh;
+  }
+
+  .projects__marquee {
+    flex-basis: 100%;
+    width: 100%;
+    /* respiro contra os filtros logo acima — sem isso as duas linhas
+       coladas liam como um bloco só de texto amontoado */
+    padding-top: 1vh;
+    border-top: 1px solid rgba(244, 247, 245, 0.1);
+  }
+}
+
+@media (max-width: 640px) {
+  .projects__header {
+    padding: 9vh 8vw 2.4vh;
+  }
+
+  .projects__meta {
+    align-items: flex-start;
+    gap: 4vw;
+  }
+
+  .projects__filters {
+    flex: 1;
+  }
+
+  .projects__filter {
+    padding: 0.45em 0.75em;
+    letter-spacing: 0.06em;
+  }
+
+  .projects__row {
+    grid-template-columns: 1fr;
+    gap: 0.6vh;
+  }
+
+  .projects__tag {
+    justify-self: start;
+  }
+
+  .projects__thumb {
+    display: none;
+  }
+
+  /* rail fica fina e mais próxima da borda pra abrir espaço real pro título da
+     row, que agora ocupa a largura toda da coluna única */
+  .projects__list-viewport {
+    padding: 0 9vw 0 6vw;
+  }
+
+  .projects__progress {
+    right: 2.5vw;
+    font-size: 0.68rem;
+  }
+}

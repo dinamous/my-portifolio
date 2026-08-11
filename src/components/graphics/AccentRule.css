@@ -1,0 +1,33 @@
+/* fio de acento sob os títulos. Margens ficam na seção — só a geometria é comum */
+.gfx-rule {
+  display: block;
+  width: var(--gfx-rule-len, clamp(56px, 7vw, 96px));
+  height: var(--gfx-rule-thick, 2px);
+  background: linear-gradient(90deg, var(--gfx-rule-stops, var(--accent-stops)));
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* mesmo fio de pé: eixos trocados e origem no topo, pra escalar de cima pra baixo */
+.gfx-rule--v {
+  width: var(--gfx-rule-thick, 2px);
+  height: var(--gfx-rule-len, clamp(56px, 7vw, 96px));
+  background-image: linear-gradient(180deg, var(--gfx-rule-stops, var(--accent-stops)));
+  transform-origin: center top;
+}
+
+/* faixa larga: o mesmo gradiente ocupando a coluna inteira, como régua de seção */
+.gfx-rule--full {
+  --gfx-rule-len: 100%;
+}
+
+/* apagado: paradas esmaecidas, pro fio que só organiza e não chama atenção */
+.gfx-rule--dim {
+  --gfx-rule-stops: var(--accent-stops-dim);
+}
+
+/* fio neutro, sem acento — divisor de conteúdo, não de seção */
+.gfx-rule--plain {
+  background-image: none;
+  background-color: rgba(244, 247, 245, 0.25);
+}

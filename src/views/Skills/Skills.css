@@ -1,0 +1,190 @@
+.skills {
+  /* preto cru: sem tinta de fundo nem textura, só o conteúdo sobre o vazio */
+  background: #000;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 6vw;
+  padding: 0 7vw;
+  overflow: hidden;
+  will-change: opacity;
+}
+
+.skills__intro {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+}
+
+/* serifa itálica, mesma voz editorial do heading da AboutMe */
+.skills__headline {
+  margin: 0;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2rem, 3.8vw, 3.8rem);
+  line-height: 1.06;
+  color: #f4f7f5;
+}
+
+/* máscara por linha: o inner sobe de fora dela no reveal */
+.skills__line {
+  display: block;
+  overflow: hidden;
+}
+
+.skills__line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.skills__rule {
+  margin: 2.6rem 0 2rem;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* ficha de credenciais: termo em mono/caixa-alta à esquerda, valor à direita */
+.skills__meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.skills__meta-row {
+  display: grid;
+  grid-template-columns: clamp(88px, 9vw, 120px) 1fr;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(244, 247, 245, 0.1);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.skills__meta-term {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent-green) 85%, transparent);
+}
+
+.skills__meta-value {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.9rem, 1.15vw, 1.05rem);
+  line-height: 1.5;
+  color: rgba(244, 247, 245, 0.78);
+}
+
+.skills__list {
+  position: relative;
+  z-index: 1;
+  max-height: 74vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  /* topo/base esmaecidos: o corte do overflow vira transição em vez de linha dura */
+  mask-image: linear-gradient(180deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+}
+
+.skills__list::-webkit-scrollbar {
+  display: none;
+}
+
+.skills__cat {
+  border-bottom: 1px solid rgba(244, 247, 245, 0.1);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.skills__cat-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.4rem 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.skills__cat-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  letter-spacing: -0.01em;
+  color: rgba(244, 247, 245, 0.6);
+}
+
+.skills__cat--open .skills__cat-name {
+  color: #f4f7f5;
+}
+
+.skills__cat-icon {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: rgba(244, 247, 245, 0.45);
+  will-change: transform;
+}
+
+.skills__cat--open .skills__cat-icon {
+  color: var(--accent-lime);
+}
+
+/* borda sempre presente, só ganha cor quando abre — assim o recuo não pula
+   durante o tween de altura do acordeão */
+.skills__techs {
+  margin: 0;
+  padding: 0 0 1.7rem 1.1rem;
+  border-left: 1px solid transparent;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.6rem;
+}
+
+.skills__cat--open .skills__techs {
+  border-left-color: color-mix(in srgb, var(--accent-lime) 50%, transparent);
+}
+
+.skills__tech {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.5);
+  will-change: transform, opacity;
+}
+
+@media (max-width: 900px) {
+  .skills {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: 4vh;
+    padding: 0 8vw;
+  }
+
+  .skills__rule {
+    margin: 1.6rem 0 1.3rem;
+  }
+
+  .skills__meta {
+    gap: 0.7rem;
+  }
+
+  .skills__meta-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+    padding-top: 0.7rem;
+  }
+
+  .skills__list {
+    max-height: 40vh;
+  }
+}

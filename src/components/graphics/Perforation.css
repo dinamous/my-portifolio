@@ -1,0 +1,20 @@
+/* furos do canhoto: os círculos são pintados com a cor do que está ATRÁS da ficha,
+   dando a ilusão de recorte. Por isso `ink` é a cor do fundo, não a do papel */
+.gfx-perf {
+  position: absolute;
+  background-image: radial-gradient(
+    circle,
+    var(--gfx-perf-ink, #030303) var(--gfx-perf-hole, 3px),
+    transparent calc(var(--gfx-perf-hole, 3px) + 0.5px)
+  );
+}
+
+.gfx-perf--v {
+  width: var(--gfx-perf-band, 8px);
+  background-size: var(--gfx-perf-band, 8px) var(--gfx-perf-step, 11px);
+}
+
+.gfx-perf--h {
+  height: var(--gfx-perf-band, 8px);
+  background-size: var(--gfx-perf-step, 11px) var(--gfx-perf-band, 8px);
+}

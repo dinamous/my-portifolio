@@ -1,0 +1,162 @@
+.whatido {
+  background: #030303;
+  display: flex;
+  /* align-items: center; */
+  clip-path: inset(0% 0% 0% 0%);
+  will-change: clip-path;
+}
+
+.whatido__grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(rgba(244, 247, 245, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 247, 245, 0.018) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.whatido__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4vw;
+  width: 100%;
+  padding: 0 6vw;
+  perspective: 1200px;
+}
+
+.whatido__col {
+  max-width: 26vw;
+  will-change: transform, opacity;
+}
+
+.whatido__col--right {
+  text-align: right;
+}
+
+.whatido__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(244, 247, 245, 0.15);
+  color: rgba(244, 247, 245, 0.55);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.65rem, 0.9vw, 0.75rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.whatido__title {
+  margin: 0 0 1.5rem;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5.2vw, 5.5rem);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.whatido__letter-wrap {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+  perspective: 400px;
+}
+
+.whatido__letter {
+  display: inline-block;
+  /* ponytail: background-size/position set inline per letter (see script) so the
+     gradient reads as one continuous sweep across the whole word instead of each
+     letter rendering its own isolated copy of it */
+  background: linear-gradient(100deg, var(--accent-stops));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  will-change: transform, opacity;
+}
+
+.whatido__word-wrap {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.6;
+}
+
+.whatido__word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.whatido__divider {
+  height: 1px;
+  margin-bottom: 1.5rem;
+  background: rgba(244, 247, 245, 0.25);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.whatido__col--right .whatido__divider {
+  transform-origin: right center;
+}
+
+.whatido__text {
+  max-width: 42ch;
+  margin: 0;
+  margin-left: auto;
+  color: #f4f7f5;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  line-height: 1.6;
+}
+
+.whatido__col--left .whatido__text {
+  margin-left: 0;
+}
+
+@media (max-width: 900px) {
+  .whatido {
+    align-items: stretch;
+    padding: 12vh 0;
+    overflow-y: auto;
+  }
+
+  .whatido__inner {
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    min-height: 100%;
+    gap: 8vh;
+    padding: 0 8vw;
+  }
+
+  .whatido__col,
+  .whatido__col--right {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .whatido__title {
+    white-space: normal;
+    font-size: clamp(2rem, 6vw, 3rem);
+  }
+
+  .whatido__divider,
+  .whatido__col--right .whatido__divider {
+    transform-origin: left center;
+  }
+
+  .whatido__text,
+  .whatido__col--left .whatido__text {
+    margin-left: 0;
+  }
+}

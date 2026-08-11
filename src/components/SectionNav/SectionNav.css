@@ -1,0 +1,99 @@
+/* fixo (não absolute como o Navbar do Hero): vive acima de todas as seções da
+   pilha — inclusive o z-index:20 forçado da .aboutme — e persiste entre elas.
+   mix-blend-mode: difference mantém o texto legível sobre qualquer fundo
+   (WhatIDo claro, demais seções escuras), mesmo idiom do Navbar do Hero. */
+.sectionnav {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.3rem 5vw;
+  mix-blend-mode: difference;
+  /* estado inicial escondido também no CSS, para não piscar antes do efeito rodar */
+  opacity: 0;
+  visibility: hidden;
+}
+
+.sectionnav__brand {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: #fff;
+  opacity: 0.85;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  letter-spacing: 0.02em;
+}
+
+.sectionnav__brand-accent {
+  opacity: 0.6;
+}
+
+.sectionnav__links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: clamp(1.1rem, 2.5vw, 2.2rem);
+}
+
+.sectionnav__links a {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+  color: #fff;
+  opacity: 0.55;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  transition: opacity 0.25s ease;
+}
+
+.sectionnav__num {
+  margin-right: 0.4em;
+  font-weight: 400;
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
+/* só o posicionamento — o desenho e a animação da barra vivem em SectionProgress */
+.sectionnav__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.sectionnav__links a:hover,
+.sectionnav__links a:focus-visible {
+  opacity: 1;
+}
+
+/* seção ativa: link aceso — a barra cheia já vem do progresso do stack */
+.sectionnav__link--active {
+  opacity: 1 !important;
+}
+
+@media (max-width: 640px) {
+  .sectionnav {
+    padding: 1rem 4vw;
+  }
+
+  .sectionnav__num {
+    display: none;
+  }
+
+  .sectionnav__links {
+    gap: clamp(0.6rem, 3vw, 1.1rem);
+  }
+
+  .sectionnav__links a {
+    font-size: clamp(0.58rem, 2.6vw, 0.7rem);
+    letter-spacing: 0.08em;
+  }
+}

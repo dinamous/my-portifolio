@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* paleta de acento: única fonte dos hex do gradiente cyan → verde → lima.
+   Os *-stops são a lista de paradas, não um gradiente pronto — entram dentro
+   do linear-gradient() de quem usa, então cada elemento escolhe o próprio
+   ângulo: linear-gradient(90deg, var(--accent-stops)). */
+:root {
+  --accent-cyan: #0891b2;
+  --accent-green: #34d399;
+  --accent-lime: #a3e635;
+  --accent-stops: var(--accent-cyan), var(--accent-green) 55%, var(--accent-lime);
+  --accent-stops-rev: var(--accent-lime), var(--accent-green) 45%, var(--accent-cyan);
+  /* mesma lista rebaixada, pra borda de gradiente que não deve competir com o
+     conteúdo — evita repetir três color-mix em cada elemento */
+  --accent-stops-dim: color-mix(in srgb, var(--accent-cyan) 40%, transparent),
+    color-mix(in srgb, var(--accent-green) 40%, transparent) 55%,
+    color-mix(in srgb, var(--accent-lime) 40%, transparent);
+}
+
+/* ponytail: sections are fixed full-screen panels, page itself never scrolls */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ponytail: fixed inset-0 sections paint in DOM order until initSectionStack's
+   useEffect assigns real z-index on mount — without a default here, the browser's
+   first paint stacks the LAST section (Contact) on top of Hero's loader, flashing
+   it before JS ever runs. `reverse()` mirrors the same "earlier = higher" rule
+   sectionStack.ts applies imperatively, so there's no visible handoff between them. */
+[data-stack] {
+  z-index: 1;
+}
+[data-stack]:nth-child(1) { z-index: 6; }
+[data-stack]:nth-child(2) { z-index: 5; }
+[data-stack]:nth-child(3) { z-index: 4; }
+[data-stack]:nth-child(4) { z-index: 3; }
+[data-stack]:nth-child(5) { z-index: 2; }
+[data-stack]:nth-child(6) { z-index: 1; }

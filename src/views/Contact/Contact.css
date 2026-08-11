@@ -1,0 +1,590 @@
+.contact {
+  background: #030303;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: 5vw;
+  padding: 0 7vw;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+/* ------------------------------------------------------------ coluna texto */
+
+.contact__left {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  will-change: transform;
+}
+
+.contact__headline {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.8rem, 7.6vw, 6.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: #f4f7f5;
+}
+
+/* uma linha = uma flex row: o ponto acompanha a última palavra em vez de
+   quebrar sozinho pra linha seguinte */
+.contact__line-row {
+  display: flex;
+  align-items: baseline;
+}
+
+/* máscara por palavra: o inner sobe de fora dela no reveal */
+.contact__word {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+
+.contact__word-inner {
+  display: block;
+  will-change: transform;
+}
+
+.contact__word--serif {
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.contact__dot {
+  background: linear-gradient(120deg, var(--accent-stops));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  will-change: transform, opacity;
+}
+
+.contact__bar {
+  margin: 2rem 0 1.6rem;
+}
+
+.contact__sub {
+  margin: 0 0 2.2rem;
+  max-width: 30rem;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  line-height: 1.6;
+  color: rgba(244, 247, 245, 0.62);
+  will-change: opacity;
+}
+
+.contact__channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.contact__channel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid rgba(244, 247, 245, 0.14);
+  background: #080a09;
+  text-decoration: none;
+  will-change: transform, opacity;
+}
+
+/* borda em gradiente: a cor não cabe em border-color, então são duas camadas de
+   background — o sólido no padding-box tapa o gradiente no miolo e sobra só a
+   moldura. Mesmo truque nos chips e no submit */
+.contact__channel:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(#080a09, #080a09) padding-box,
+    linear-gradient(120deg, var(--accent-stops)) border-box;
+}
+
+.contact__channel-term {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--accent-stops));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.contact__channel-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.82rem, 1vw, 0.95rem);
+  color: rgba(244, 247, 245, 0.86);
+}
+
+.contact__socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact__social {
+  will-change: transform, opacity;
+}
+
+.contact__social a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(244, 247, 245, 0.6);
+}
+
+.contact__social a:hover {
+  color: #f4f7f5;
+}
+
+.contact__social-handle {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: rgba(244, 247, 245, 0.32);
+}
+
+/* ------------------------------------------------------------- cartão form */
+
+.contact__card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(244, 247, 245, 0.1);
+  background: #080a09;
+  overflow: hidden;
+  transform-origin: center top;
+  will-change: transform, opacity;
+}
+
+/* marcas de corte, selo e picote vêm de components/graphics — aqui só onde ancoram */
+.contact__mark {
+  top: 10px;
+  right: 10px;
+}
+
+/* canhoto do cartão, picotado embaixo em vez de um border-bottom reto */
+.contact__stub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem clamp(1.4rem, 2.6vw, 2.4rem);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.38);
+}
+
+.contact__stub-edge {
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* picote vertical na calha entre as colunas: 7vw de padding + 42.5vw da coluna
+   esquerda + metade do gap de 5vw */
+.contact__divider {
+  left: 52vw;
+  top: 16vh;
+  bottom: 16vh;
+  z-index: 1;
+  transform-origin: center top;
+  will-change: transform, opacity;
+}
+
+.contact__meter {
+  height: 2px;
+  background: rgba(244, 247, 245, 0.08);
+}
+
+.contact__meter-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-stops));
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.contact__form {
+  position: relative;
+  padding: clamp(1.4rem, 2.6vw, 2.4rem);
+}
+
+.contact__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 1.8vh, 1.5rem);
+  padding-left: 1.4rem;
+}
+
+/* trilho do campo em foco: base de 100px escalada por scaleY (nunca height) */
+.contact__rail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 100px;
+  background: linear-gradient(180deg, var(--accent-stops));
+  transform-origin: left top;
+  will-change: transform, opacity;
+}
+
+.contact__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+  will-change: transform, opacity;
+}
+
+.contact__label {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.45);
+  will-change: transform;
+}
+
+.contact__input {
+  width: 100%;
+  padding: 0.55rem 0;
+  border: 0;
+  border-bottom: 1px solid rgba(244, 247, 245, 0.14);
+  background: none;
+  outline: none;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.9rem, 1.1vw, 1rem);
+  color: #f4f7f5;
+}
+
+.contact__input::placeholder {
+  color: rgba(244, 247, 245, 0.24);
+}
+
+.contact__input--area {
+  resize: none;
+  line-height: 1.5;
+}
+
+/* linha de foco desenhada por cima da borda estática */
+.contact__line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-stops));
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.contact__row--error .contact__input {
+  border-bottom-color: #f87171;
+}
+
+.contact__row--error .contact__label {
+  color: #f87171;
+}
+
+.contact__err {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: #f87171;
+}
+
+/* sem texto de erro o span não reserva espaço — o campo não pula ao aparecer */
+.contact__err:empty {
+  display: none;
+}
+
+.contact__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.2rem;
+}
+
+.contact__chip {
+  position: relative;
+  padding: 0.42rem 0.9rem;
+  border: 1px solid rgba(244, 247, 245, 0.14);
+  background: none;
+  cursor: pointer;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  color: rgba(244, 247, 245, 0.6);
+  overflow: hidden;
+}
+
+.contact__chip-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, var(--accent-stops));
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.contact__chip-text {
+  position: relative;
+}
+
+.contact__row--actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 1.2rem;
+  padding-top: 0.4rem;
+}
+
+.contact__submit {
+  position: relative;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid rgba(244, 247, 245, 0.14);
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.contact__submit:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(#080a09, #080a09) padding-box,
+    linear-gradient(90deg, var(--accent-stops)) border-box;
+}
+
+.contact__submit-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--accent-stops));
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* sem mix-blend-mode aqui: contra o fill entrando ele deixava o texto ilegível
+   no meio do wipe. A cor é tweenada junto com o fill, como nos chips */
+.contact__submit-text {
+  position: relative;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f4f7f5;
+}
+
+.contact__alt {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  color: rgba(244, 247, 245, 0.42);
+  text-decoration: none;
+  /* sublinhado como background de 1px: border-bottom não aceita gradiente */
+  padding-bottom: 2px;
+  background: linear-gradient(90deg, var(--accent-stops-dim)) left bottom / 100% 1px no-repeat;
+}
+
+.contact__alt:hover {
+  color: rgba(244, 247, 245, 0.8);
+  background-image: linear-gradient(90deg, var(--accent-stops));
+}
+
+/* estado de enviado: ocupa o mesmo cartão, sobreposto ao corpo do form */
+.contact__sent {
+  position: absolute;
+  inset: clamp(1.4rem, 2.6vw, 2.4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.8rem;
+  will-change: transform, opacity;
+}
+
+.contact__sent-title {
+  margin: 0;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  color: #f4f7f5;
+}
+
+.contact__sent-text {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(244, 247, 245, 0.6);
+}
+
+.contact__sent-text a {
+  color: var(--accent-lime);
+}
+
+.contact__again {
+  align-self: flex-start;
+  margin-top: 0.6rem;
+  padding: 0 0 3px;
+  border: 0;
+  background: linear-gradient(90deg, var(--accent-stops)) left bottom / 100% 1px no-repeat;
+  cursor: pointer;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  color: rgba(244, 247, 245, 0.75);
+}
+
+@media (max-width: 980px) {
+  .contact {
+    grid-template-columns: 1fr;
+    align-items: start;
+    align-content: center;
+    gap: min(2vh, 14px);
+    padding: min(8vh, 48px) 8vw min(6vh, 36px);
+    overflow-y: auto;
+  }
+
+  /* uma coluna só: a calha entre elas deixa de existir. sub volta a aparecer
+     (o texto de intro importa mais que o espaço), só perde o max-width da
+     coluna desktop */
+  .contact__socials,
+  .contact__divider {
+    display: none;
+  }
+
+  .contact__headline {
+    font-size: clamp(2.2rem, 8vw, 3.4rem);
+  }
+
+  .contact__bar {
+    margin: 0.9rem 0 0.9rem;
+  }
+
+  .contact__sub {
+    max-width: none;
+    margin: 0 0 1.1rem;
+  }
+
+  .contact__channels {
+    margin-bottom: 0;
+    gap: 0.5rem;
+  }
+
+  .contact__channel {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .contact__row--actions {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+}
+
+/* abaixo de ~640px o cartão inteiro (form + ações) não cabe junto com o
+   cabeçalho em 100dvh — aperta ainda mais espaçamento, fonte e altura da
+   textarea em vez de deixar o botão de enviar sair da tela atrás da SectionNav.
+   mesmo aperto entra por altura curta (max-height) pra cobrir telas largas e baixas
+   (celular deitado, notebook pequeno) que caem no layout de uma coluna mas não
+   tinham largura ≤640px pra herdar esse espaçamento */
+@media (max-width: 640px), (max-width: 980px) and (max-height: 750px) {
+  .contact {
+    padding: min(3vh, 16px) 6vw min(3vh, 16px);
+    gap: min(1vh, 8px);
+  }
+
+  .contact__headline {
+    font-size: clamp(1.7rem, 8.5vw, 2.4rem);
+  }
+
+  .contact__bar {
+    margin: 0.5rem 0 0.5rem;
+  }
+
+  .contact__sub {
+    margin: 0 0 0.6rem;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .contact__channels {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+  }
+
+  .contact__channel {
+    flex: 1;
+    min-width: 0;
+    gap: 0.15rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .contact__channel-value {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72rem;
+  }
+
+  .contact__stub {
+    padding: 0.45rem clamp(0.8rem, 4vw, 1.2rem);
+  }
+
+  .contact__form {
+    padding: clamp(0.8rem, 4vw, 1.2rem);
+  }
+
+  .contact__body {
+    gap: 0.36rem;
+    padding-left: 1rem;
+  }
+
+  .contact__row {
+    gap: 0.16rem;
+  }
+
+  .contact__input {
+    padding: 0.4rem 0;
+  }
+
+  .contact__input--area {
+    line-height: 1.35;
+  }
+
+  .contact__chips {
+    padding-top: 0.1rem;
+  }
+
+  .contact__chip {
+    padding: 0.32rem 0.7rem;
+  }
+
+  .contact__row--actions {
+    padding-top: 0;
+  }
+
+  .contact__submit {
+    padding: 0.55rem 1.2rem;
+  }
+}
