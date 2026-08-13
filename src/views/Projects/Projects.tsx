@@ -626,7 +626,7 @@ export default function Projects() {
                   <img
                     className="projects__thumb-img"
                     src={p.images[0]}
-                    alt=""
+                    alt={p.title}
                     decoding="async"
                     fetchPriority="low"
                   />

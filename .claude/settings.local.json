@@ -15,7 +15,8 @@
       "Bash(curl -s \"http://localhost:4321/src/components/WhatIDo.astro?astro&type=script&index=0&lang.ts\")",
       "Bash(ffmpeg -version)",
       "mcp__playwright__browser_take_screenshot",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(node -e \"console.log\\(require\\('fs'\\).readFileSync\\('dist/projetos/pizza-shop.html','utf8'\\).split\\('</head>'\\)[0].split\\('<link rel=\\\\\"preconnect\\\\\"'\\)[0]\\)\")"
     ]
   },
   "enabledPlugins": {

@@ -4,7 +4,7 @@ import { Observer } from "gsap/Observer";
 import { prefersReducedMotion } from "../../lib/motion";
 import { lockSectionStack, unlockSectionStack } from "../../lib/sectionStack";
 import { getProjectBySlug, type Project } from "../../lib/projects";
-import { getSlugFromLocation, popProjectUrl, pushProjectUrl } from "../../lib/router";
+import { applyProjectMeta, getSlugFromLocation, popProjectUrl, pushProjectUrl } from "../../lib/router";
 import AnimatedLetters from "../../components/AnimatedLetters";
 import ProjectGallery from "../../components/ProjectGallery/ProjectGallery";
 import { AccentRule, DashedLine } from "../../components/graphics";
@@ -115,7 +115,13 @@ export default function ProjectDetail() {
 
     const open = (slug: string, x?: number, y?: number) => {
       const p = getProjectBySlug(slug);
-      if (!p) return;
+      // slug inexistente na URL: some com ela em vez de deixar a home respondendo
+      // num endereço que não existe (soft-404 pro crawler, URL mentirosa pro usuário)
+      if (!p) {
+        if (getSlugFromLocation() === slug) history.replaceState({}, "", "/");
+        return;
+      }
+      applyProjectMeta(p);
       if (x != null && y != null) originRef.current = { x, y };
       setProject(p);
       setIsOpen(true);
@@ -136,6 +142,7 @@ export default function ProjectDetail() {
       const slug = getSlugFromLocation();
       if (slug) open(slug);
       else {
+        applyProjectMeta(null);
         setIsOpen(false);
         unlockSectionStack();
       }
@@ -150,6 +157,7 @@ export default function ProjectDetail() {
 
   const handleClose = () => {
     popProjectUrl();
+    applyProjectMeta(null);
     setIsOpen(false);
     unlockSectionStack();
     triggerRef.current?.focus();

@@ -1,4 +1,5 @@
 import rawProjects from "../../projects.json";
+import { slugify } from "./slug";
 
 export type ProjectAction = { label: string; link: string };
 
@@ -61,15 +62,6 @@ function categoriesOf(raw: string[] = []) {
   const list = Array.from(new Set(raw.map((c) => CATEGORY_LABEL[c.trim().toLowerCase()] ?? c)));
   if (list.includes("Frontend") && list.includes("Backend")) list.push("Fullstack");
   return list;
-}
-
-function slugify(text: string) {
-  return text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 }
 
 // dados reais (hoje projects.json na raiz); mesmo shape que vai alimentar o
