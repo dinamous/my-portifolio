@@ -18,6 +18,9 @@ export default function Navbar() {
     );
 
     const onPageLinkClick = (e: MouseEvent) => {
+      // ctrl/cmd/middle-click seguem o <a> normal (abrir em nova aba etc.) —
+      // só o clique simples troca de seção pela pilha GSAP em vez de navegar
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = e.currentTarget as HTMLAnchorElement;
       e.preventDefault();
       goToSection(a.getAttribute("href")!.slice(1));

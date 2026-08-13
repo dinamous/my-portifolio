@@ -10,8 +10,15 @@ import "./Contact.css";
 const projectTypes = ["Site / Landing", "Web App", "Motion / 3D", "Outro"];
 
 const textFields = [
-  { name: "nome", label: "Como te chamo", placeholder: "Seu nome", type: "text", autoComplete: "name" },
-  { name: "email", label: "E-mail", placeholder: "voce@empresa.com", type: "email", autoComplete: "email" },
+  { name: "nome", label: "Como te chamo", placeholder: "Ana Souza", type: "text", autoComplete: "name" },
+  {
+    name: "email",
+    label: "E-mail",
+    placeholder: "voce@empresa.com",
+    type: "email",
+    autoComplete: "email",
+    spellCheck: false,
+  },
 ];
 
 export default function Contact() {
@@ -407,6 +414,7 @@ export default function Contact() {
                   type={f.type}
                   placeholder={f.placeholder}
                   autoComplete={f.autoComplete}
+                  spellCheck={f.spellCheck}
                   enterKeyHint="next"
                 />
                 <span className="contact__line" aria-hidden="true"></span>

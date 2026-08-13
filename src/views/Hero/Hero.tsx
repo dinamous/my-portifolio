@@ -297,6 +297,7 @@ export default function Hero() {
       <div className="hero__scan" id="hero-scan" aria-hidden="true"></div>
 
       <div className="hero__type" id="hero-type" aria-hidden="true"></div>
+      <p className="sr-only">{heroTypePhrases[0].replace(/\*/g, "")}</p>
 
       <div className="hero__stack" id="hero-stack">
         <div className="hero__bottom">

@@ -69,6 +69,9 @@ export default function SectionNav() {
     window.addEventListener("stack:value", onStackValue);
 
     const onLinkClick = (e: MouseEvent) => {
+      // ctrl/cmd/middle-click seguem o <a> normal (abrir em nova aba etc.) —
+      // só o clique simples troca de seção pela pilha GSAP em vez de navegar
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       e.preventDefault();
       goToSection((e.currentTarget as HTMLAnchorElement).getAttribute("href")!.slice(1));
     };

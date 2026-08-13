@@ -232,6 +232,12 @@ export function goToSection(idOrIndex: string | number) {
   if (index < 0 || !moveTo) return;
   target = gsap.utils.clamp(0, max, index);
 
+  // replaceState (não push): a URL passa a refletir a seção atual para
+  // refresh/compartilhamento, mas cada clique de nav não deve virar uma
+  // entrada própria no histórico (o botão voltar continua saindo do site)
+  const hash = index === 0 ? "" : `#${sections[index].id}`;
+  history.replaceState(history.state, "", `${location.pathname}${hash}`);
+
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;

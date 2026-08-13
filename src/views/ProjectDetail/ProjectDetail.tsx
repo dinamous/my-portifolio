@@ -107,6 +107,7 @@ export default function ProjectDetail() {
   const [isOpen, setIsOpen] = useState(false);
   const originRef = useRef({ x: 0, y: 0 });
   const reduceMotionRef = useRef(false);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     reduceMotionRef.current = prefersReducedMotion();
@@ -124,7 +125,8 @@ export default function ProjectDetail() {
     const initialSlug = getSlugFromLocation();
     if (initialSlug) open(initialSlug);
 
-    const onOpenEvent = ((e: CustomEvent<{ slug: string; x: number; y: number }>) => {
+    const onOpenEvent = ((e: CustomEvent<{ slug: string; x: number; y: number; trigger?: HTMLElement }>) => {
+      triggerRef.current = e.detail.trigger ?? null;
       pushProjectUrl(e.detail.slug);
       open(e.detail.slug, e.detail.x, e.detail.y);
     }) as EventListener;
@@ -150,6 +152,7 @@ export default function ProjectDetail() {
     popProjectUrl();
     setIsOpen(false);
     unlockSectionStack();
+    triggerRef.current?.focus();
   };
 
   useEffect(() => {
@@ -207,6 +210,10 @@ export default function ProjectDetail() {
     if (!project) return;
     const inner = document.getElementById("projectdetail-inner")!;
     const pieces = inner.querySelectorAll<HTMLElement>("[data-reveal]");
+
+    // foco vai pro botão fechar assim que a ficha monta — sem isso o teclado/leitor
+    // de tela fica preso no que ficou por baixo do overlay (o clip-path é só visual)
+    if (isOpen) inner.querySelector<HTMLElement>(".projectdetail__close")?.focus();
     if (reduceMotionRef.current) {
       gsap.set(pieces, { opacity: 1, y: 0 });
       return;
@@ -444,7 +451,7 @@ export default function ProjectDetail() {
           <DashedLine className="projectdetail__hr" />
 
           {/* key: trocar de projeto sem desmontar a ficha (URL direta, popstate)
-             precisa zerar �ndice e amplia��o da galeria */}
+             precisa zerar índice e ampliação da galeria */}
           <ProjectGallery key={project.slug} images={project.images} title={project.title} />
 
           <section className="projectdetail__techs-block" data-reveal>
@@ -461,6 +468,7 @@ export default function ProjectDetail() {
                         target="_blank"
                         rel="noreferrer"
                         data-npm={pkg}
+                        aria-describedby="projectdetail-tip"
                       >
                         {t}
                         <span className="projectdetail__tech-mark" aria-hidden="true">
@@ -476,7 +484,12 @@ export default function ProjectDetail() {
             </ul>
           </section>
 
-          <div className="projectdetail__tip" id="projectdetail-tip" role="tooltip">
+          <div
+            className="projectdetail__tip"
+            id="projectdetail-tip"
+            role="tooltip"
+            aria-live="polite"
+          >
             <span className="projectdetail__tip-head"></span>
             <p className="projectdetail__tip-body"></p>
             <DashedLine className="projectdetail__tip-edge" accent />

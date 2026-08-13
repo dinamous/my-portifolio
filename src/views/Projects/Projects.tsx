@@ -32,7 +32,11 @@ function handleOpenProject(e: ReactMouseEvent<HTMLAnchorElement>, slug: string, 
   }
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   e.preventDefault();
-  window.dispatchEvent(new CustomEvent("project:open", { detail: { slug, x: e.clientX, y: e.clientY } }));
+  window.dispatchEvent(
+    new CustomEvent("project:open", {
+      detail: { slug, x: e.clientX, y: e.clientY, trigger: e.currentTarget },
+    }),
+  );
 }
 
 export default function Projects() {
@@ -41,7 +45,12 @@ export default function Projects() {
   // só as linhas recascatam — reanimar o header (onde vivem os próprios botões de
   // filtro) a cada clique seria um flash gratuito
   const enteredRef = useRef(false);
-  const [filter, setFilter] = useState(PROJECT_FILTERS[0]);
+  // filtro inicial vem da URL (?filtro=) quando ela aponta pra um valor válido —
+  // recarregar ou compartilhar um link filtrado preserva a seleção
+  const [filter, setFilter] = useState(() => {
+    const fromUrl = new URLSearchParams(location.search).get("filtro");
+    return fromUrl && (PROJECT_FILTERS as string[]).includes(fromUrl) ? fromUrl : PROJECT_FILTERS[0];
+  });
   // dois estados de propósito: `filter` é o botão (responde no clique) e `listFilter` é a
   // lista, que só troca depois das linhas atuais saírem. Com um estado só, o React
   // remontava as linhas no mesmo frame do clique — as antigas sumiam de uma vez, sem
@@ -52,6 +61,17 @@ export default function Projects() {
   const pickFilter = (f: string) => {
     if (f === filter) return;
     setFilter(f);
+    // replaceState (não push): trocar de filtro não deve empilhar histórico,
+    // só manter a URL compartilhável/atualizável com a seleção atual
+    const params = new URLSearchParams(location.search);
+    if (f === PROJECT_FILTERS[0]) params.delete("filtro");
+    else params.set("filtro", f);
+    const query = params.toString();
+    history.replaceState(
+      history.state,
+      "",
+      `${location.pathname}${query ? `?${query}` : ""}${location.hash}`,
+    );
     const rows = gsap.utils.toArray<HTMLElement>(".projects__row");
     // sem entrada feita ainda não há nada em cena pra tirar
     if (!enteredRef.current || prefersReducedMotion() || !rows.length) {
