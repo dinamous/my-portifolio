@@ -38,7 +38,7 @@
   {
     "titulo": "pizza.shop",
     "img": "/projects/pizzashop.webp",
-    "descricao": "Uma aplicação simulando um dashbaord de vendas, inspirado na plataforma Ifood.",
+    "descricao": "Uma aplicação simulando um dashboard de vendas, inspirado na plataforma iFood.",
     "techs": ["Vue", "Vite", "Vuelidate", "shadcn/ui"],
     "categoria": ["Front-end"],
     "actions": [

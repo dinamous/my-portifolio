@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* fontes self-hosted (@fontsource): saem no mesmo domínio e no mesmo bundle de
+   CSS, sem o DNS + TLS + segundo request que o link do Google Fonts custava
+   antes da primeira pintura. Só os subsets latin — o site é pt-BR. */
+@import "@fontsource/space-grotesk/latin-500.css";
+@import "@fontsource/space-grotesk/latin-700.css";
+@import "@fontsource/cormorant-infant/latin-500-italic.css";
+
 /* paleta de acento: única fonte dos hex do gradiente cyan → verde → lima.
    Os *-stops são a lista de paradas, não um gradiente pronto — entram dentro
    do linear-gradient() de quem usa, então cada elemento escolhe o próprio

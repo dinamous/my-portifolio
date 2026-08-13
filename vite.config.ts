@@ -29,11 +29,10 @@ function seoPlugin(): Plugin {
         const slug = slugify(p.titulo);
         const url = `${SITE}/projetos/${slug}`;
         const title = `${p.titulo} — Matheus Simões`;
-        // ponytail: só `img` de public/ vira og:image — a mídia vinda de
-        // src/assets/<pasta>/ é hasheada no build e o nome (a0-thumb.png) se repete
-        // entre projetos, então não dá pra casar pelo bundle. Esses caem no retrato.
-        // Upgrade: uma capa 1200x630 por projeto em public/og/<slug>.jpg.
-        const image = p.img && existsSync(resolve(dist, `.${p.img}`)) ? SITE + p.img : `${SITE}/profile-picture.webp`;
+        // capa 1200x630 gerada por `npm run media` (a mídia do projeto em si vive em
+        // src/assets e sai hasheada do build, então não serve de og:image direto).
+        const cover = `/og/${slug}.jpg`;
+        const image = SITE + (existsSync(resolve(dist, `.${cover}`)) ? cover : "/profile-picture.webp");
         const meta: Record<string, string> = {
           description: p.descricao,
           "og:title": title,

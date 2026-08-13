@@ -1,3 +1,6 @@
+import { pageview } from "./analytics";
+import { getProjectBySlug } from "./projects";
+
 // navegação client-side mínima pro overlay de projeto (History API nativa —
 // não precisa de react-router só pra uma rota) — cada projeto fica acessível
 // em /projetos/:slug, compartilhável e recarregável direto.
@@ -48,4 +51,16 @@ export function applyProjectMeta(project: { slug: string; title: string; descrip
     document.querySelector(selector)?.setAttribute("content", value);
   }
   document.querySelector('link[rel="canonical"]')?.setAttribute("href", url);
+  pageview(title);
+}
+
+// o primeiro page_view da visita: `applyProjectMeta` cobre toda troca de rota, mas
+// não roda num load de home. Slug válido na URL fica pra ele mesmo, na montagem do
+// overlay, que é onde o título do projeto existe; slug inválido é apagado da URL e
+// cai na home, então conta como home — com o href quebrado ainda visível no
+// relatório, que é o que denuncia link morto circulando por aí.
+export function trackInitialPageview() {
+  const slug = getSlugFromLocation();
+  if (slug && getProjectBySlug(slug)) return;
+  pageview(HOME_TITLE);
 }
