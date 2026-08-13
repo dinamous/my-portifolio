@@ -220,8 +220,11 @@ export default function ProjectDetail() {
     const pieces = inner.querySelectorAll<HTMLElement>("[data-reveal]");
 
     // foco vai pro botão fechar assim que a ficha monta — sem isso o teclado/leitor
-    // de tela fica preso no que ficou por baixo do overlay (o clip-path é só visual)
-    if (isOpen) inner.querySelector<HTMLElement>(".projectdetail__close")?.focus();
+    // de tela fica preso no que ficou por baixo do overlay (o clip-path é só visual).
+    // Sem checar isOpen: `project` só vira não-nulo dentro de open(), que já liga o
+    // isOpen no mesmo render, e no fechamento ele volta a null (return lá em cima) —
+    // pôr isOpen nas deps só faria a cascata inteira reanimar durante o fecha.
+    inner.querySelector<HTMLElement>(".projectdetail__close")?.focus();
     if (reduceMotionRef.current) {
       gsap.set(pieces, { opacity: 1, y: 0 });
       return;
