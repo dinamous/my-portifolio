@@ -79,9 +79,14 @@
   color: rgba(244, 247, 245, 0.78);
 }
 
-.skills__list {
+.skills__list-wrap {
   position: relative;
   z-index: 1;
+  min-width: 0;
+}
+
+.skills__list {
+  position: relative;
   max-height: 74vh;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -92,6 +97,27 @@
 
 .skills__list::-webkit-scrollbar {
   display: none;
+}
+
+/* trilho encostado na coluna, fora do overflow: altura = altura visível da lista, e o
+   thumb é escalado/transladado pelo GSAP (scaleY + y), sem tocar em height/top */
+.skills__scrollbar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -1.4rem;
+  width: 2px;
+  background: rgba(244, 247, 245, 0.1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skills__scrollbar-thumb {
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, var(--accent-stops-dim));
+  transform-origin: top center;
+  will-change: transform;
 }
 
 .skills__cat {
@@ -207,5 +233,12 @@
 
   .skills__list {
     max-height: 40vh;
+  }
+
+  /* mais grosso e mais perto da borda: no touch não há hover pra revelar nada e a
+     margem lateral é menor */
+  .skills__scrollbar {
+    right: -0.9rem;
+    width: 3px;
   }
 }

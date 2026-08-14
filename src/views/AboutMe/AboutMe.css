@@ -236,11 +236,18 @@
   }
 
   .aboutme__ticket {
-    height: clamp(230px, 40dvh, 340px);
+    height: clamp(260px, 42dvh, 360px);
   }
 
+  /* largura total, mas alta o bastante pra não virar faixa: a 90-150px o recorte de um
+     arquivo 800x1423 ficava ~2:1 e cortava o rosto. Teto em dvh pra ticket+panel
+     continuarem cabendo em 100dvh (a seção não rola). */
   .aboutme__photo {
-    height: clamp(90px, 16dvh, 150px);
+    height: clamp(150px, 26dvh, 230px);
+  }
+
+  .aboutme__photo-img {
+    object-position: 50% 25%;
   }
 
   .aboutme__stub {

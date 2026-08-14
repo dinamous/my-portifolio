@@ -293,8 +293,11 @@ export default function ProjectDetail() {
       // sem ignorá-lo, o wheel do zoom rolaria a ficha por baixo
       ignore: document.getElementById("gallery-lightbox") ?? undefined,
       onChange: (self) => {
+        // mesma convenção da pilha (ver sectionStack): wheel já vem "pra frente =
+        // positivo", touch reporta o arrasto cru (dedo sobe = negativo) e precisa inverter
+        const delta = self.event.type === "wheel" ? self.deltaY : -self.deltaY;
         const room = overlay.scrollHeight - overlay.clientHeight;
-        target = gsap.utils.clamp(0, room, target + self.deltaY);
+        target = gsap.utils.clamp(0, room, target + delta);
         scrollTo(target);
       },
     });

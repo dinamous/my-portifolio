@@ -151,11 +151,9 @@ export default function Hero() {
           gsap.set(w, { [mainAxis]: wordDeltas[i], scale: 0.8 }),
         );
 
-        // ponytail: mesma medida usada pra entrada e saída (offsetHeight da seção, não
-        // do próprio .hero__scan) — 100vh no CSS pode divergir da altura real da seção
-        // (toolbar dinâmica mobile, scrollbar), e usar duas fontes diferentes deixava
-        // a barra saindo -scanHeight sem cobrir de fato heroSection.offsetHeight, então
-        // uma fatia ficava visível no topo em algumas resoluções.
+        // ponytail: offsetHeight da seção é exatamente a altura do .hero__scan (height:100%
+        // no CSS) — antes o CSS usava 100vh, que diverge da altura real em alguns casos
+        // (toolbar dinâmica mobile, scrollbar) e deixava uma fatia visível no topo no fim.
         const scanHeight = heroSection.offsetHeight;
         gsap.set(scan, { y: scanHeight });
 
@@ -170,7 +168,14 @@ export default function Hero() {
             "+=0.3",
           )
           .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
-          .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "-=0.35")
+          .to(scan, {
+            y: -scanHeight,
+            duration: 2.4,
+            ease: "power2.inOut",
+            // a máscara só existe pra essa passada; sai do DOM no fim pra nenhuma
+            // sobra de mix-blend-mode ficar pendurada em cima do hero
+            onComplete: () => scan.remove(),
+          }, "-=0.35")
           .to(words, { color: "#111111", duration: 2.4, ease: "power2.inOut" }, "<")
           .to(heroBg, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
           .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
@@ -192,19 +197,18 @@ export default function Hero() {
       gsap.set(loader, { autoAlpha: 0 });
       runEntrance();
     } else {
-      // proxy numérico só pra dirigir o contador via onUpdate — a barra em si
-      // anima scaleX direto, sem ler esse valor de volta
+      // um tween só dirige contador e barra: dois tweens paralelos deixavam o do
+      // contador vivo depois do kill() e ele voltava a contar por cima do 100
       const counter = { value: 0 };
-      const progressTween = gsap.to(loaderBar, {
-        scaleX: 0.9,
-        duration: 2.5,
-        ease: "power1.out",
-      });
-      gsap.to(counter, {
+      const setProgress = () => {
+        loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0");
+        gsap.set(loaderBar, { scaleX: counter.value / 100 });
+      };
+      const progressTween = gsap.to(counter, {
         value: 90,
         duration: 2.5,
         ease: "power1.out",
-        onUpdate: () => (loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0")),
+        onUpdate: setProgress,
       });
 
       const fontsReady = document.fonts.ready;
@@ -214,13 +218,7 @@ export default function Hero() {
         progressTween.kill();
         gsap
           .timeline()
-          .to(loaderBar, { scaleX: 1, duration: 0.3, ease: "power2.out" })
-          .to(counter, {
-            value: 100,
-            duration: 0.3,
-            ease: "power2.out",
-            onUpdate: () => (loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0")),
-          }, "<")
+          .to(counter, { value: 100, duration: 0.3, ease: "power2.out", onUpdate: setProgress })
           .to(loader, { autoAlpha: 0, duration: 0.4, ease: "power2.out" }, "+=0.15")
           .call(runEntrance);
       });

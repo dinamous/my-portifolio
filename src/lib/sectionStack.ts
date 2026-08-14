@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { Observer } from "gsap/Observer";
+import { prefersReducedMotion } from "./motion";
 
 gsap.registerPlugin(Observer);
 
@@ -105,6 +106,28 @@ function updateBars() {
     });
 }
 
+// scroll das colunas roláveis ([data-stack-scroll]): um quickTo por scroller, mesmo
+// motivo do quickTo da pilha — cada notch de wheel vira glide em vez de salto. `pos` é
+// o alvo acumulado (não o scrollTop corrente, que está atrasado pelo tween) e é
+// ressincronizado com o DOM sempre que nada está tweenando, porque o acordeão e o
+// resize mexem no scrollTop por fora. Touch escreve direto: durante o arrasto a lista
+// tem que seguir o dedo 1:1, e um tween de 0.6s ali lê como borracha.
+const scrollers = new WeakMap<HTMLElement, { to: (v: number) => void; pos: number }>();
+function scrollerState(el: HTMLElement) {
+  let s = scrollers.get(el);
+  if (!s) {
+    s = {
+      to: prefersReducedMotion()
+        ? (v: number) => { el.scrollTop = v; }
+        : gsap.quickTo(el, "scrollTop", { duration: 0.6, ease: "power2.out" }),
+      pos: el.scrollTop,
+    };
+    scrollers.set(el, s);
+  }
+  if (!gsap.isTweening(el)) s.pos = el.scrollTop;
+  return s;
+}
+
 // ponytail: module-level singleton, mirrors the old getSmoother() pattern —
 // whichever script runs first wires up the Observer once for the whole page
 export function initSectionStack(selector = "[data-stack]") {
@@ -158,8 +181,6 @@ export function initSectionStack(selector = "[data-stack]") {
       // preventDefault:true mata o scroll nativo de qualquer coisa dentro das
       // seções, então uma coluna rolável (ex. lista da Skills) recebe o delta
       // aqui e só devolve o controle pra pilha quando bate na própria borda.
-      // ponytail: scrollTop direto, sem tween — delta de wheel já vem em passos
-      // pequenos; suavizar com quickTo se ficar seco.
       // wheel deltaY já vem no sentido "rolar pra frente = positivo"; touch/pointer
       // reporta o delta bruto do arrasto (dedo sobe = deltaY negativo), então precisa
       // inverter pra swipe pra cima avançar — mesma convenção usada pelo próprio
@@ -172,10 +193,15 @@ export function initSectionStack(selector = "[data-stack]") {
       ) as HTMLElement | null;
       if (scroller) {
         const room = scroller.scrollHeight - scroller.clientHeight;
-        const atEdge =
-          delta > 0 ? scroller.scrollTop >= room - 1 : scroller.scrollTop <= 0;
+        const s = scrollerState(scroller);
+        // a borda é medida no alvo, não no scrollTop corrente: com o tween em curso
+        // o corrente ainda está no meio do caminho e a pilha só devia assumir quando
+        // a lista realmente não tem mais pra onde ir
+        const atEdge = delta > 0 ? s.pos >= room - 1 : s.pos <= 0;
         if (room > 0 && !atEdge) {
-          scroller.scrollTop = gsap.utils.clamp(0, room, scroller.scrollTop + delta);
+          s.pos = gsap.utils.clamp(0, room, s.pos + delta);
+          if (isWheel) s.to(s.pos);
+          else scroller.scrollTop = s.pos;
           return;
         }
       }

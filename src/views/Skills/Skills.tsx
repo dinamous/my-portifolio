@@ -122,6 +122,34 @@ export default function Skills() {
       });
     });
 
+    // indicador de scroll: só existe quando a coluna transborda (varia por viewport) e
+    // só é visível junto com as categorias — senão apareceria inteiro por cima do wipe
+    // de entrada. Por isso as duas fontes ficam separadas e o paint multiplica as duas.
+    const list = document.getElementById("skills-list")!;
+    const bar = document.getElementById("skills-scrollbar")!;
+    const thumb = bar.querySelector<HTMLElement>(".skills__scrollbar-thumb")!;
+    let roomAlpha = 0;
+    let revealAlpha = 0;
+    const paintBar = () => gsap.set(bar, { opacity: roomAlpha * revealAlpha });
+
+    const syncBar = () => {
+      roomAlpha = list.scrollHeight - list.clientHeight > 1 ? 1 : 0;
+      gsap.set(thumb, {
+        scaleY: list.clientHeight / list.scrollHeight,
+        y: (list.scrollTop / list.scrollHeight) * list.clientHeight,
+      });
+      paintBar();
+    };
+    list.addEventListener("scroll", syncBar, { passive: true });
+    // o acordeão tweena a altura das categorias — um ResizeObserver nelas cobre isso,
+    // resize de janela e carga de fonte com um listener só (e dispara uma vez no observe)
+    const ro = new ResizeObserver(syncBar);
+    cats.forEach((c) => ro.observe(c));
+    cleanups.push(() => {
+      list.removeEventListener("scroll", syncBar);
+      ro.disconnect();
+    });
+
     // mesmo idiom da AboutMe: entrada e saída da seção não têm timeline nem tween —
     // cada elemento ganha a sua fatia de um único valor contínuo de progresso e é
     // escrito com gsap.set. Por isso também não há branch de reduced-motion aqui
@@ -181,6 +209,10 @@ export default function Skills() {
         });
       });
 
+      // entra depois da cascata de categorias: ele mede uma coluna que ainda está sendo desenhada
+      revealAlpha = gsap.utils.clamp(0, 1, (revealT - 0.6) / 0.25);
+      paintBar();
+
       const ruleT = enterEase(gsap.utils.clamp(0, 1, (revealT - 0.42) / 0.28));
       gsap.set(rule, { opacity: ruleT, scaleX: ruleT });
 
@@ -232,6 +264,10 @@ export default function Skills() {
             clipPath: `inset(0 0 0 ${k * 100}%)`,
           }),
         );
+        // sai com a coluna que ele mede, não depois dela
+        revealAlpha = 1 - exitLocalT(0, 0.62, et);
+        paintBar();
+
         stagger(metaRows, exitLocalT(0.2, 0.45, et), (el, k) =>
           gsap.set(el, { opacity: 1 - k, y: gsap.utils.interpolate(0, -14, k) }),
         );
@@ -283,30 +319,38 @@ export default function Skills() {
         </dl>
       </div>
 
-      {/* data-stack-scroll: o Observer do sectionStack captura o wheel na janela
-         inteira, então essa coluna só rola porque ele repassa o delta pra cá */}
-      <div className="skills__list" id="skills-list" data-stack-scroll>
-        {categories.map((cat, i) => (
-          <div className="skills__cat" key={cat.name}>
-            <button
-              className="skills__cat-head"
-              type="button"
-              aria-expanded="false"
-              aria-controls={`skills-cat-body-${i}`}
-            >
-              <span className="skills__cat-name">{cat.name}</span>
-              <span className="skills__cat-icon" aria-hidden="true">+</span>
-              <span className="skills__cat-underline" aria-hidden="true"></span>
-            </button>
-            <div className="skills__cat-body" id={`skills-cat-body-${i}`}>
-              <ul className="skills__techs">
-                {cat.techs.map((tech) => (
-                  <li className="skills__tech" key={tech}>{tech}</li>
-                ))}
-              </ul>
+      <div className="skills__list-wrap">
+        {/* data-stack-scroll: o Observer do sectionStack captura o wheel na janela
+           inteira, então essa coluna só rola porque ele repassa o delta pra cá */}
+        <div className="skills__list" id="skills-list" data-stack-scroll>
+          {categories.map((cat, i) => (
+            <div className="skills__cat" key={cat.name}>
+              <button
+                className="skills__cat-head"
+                type="button"
+                aria-expanded="false"
+                aria-controls={`skills-cat-body-${i}`}
+              >
+                <span className="skills__cat-name">{cat.name}</span>
+                <span className="skills__cat-icon" aria-hidden="true">+</span>
+                <span className="skills__cat-underline" aria-hidden="true"></span>
+              </button>
+              <div className="skills__cat-body" id={`skills-cat-body-${i}`}>
+                <ul className="skills__techs">
+                  {cat.techs.map((tech) => (
+                    <li className="skills__tech" key={tech}>{tech}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* trilho fora da lista: ela esconde a scrollbar nativa e o mask do topo/base
+           comeria um indicador desenhado dentro dela */}
+        <div className="skills__scrollbar" id="skills-scrollbar" aria-hidden="true">
+          <span className="skills__scrollbar-thumb"></span>
+        </div>
       </div>
     </section>
   );

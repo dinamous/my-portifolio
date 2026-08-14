@@ -15,11 +15,17 @@ const ScannerBackground = lazy(() => import("../../components/ScannerBackground"
 const projectTypes = ["Site / Landing", "Web App", "Motion / 3D", "Outro"];
 
 const textFields = [
-  { name: "nome", label: "Como te chamo", placeholder: "Ana Souza", type: "text", autoComplete: "name" },
+  {
+    name: "nome",
+    label: "Como te chamo",
+    placeholder: "seu nome · empresa",
+    type: "text",
+    autoComplete: "name",
+  },
   {
     name: "email",
     label: "E-mail",
-    placeholder: "voce@empresa.com",
+    placeholder: "voce@empresa.com.br",
     type: "email",
     autoComplete: "email",
     spellCheck: false,
@@ -161,6 +167,15 @@ export default function Contact() {
     }
 
     // ------------------------------------------------------------ formulário
+    // o anel de foco pertence a quem navega por teclado. Tab marca, qualquer
+    // clique desmarca — o keydown do Tab chega antes do foco mudar, então a
+    // classe já está lá quando o próximo campo recebe o foco
+    const setKbd = (on: boolean) => section.classList.toggle("contact--kbd", on);
+    onWindow("keydown", ((e: KeyboardEvent) => {
+      if (e.key === "Tab") setKbd(true);
+    }) as EventListener);
+    onWindow("pointerdown", () => setKbd(false));
+
     // trilho luminoso: acompanha o campo em foco. scaleY sobre uma base fixa de
     // 100px em vez de height — transform não dispara layout
     const RAIL_BASE = 100;
@@ -171,10 +186,17 @@ export default function Contact() {
     const moveRail = (row: HTMLElement) => {
       const r = row.getBoundingClientRect();
       const c = body.getBoundingClientRect();
-      gsap.to(rail, { opacity: 1, duration: 0.25 });
+      // "auto" e não true: o trilho também é alvo dos quickTo de y/scaleY, e
+      // overwrite total mataria o movimento junto com o fade
+      gsap.to(rail, { opacity: 1, duration: 0.25, overwrite: "auto" });
       railY(r.top - c.top);
       railS(r.height / RAIL_BASE);
     };
+
+    // sem isto o trilho ficava aceso ao lado do último campo pra sempre. O delay
+    // segura o apagão até o focus do próximo campo (que dispara logo depois do
+    // blur) sobrescrever o tween — trocar de campo não pisca
+    const hideRail = () => gsap.to(rail, { opacity: 0, duration: 0.3, delay: 0.06, overwrite: "auto" });
 
     let selectedType = projectTypes[0];
 
@@ -211,15 +233,33 @@ export default function Contact() {
       // o erro não sai no foco: o submit inválido já joga o foco no primeiro campo
       // errado, e limpar aqui apagaria a mensagem antes de ela ser lida
       on(input, "focus", () => {
-        gsap.to(line, { scaleX: 1, duration: 0.45, ease: "power3.out" });
-        gsap.to(label, { color: "#f4f7f5", x: 4, duration: 0.3, ease: "power2.out" });
+        gsap.to(line, { scaleX: 1, duration: 0.45, ease: "power3.out", overwrite: true });
+        gsap.to(label, { color: "rgba(244,247,245,0.1)", x: 4, duration: 0.3, ease: "power2.out" });
         moveRail(row);
       });
       on(input, "blur", () => {
-        gsap.to(line, { scaleX: 0, duration: 0.35, ease: "power2.inOut", transformOrigin: "right center" })
-          .eventCallback("onComplete", () => gsap.set(line, { transformOrigin: "left center" }));
+        gsap.to(line, {
+          scaleX: 0,
+          duration: 0.35,
+          ease: "power2.inOut",
+          transformOrigin: "right center",
+          overwrite: true,
+          onComplete: () => gsap.set(line, { transformOrigin: "left center" }),
+        });
         gsap.to(label, { color: "rgba(244,247,245,0.45)", x: 0, duration: 0.3, ease: "power2.out" });
+        hideRail();
       });
+
+      // hover: um traço curto do mesmo gradiente, o mesmo elemento que o foco
+      // preenche até o fim — o campo deixa de ser um sublinhado inerte até o clique.
+      // o guard de activeElement evita que sair com o mouse apague a linha do campo
+      // que está em foco
+      const nib = (over: boolean) => {
+        if (document.activeElement === input) return;
+        gsap.to(line, { scaleX: over ? 0.16 : 0, duration: 0.3, ease: "power3.out", overwrite: true });
+      };
+      on(input, "mouseenter", () => nib(true));
+      on(input, "mouseleave", () => nib(false));
       // o erro sai assim que a pessoa começa a corrigir, não só ao refocar
       on(input, "input", () => {
         clearError(row);
@@ -428,16 +468,18 @@ export default function Contact() {
             {textFields.map((f) => (
               <label className="contact__row" key={f.name}>
                 <span className="contact__label">{f.label}</span>
-                <input
-                  className="contact__input"
-                  name={f.name}
-                  type={f.type}
-                  placeholder={f.placeholder}
-                  autoComplete={f.autoComplete}
-                  spellCheck={f.spellCheck}
-                  enterKeyHint="next"
-                />
-                <span className="contact__line" aria-hidden="true"></span>
+                <span className="contact__field">
+                  <input
+                    className="contact__input"
+                    name={f.name}
+                    type={f.type}
+                    placeholder={f.placeholder}
+                    autoComplete={f.autoComplete}
+                    spellCheck={f.spellCheck}
+                    enterKeyHint="next"
+                  />
+                  <span className="contact__line" aria-hidden="true"></span>
+                </span>
                 <span className="contact__err" role="alert"></span>
               </label>
             ))}
@@ -456,13 +498,15 @@ export default function Contact() {
 
             <label className="contact__row">
               <span className="contact__label">Sobre o projeto</span>
-              <textarea
-                className="contact__input contact__input--area"
-                name="mensagem"
-                rows={3}
-                placeholder="Prazo, referência, o que já existe…"
-              />
-              <span className="contact__line" aria-hidden="true"></span>
+              <span className="contact__field">
+                <textarea
+                  className="contact__input contact__input--area"
+                  name="mensagem"
+                  rows={3}
+                  placeholder="Landing do lançamento em outubro. Já temos identidade e copy — falta motion e integração com o CRM."
+                />
+                <span className="contact__line" aria-hidden="true"></span>
+              </span>
               <span className="contact__err" role="alert"></span>
             </label>
 

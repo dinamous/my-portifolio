@@ -310,7 +310,7 @@
   font-weight: 500;
   /* cqh = altura da row (ver container-type no li): quando a lista aperta pra
      caber, o título encolhe junto em vez de estourar a linha */
-  font-size: min(clamp(2.2rem, 4.6vw, 4.2rem), 46cqh);
+  font-size: min(clamp(1.7rem, 3.5vw, 3.2rem), 38cqh);
   line-height: 1;
   color: #f4f7f5;
   /* espaço pra faixa do hover morar DENTRO da caixa: com ela em bottom negativo o
@@ -352,7 +352,7 @@
 .projects__tag {
   justify-self: end;
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  font-size: clamp(0.6rem, 0.75vw, 0.7rem);
   color: rgba(244, 247, 245, 0.55);
   text-transform: uppercase;
   letter-spacing: 0.1em;
