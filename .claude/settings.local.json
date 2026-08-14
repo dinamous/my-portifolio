@@ -17,7 +17,9 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(npm ls *)",
       "Bash(node -e \"console.log\\(require\\('fs'\\).readFileSync\\('dist/projetos/pizza-shop.html','utf8'\\).split\\('</head>'\\)[0].split\\('<link rel=\\\\\"preconnect\\\\\"'\\)[0]\\)\")",
-      "mcp__playwright__browser_close"
+      "mcp__playwright__browser_close",
+      "Bash(node -e ' *)",
+      "Bash(npx tsc *)"
     ]
   },
   "enabledPlugins": {

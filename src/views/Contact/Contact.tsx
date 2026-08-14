@@ -1,11 +1,16 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "../../lib/motion";
 import { scrubTimeline } from "../../lib/scrub";
 import { contact } from "../../lib/contact";
-import ScannerBackground from "../../components/ScannerBackground";
 import { AccentRule, CropMarks, DashedLine, RegMark } from "../../components/graphics";
 import "./Contact.css";
+
+// ogl (~40 kB) sai do bundle inicial: a Contact é a última da pilha, então o
+// shader não tem o que pintar até a Skills começar a fechar. O gate de
+// visibilidade interno do ScannerBackground não serve aqui — a seção é
+// fixed inset-0, o rect nunca sai da viewport e o rAF nunca pausaria.
+const ScannerBackground = lazy(() => import("../../components/ScannerBackground"));
 
 const projectTypes = ["Site / Landing", "Web App", "Motion / 3D", "Outro"];
 
@@ -22,6 +27,8 @@ const textFields = [
 ];
 
 export default function Contact() {
+  const [scanner, setScanner] = useState(false);
+
   useEffect(() => {
     const section = document.getElementById("contact-section")!;
     const q = <T extends HTMLElement>(sel: string) => section.querySelector<T>(sel)!;
@@ -103,6 +110,15 @@ export default function Contact() {
         setProgress(gsap.utils.clamp(0, 1, (e.detail.progress - 0.45) / 0.55));
       }) as EventListener);
     }
+
+    // o shader existe só enquanto a seção está a caminho ou em cena: montar puxa
+    // o chunk do ogl, desmontar solta o contexto WebGL pelo cleanup do próprio
+    // componente. Fora daqui não há nada visível pra ele pintar.
+    // ponytail: liga/desliga no p === 0 exato; vai e volta bem em cima dessa
+    // borda recria o contexto — colocar histerese se algum dia piscar.
+    onWindow("skills:progress", ((e: CustomEvent<{ progress: number }>) => {
+      setScanner(e.detail.progress > 0);
+    }) as EventListener);
 
     // ------------------------------------------------------------- ambiente
     if (!reduceMotion) {
@@ -330,7 +346,11 @@ export default function Contact() {
 
   return (
     <section className="contact fixed inset-0 h-dvh w-screen" id="contact-section" data-stack>
-      <ScannerBackground />
+      {scanner && (
+        <Suspense fallback={null}>
+          <ScannerBackground />
+        </Suspense>
+      )}
 
       <DashedLine vertical id="contact-divider" className="contact__divider" />
 

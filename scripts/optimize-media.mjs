@@ -15,6 +15,7 @@ import projects from "../projects.json" with { type: "json" };
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ASSETS = join(root, "src/assets/projects");
 const MAX_WIDTH = 1600; // maior que isso é screenshot em escala 2x, invisível na tela
+const MAX_HEIGHT = 720; // vídeo: screen capture nativo vem em 2x e nunca ocupa mais que meia tela na galeria
 const IMAGE_EXT = [".png", ".jpg", ".jpeg"];
 
 const kb = (bytes) => `${Math.round(bytes / 1024)} kB`;
@@ -38,11 +39,16 @@ async function toWebp(file) {
 // VP8 2.4 Mbps de screen capture: VP9 no mesmo CRF entrega o mesmo frame por uma
 // fração do bitrate. -row-mt + cpu-used 2 é o meio-termo entre tempo de encode e
 // tamanho; áudio cai pra opus 64k (é narração/trilha, não material crítico).
-function reencodeVideo(file) {
+function reencodeVideo(file, height) {
   const before = statSync(file).size;
   const tmp = file + ".tmp.webm";
+  // altura alvo calculada aqui e não com min() no filtro: expressão de ffmpeg leva
+  // vírgula, que o próprio ffmpeg lê como separador de filtro e exigiria escape.
+  // -2 na largura deixa o encoder achar o par mais próximo (VP9 recusa ímpar).
+  const scale = height > MAX_HEIGHT ? ["-vf", `scale=-2:${MAX_HEIGHT}`] : [];
   execFileSync("ffmpeg", [
     "-y", "-loglevel", "error", "-i", file,
+    ...scale,
     "-c:v", "libvpx-vp9", "-crf", "33", "-b:v", "0", "-row-mt", "1", "-deadline", "good", "-cpu-used", "2",
     "-c:a", "libopus", "-b:a", "64k",
     tmp,
@@ -58,12 +64,15 @@ function reencodeVideo(file) {
   console.log(`  ${kb(before)} → ${kb(after)}  ${file.slice(root.length + 1)}`);
 }
 
-function isVp9(file) {
-  const codec = execFileSync("ffprobe", [
+// key=value e não csv: com dois campos o csv sai na ordem interna do ffprobe, não
+// na ordem pedida — ler pela chave não depende disso.
+function probe(file) {
+  const out = execFileSync("ffprobe", [
     "-v", "error", "-select_streams", "v:0",
-    "-show_entries", "stream=codec_name", "-of", "csv=p=0", file,
-  ]).toString().trim();
-  return codec === "vp9";
+    "-show_entries", "stream=codec_name,height", "-of", "default=noprint_wrappers=1", file,
+  ]).toString();
+  const get = (key) => out.match(new RegExp(`^${key}=(.+)$`, "m"))?.[1];
+  return { codec: get("codec_name"), height: Number(get("height")) };
 }
 
 console.log("imagens:");
@@ -79,7 +88,9 @@ console.log("vídeos:");
 for (const folder of folders) {
   for (const name of readdirSync(join(ASSETS, folder))) {
     const file = join(ASSETS, folder, name);
-    if (extname(name).toLowerCase() === ".webm" && !isVp9(file)) reencodeVideo(file);
+    if (extname(name).toLowerCase() !== ".webm") continue;
+    const { codec, height } = probe(file);
+    if (codec !== "vp9" || height > MAX_HEIGHT) reencodeVideo(file, height);
   }
 }
 

@@ -6,6 +6,8 @@ import { scrubValue } from "../../lib/scrub";
 import { AccentRule } from "../../components/graphics";
 import "./Skills.css";
 
+// ponytail: esta view não usa mais scrambleText, mas o registro único do plugin
+// mora aqui e o easter egg da Hero depende dele — não remover junto com o hover.
 gsap.registerPlugin(ScrambleTextPlugin);
 
 // ponytail: stack hardcoded, mesmo motivo do `about` na AboutMe — vira documento
@@ -40,7 +42,6 @@ export default function Skills() {
     const lines = Array.from(section.querySelectorAll<HTMLElement>(".skills__line-inner"));
     const metaRows = Array.from(section.querySelectorAll<HTMLElement>(".skills__meta-row"));
     const cats = Array.from(section.querySelectorAll<HTMLElement>(".skills__cat"));
-    const names = Array.from(section.querySelectorAll<HTMLElement>(".skills__cat-name"));
 
     const reduceMotion = prefersReducedMotion();
     const cleanups: Array<() => void> = [];
@@ -52,6 +53,7 @@ export default function Skills() {
       body: cat.querySelector<HTMLElement>(".skills__cat-body")!,
       head: cat.querySelector<HTMLButtonElement>(".skills__cat-head")!,
       icon: cat.querySelector<HTMLElement>(".skills__cat-icon")!,
+      underline: cat.querySelector<HTMLElement>(".skills__cat-underline")!,
       techs: Array.from(cat.querySelectorAll<HTMLElement>(".skills__tech")),
     }));
 
@@ -90,7 +92,7 @@ export default function Skills() {
     // mesmo idiom da AboutMe: entrada e saída da seção não têm timeline nem tween —
     // cada elemento ganha a sua fatia de um único valor contínuo de progresso e é
     // escrito com gsap.set. Por isso também não há branch de reduced-motion aqui
-    // (nada anima sozinho; tudo segue o scroll), só no scramble mais abaixo.
+    // (nada anima sozinho; tudo segue o scroll).
     // SPREAD é a fatia da janela gasta escalonando os starts; o resto (1 - SPREAD) é a
     // duração de cada elemento, então eles se sobrepõem. Sem isso cada um teria só
     // 1/count do trecho — com 9 categorias vira um piscar em vez de uma cascata.
@@ -105,32 +107,9 @@ export default function Skills() {
 
     const enterEase = gsap.parseEase("power3.out");
 
-    // decodificação escrubada: os caracteres à esquerda do cursor já são os reais, o
-    // resto é símbolo. Versão em gsap.set do que o ScrambleTextPlugin faz tweenando —
-    // aqui precisa andar e voltar com o scroll, e um tween por tick não faria isso.
-    const GLYPHS = "!<>-_\\/[]{}—=+*^?#";
-    const decode = (el: HTMLElement, k: number) => {
-      const text = el.dataset.text ?? "";
-      const shown = Math.round(k * text.length);
-      if (shown >= text.length) {
-        if (el.textContent !== text) el.textContent = text;
-        return;
-      }
-      let out = text.slice(0, shown);
-      for (let i = shown; i < text.length; i++) {
-        // semeado pelo cursor, não pelo frame: os símbolos só trocam quando um caractere
-        // novo entra — semear no tempo faria a coluna inteira tremer parada
-        out += text[i] === " " ? " " : GLYPHS[(i * 7 + shown * 3) % GLYPHS.length];
-      }
-      // sendo semeado pelo cursor, a string se repete entre os frames em que ele não
-      // anda; escrever mesmo assim invalidaria o layout do texto à toa
-      if (el.textContent !== out) el.textContent = out;
-    };
-
     // cada categoria é revelada por uma cortina que corre da esquerda pra direita (leva a
-    // borda inferior junto, então a linha se desenha) enquanto o nome decodifica. Na saída
-    // a cortina continua no mesmo sentido, saindo pela direita — entra e sai atravessando.
-    // `names` já está em ordem de documento, então names[i] é o nome de cats[i].
+    // borda inferior junto, então a linha se desenha). Na saída a cortina continua no mesmo
+    // sentido, saindo pela direita — entra e sai atravessando.
 
     gsap.set(lines, { yPercent: 110 });
     gsap.set(rule, { opacity: 0, scaleX: 0 });
@@ -168,11 +147,6 @@ export default function Skills() {
           clipPath: `inset(0 ${(1 - e) * 100}% 0 0)`,
         });
       });
-      // o nome decodifica atrás da cortina, terminando depois dela: o texto ainda está
-      // se resolvendo quando a linha já apareceu inteira
-      cats.forEach((_, i) =>
-        decode(names[i], reduceMotion ? 1 : seqT(gsap.utils.clamp(0, 1, (revealT - 0.2) / 0.8), i, cats.length)),
-      );
 
       const ruleT = enterEase(gsap.utils.clamp(0, 1, (revealT - 0.42) / 0.28));
       gsap.set(rule, { opacity: ruleT, scaleX: ruleT });
@@ -225,11 +199,6 @@ export default function Skills() {
             clipPath: `inset(0 0 0 ${k * 100}%)`,
           }),
         );
-        // o nome se desfaz em símbolo antes de a cortina chegar nele — a leitura some
-        // primeiro, a linha depois
-        cats.forEach((_, i) =>
-          decode(names[i], reduceMotion ? 1 : 1 - seqT(exitLocalT(0, 0.45, et), i, cats.length)),
-        );
         stagger(metaRows, exitLocalT(0.2, 0.45, et), (el, k) =>
           gsap.set(el, { opacity: 1 - k, y: gsap.utils.interpolate(0, -14, k) }),
         );
@@ -251,20 +220,6 @@ export default function Skills() {
       window.dispatchEvent(new CustomEvent("skills:progress", { detail: { progress: p } }));
     }) as EventListener;
     section.addEventListener("stack:progress", onStackProgress);
-
-    // microinteração: scramble no nome da categoria ao passar o mouse
-    if (!reduceMotion) {
-      names.forEach((name) => {
-        const onEnter = () =>
-          gsap.to(name, {
-            duration: 0.5,
-            scrambleText: { text: name.dataset.text ?? "", chars: "upperAndLowerCase", speed: 0.5 },
-            ease: "none",
-          });
-        name.addEventListener("mouseenter", onEnter);
-        cleanups.push(() => name.removeEventListener("mouseenter", onEnter));
-      });
-    }
 
     return () => {
       cleanups.forEach((fn) => fn());
@@ -306,7 +261,7 @@ export default function Skills() {
               aria-expanded="false"
               aria-controls={`skills-cat-body-${i}`}
             >
-              <span className="skills__cat-name" data-text={cat.name}>{cat.name}</span>
+              <span className="skills__cat-name">{cat.name}</span>
               <span className="skills__cat-icon" aria-hidden="true">+</span>
             </button>
             <div className="skills__cat-body" id={`skills-cat-body-${i}`}>

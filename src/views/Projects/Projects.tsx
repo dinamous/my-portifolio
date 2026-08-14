@@ -130,11 +130,21 @@ export default function Projects() {
     // fixo no CSS) porque quantas rows cabem depende da altura da viewport.
     let rowH = 0;
     let maxStep = 0;
-    // janela do progresso local dedicada a navegar a lista, antes da cascata de
-    // saída. A barra de "Trabalhos" na navbar enche em local≈1/3 (ver SectionNav),
-    // então esse é o piso: barra cheia = lista no fim = saída na sequência.
-    // ponytail: listas longas esticam a janela pra não virar scroll turbo — aí a
-    // barra satura antes do fim; o mal menor enquanto o stack tem passo fixo.
+    // respiro: fatia do curso em que o scroll não move nada, entre a lista chegar
+    // ao fim e a cascata de saída disparar. Sem ele um notch a mais na última linha
+    // já arremessava a seção fora, sem dar tempo de ler o último projeto — e vale
+    // também sem overflow, onde a lista inteira aparece de cara.
+    const BREATHE_T = 0.12;
+    // a metade final do curso é da saída, e não "o que a lista não usou": é
+    // exatamente a janela em que a barra da Skills enche na navbar (sectionEnter, em
+    // sectionStack, faz a troca em local 0.5 e isso não é negociável daqui). Deixar a
+    // lista correr até 0.9 empurrava a cascata inteira pros 10% finais — a barra da
+    // Skills andava meio curso com a Projects intacta, e aí a transição acontecia num
+    // piscar. A lista fica com o que vem antes do respiro.
+    const EXIT_START = 0.5;
+    // janela do progresso local dedicada a navegar a lista.
+    // ponytail: teto fixo, então lista longa rola mais rápido que o wheel (hoje ~1.7x)
+    // em vez de roubar curso da saída; só um passo variável no stack resolveria de fato.
     let listT = 0;
 
     const measure = () => {
@@ -149,7 +159,10 @@ export default function Projects() {
       rowH = viewportH / perPage;
       maxStep = Math.max(0, rows.length - perPage);
       list.style.setProperty("--projects-row-h", `${rowH}px`);
-      listT = maxStep > 0 ? gsap.utils.clamp(1 / 3, 0.75, (maxStep * rowH) / TRANSITION_DISTANCE) : 0;
+      listT =
+        maxStep > 0
+          ? gsap.utils.clamp(0.2, EXIT_START - BREATHE_T, (maxStep * rowH) / TRANSITION_DISTANCE)
+          : 0;
     };
     measure();
 
@@ -165,12 +178,6 @@ export default function Projects() {
     const rowExitStagger = Math.min(0.08, 1.2 / rowsOnScreen);
     const revealSlot = (i: number) => Math.min(i, rowsOnScreen - 1);
     const exitSlot = (i: number) => Math.max(0, i - maxStep);
-
-    // respiro: fatia do curso em que o scroll não move nada, entre a lista chegar
-    // ao fim e a cascata de saída disparar. Sem ele um notch a mais na última linha
-    // já arremessava a seção fora, sem dar tempo de ler o último projeto — e vale
-    // também sem overflow, onde a lista inteira aparece de cara.
-    const BREATHE_T = 0.2;
 
     gsap.set(list, { y: 0 });
     gsap.set(progressFill, { scaleY: maxStep > 0 ? 0 : 1 });
