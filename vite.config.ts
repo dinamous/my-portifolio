@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import rawProjects from "./projects.json";
 import { slugify } from "./src/lib/slug";
+import { contact } from "./src/lib/contact";
 
 const SITE = "https://dinamousdev.com.br";
 
@@ -23,9 +24,10 @@ function seoPlugin(): Plugin {
     closeBundle() {
       const html = readFileSync(resolve(dist, "index.html"), "utf8");
       const urls = [`${SITE}/`];
+      const llmsLines: string[] = [];
 
       mkdirSync(resolve(dist, "projetos"), { recursive: true });
-      for (const p of rawProjects as { titulo: string; descricao: string; img?: string }[]) {
+      for (const p of rawProjects as { titulo: string; descricao: string; techs?: string[]; img?: string }[]) {
         const slug = slugify(p.titulo);
         const url = `${SITE}/projetos/${slug}`;
         const title = `${p.titulo} — Matheus Simões`;
@@ -57,7 +59,36 @@ function seoPlugin(): Plugin {
 
         writeFileSync(resolve(dist, "projetos", `${slug}.html`), page);
         urls.push(url);
+        llmsLines.push(
+          `- [${p.titulo}](${url}): ${p.descricao}${p.techs?.length ? ` Stack: ${p.techs.join(", ")}.` : ""}`,
+        );
       }
+
+      // llms.txt (llmstxt.org): o mesmo conteúdo do site em markdown, pra LLM que
+      // não roda o JS. Sai daqui e não de public/ pra não virar lista de projeto
+      // duplicada, desatualizando junto do projects.json.
+      writeFileSync(
+        resolve(dist, "llms.txt"),
+        [
+          "# Matheus Simões — Motion Frontend",
+          "",
+          "> Desenvolvedor frontend especializado em interfaces com motion design: React, GSAP e animação de interface. Portfólio em " +
+            SITE +
+            ".",
+          "",
+          "## Projetos",
+          "",
+          ...llmsLines,
+          "",
+          "## Contato",
+          "",
+          `- Email: ${contact.email}`,
+          `- WhatsApp: ${contact.phoneLabel} (https://wa.me/${contact.whatsapp})`,
+          `- Localização: ${contact.location}`,
+          ...contact.socials.map((s) => `- ${s.label}: ${s.href}`),
+          "",
+        ].join("\n"),
+      );
 
       writeFileSync(
         resolve(dist, "sitemap.xml"),

@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# scrapers de SEO: crawl agressivo, zero tráfego de volta
+User-agent: AhrefsBot
+User-agent: SemrushBot
+User-agent: MJ12bot
+User-agent: DotBot
+Disallow: /
+
 Sitemap: https://dinamousdev.com.br/sitemap.xml
