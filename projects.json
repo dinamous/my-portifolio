@@ -36,17 +36,6 @@
     "actions": [{ "label": "Link", "link": "https://next.superlogica.com/" }]
   },
   {
-    "titulo": "pizza.shop",
-    "img": "/projects/pizzashop.webp",
-    "descricao": "Uma aplicação simulando um dashboard de vendas, inspirado na plataforma iFood.",
-    "techs": ["Vue", "Vite", "Vuelidate", "shadcn/ui"],
-    "categoria": ["Front-end"],
-    "actions": [
-      { "label": "Repo", "link": "https://github.com/dinamous/pizza-shop/tree/main" },
-      { "label": "Link", "link": "https://pizza-shop-web.vercel.app" }
-    ]
-  },
-  {
     "titulo": "AutismVogais",
     "img": "/projects/AutismVogais.webp",
     "descricao": "Prototipação de uma Ferramenta digital com o intuito de auxiliar o aprendizado de vogais e alfabetização de crianças no espectro autista.",
@@ -87,17 +76,6 @@
     "techs": ["Node", "SQL", "React", "Sequelize ORM"],
     "categoria": ["Front-End", "Back-End"],
     "actions": [{ "label": "Repo", "link": "https://github.com/dinamous/text-to-speech/tree/master" }]
-  },
-  {
-    "titulo": "Vizionar RA (Fictícia)",
-    "img": "/projects/Vizionar.webp",
-    "descricao": "Um website desenvolvido de modo a exemplificar uma landing page de uma empresa ficticia que oferece serviço de Realidade Aumentada.",
-    "techs": ["HTML", "CSS", "Bootstrap"],
-    "categoria": ["Front-End"],
-    "actions": [
-      { "label": "Repo", "link": "https://github.com/dinamous/vizionar" },
-      { "label": "Link", "link": "https://dinamous.github.io/vizionar/index.html" }
-    ]
   },
   {
     "titulo": "A 13° Jornada Científica e Tecnológica",

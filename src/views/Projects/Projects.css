@@ -244,6 +244,13 @@
   cursor: none;
 }
 
+/* a thumb transborda a row, e `will-change: transform` acima faz de cada row um
+   stacking context próprio — sem isto a row seguinte desenha o border-bottom dela
+   por cima da thumb aberta. Só z-index, nada animado (regra de animação do projeto). */
+.projects__row:hover {
+  z-index: 2;
+}
+
 .projects__row:focus-visible {
   outline: 1px solid var(--accent-green);
   outline-offset: -4px;
@@ -306,6 +313,9 @@
   font-size: min(clamp(2.2rem, 4.6vw, 4.2rem), 46cqh);
   line-height: 1;
   color: #f4f7f5;
+  /* espaço pra faixa do hover morar DENTRO da caixa: com ela em bottom negativo o
+     overflow:hidden daqui (que existe pro corte horizontal) comia a barra inteira */
+  padding-bottom: 0.12em;
   /* nome maior que a coluna: a borda direita se dissolve em vez de estourar o
      grid. AnimatedLetters quebra o texto em spans por letra, então
      text-overflow: ellipsis (exige texto contínuo) não é opção — a máscara
@@ -330,7 +340,7 @@
 .projects__title-underline {
   position: absolute;
   left: 0;
-  bottom: -0.08em;
+  bottom: 0;
   height: 2px;
   width: 100%;
   background: linear-gradient(90deg, var(--accent-stops));
@@ -350,15 +360,17 @@
 
 /* thumb vive na própria coluna do grid (entre título e tag) em vez de
    position:absolute sobre a linha — evita sobrepor a tag e, como o clip-path
-   só recorta o desenho e não a caixa, a coluna já reserva o espaço final e o
-   hover não causa reflow nem vaza sobre a linha vizinha. */
+   só recorta o desenho e não a caixa, a coluna já reserva a largura final e o
+   hover não causa reflow. Na vertical ela passa da row de propósito (130cqh):
+   com align-items:center o excedente sobra igual em cima e embaixo, e a altura
+   da row é fixa (--projects-row-h), então nada disso empurra a lista. */
 .projects__thumb {
   position: relative;
-  width: clamp(120px, 12.6vw, 200px);
+  width: clamp(180px, 19.5vw, 340px);
   /* mesmo cqh do título: a thumb é o elemento mais alto da row, então é ela que
      estouraria primeiro quando a lista aperta. object-fit: cover no <img> absorve
      a mudança de proporção. */
-  height: min(clamp(74px, 7.8vw, 124px), 74cqh);
+  height: min(clamp(104px, 11vw, 190px), 125cqh);
   overflow: hidden;
   /* moldura reta em vez do canto arredondado — a thumb lê como frame de contato.
      border (não outline) porque o clip-path do hover precisa recortá-la junto com a
@@ -381,7 +393,7 @@
 .projects__thumb-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(155deg, rgba(15, 59, 52, 0.4), rgba(3, 8, 7, 0.55));
+  background: linear-gradient(155deg, rgba(15, 59, 52, 0.2), rgba(3, 8, 7, 0.32));
   mix-blend-mode: multiply;
 }
 

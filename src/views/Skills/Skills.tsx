@@ -53,6 +53,7 @@ export default function Skills() {
       body: cat.querySelector<HTMLElement>(".skills__cat-body")!,
       head: cat.querySelector<HTMLButtonElement>(".skills__cat-head")!,
       icon: cat.querySelector<HTMLElement>(".skills__cat-icon")!,
+      name: cat.querySelector<HTMLElement>(".skills__cat-name")!,
       underline: cat.querySelector<HTMLElement>(".skills__cat-underline")!,
       techs: Array.from(cat.querySelectorAll<HTMLElement>(".skills__tech")),
     }));
@@ -87,6 +88,38 @@ export default function Skills() {
       const onClick = () => setOpen(openIndex === i ? -1 : i);
       p.head.addEventListener("click", onClick);
       cleanups.push(() => p.head.removeEventListener("click", onClick));
+
+      if (reduceMotion) return;
+      // mesmo idiom das rows da Projects: pull magnético via quickTo (retarget contínuo
+      // no mousemove) + uma timeline pausada tocada em play/reverse — um gsap.to por
+      // evento fica preso no valor do primeiro quando o mouse cruza rápido entre linhas.
+      // o ícone fica de fora: os tweens do acordeão usam overwrite e matariam o hover.
+      const moveX = gsap.quickTo(p.head, "x", { duration: 0.8, ease: "power2" });
+      const hover = gsap
+        .timeline({ paused: true })
+        // power1.inOut e não power3.out: a linha entra e sai no mesmo ritmo, sem o
+        // arranque seco do out — é uma faixa de 1px, não precisa chamar atenção
+        .to(p.underline, { scaleX: 1, duration: 0.75, ease: "power1.inOut" }, 0)
+        .to(p.name, { x: 5, duration: 0.7, ease: "power2.out" }, 0);
+
+      const onMousemove = (e: MouseEvent) => {
+        const rect = p.head.getBoundingClientRect();
+        moveX(((e.clientX - (rect.left + rect.width / 2)) / rect.width) * 5);
+      };
+      const onMouseenter = () => hover.play();
+      const onMouseleave = () => {
+        moveX(0);
+        hover.reverse();
+      };
+      p.head.addEventListener("mousemove", onMousemove);
+      p.head.addEventListener("mouseenter", onMouseenter);
+      p.head.addEventListener("mouseleave", onMouseleave);
+      cleanups.push(() => {
+        p.head.removeEventListener("mousemove", onMousemove);
+        p.head.removeEventListener("mouseenter", onMouseenter);
+        p.head.removeEventListener("mouseleave", onMouseleave);
+        hover.kill();
+      });
     });
 
     // mesmo idiom da AboutMe: entrada e saída da seção não têm timeline nem tween —
@@ -263,6 +296,7 @@ export default function Skills() {
             >
               <span className="skills__cat-name">{cat.name}</span>
               <span className="skills__cat-icon" aria-hidden="true">+</span>
+              <span className="skills__cat-underline" aria-hidden="true"></span>
             </button>
             <div className="skills__cat-body" id={`skills-cat-body-${i}`}>
               <ul className="skills__techs">

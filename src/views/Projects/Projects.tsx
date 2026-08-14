@@ -375,6 +375,12 @@ export default function Projects() {
       // fica "preso" no valor do primeiro (o overwrite "auto" só resolve no primeiro
       // tick do tween novo, não na criação); play/reverse na mesma timeline não disputa
       // a propriedade com ninguém, só muda de direção.
+      // a thumb agora transborda a row: duas abertas ao mesmo tempo se sobrepõem de
+      // verdade. Ao entrar numa row as outras fecham em dobro da velocidade — varrer a
+      // lista inteira (em vez de confiar no mouseleave da anterior) cobre também o caso
+      // do ponteiro pular de row sem passar pelo vão entre elas.
+      const hovers: gsap.core.Timeline[] = [];
+
       rows.forEach((row) => {
         const thumb = row.querySelector<HTMLElement>(".projects__thumb");
         const scan = row.querySelector<HTMLElement>(".projects__thumb-scan");
@@ -383,8 +389,9 @@ export default function Projects() {
 
         const hover = gsap
           .timeline({ paused: true })
-          .to(thumb, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.5, ease: "power3.out" }, 0)
-          .to(underline, { scaleX: 1, duration: 0.4, ease: "power3.out" }, 0);
+          .to(thumb, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "expo.out" }, 0)
+          .to(underline, { scaleX: 1, duration: 0.45, ease: "expo.out" }, 0);
+        hovers.push(hover);
 
         const onMousemove = (e: MouseEvent) => {
           const rect = row.getBoundingClientRect();
@@ -395,7 +402,10 @@ export default function Projects() {
         };
         const onMouseenter = (e: MouseEvent) => {
           if (!activeRef.current) return;
-          hover.play();
+          hovers.forEach((t) => {
+            if (t !== hover && t.progress()) t.timeScale(2).reverse();
+          });
+          hover.timeScale(1).play();
           if (pill) gsap.set(pill, { x: e.clientX, y: e.clientY });
           pillTl?.play();
           // flash de "scan" é um efeito de disparo único (não um estado pra reverter),
@@ -408,7 +418,7 @@ export default function Projects() {
         };
         const onMouseleave = () => {
           moveX(0);
-          hover.reverse();
+          hover.timeScale(1).reverse();
           // o clique tira o ponteiro da row (o overlay entra na frente) e dispara este
           // leave — reverter a pillTl aqui atropelaria o foco no meio
           if (!pillFocus?.isActive()) pillTl?.reverse();

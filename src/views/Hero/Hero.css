@@ -81,6 +81,44 @@
   transform: translateY(100vh);
 }
 
+/* dica de rolagem: mora na faixa entre a navbar (bottom: 4vh) e a borda, por
+   isso tudo em vh — encolhe junto com aquela folga em vez de invadir a navbar
+   em telas baixas. Composição (label uppercase + trilho) é a mesma do
+   .hero__loader, só na horizontal */
+.hero__scroll {
+  --chevron: clamp(5px, 0.75vh, 8px);
+  position: absolute;
+  left: 50%;
+  /* metade dos 4vh em que a navbar está ancorada: centraliza a pilha na faixa
+     que sobra entre a base da navbar e o fim da tela */
+  bottom: 2vh;
+  transform: translate(-50%, 50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ponytail: quadrado com duas bordas + rotate(45deg) em vez de glifo — o ">"
+   de uma fonte não se alinha nem escala igual entre as três repetições */
+.hero__scroll-chevron {
+  width: var(--chevron);
+  height: var(--chevron);
+  border-right: 1.5px solid #1e293b;
+  border-bottom: 1.5px solid #1e293b;
+  /* scaleX depois do rotate abre o ângulo do chevron sem mexer na altura da pilha */
+  transform: scaleX(1.6) rotate(45deg);
+  opacity: 0.18;
+  will-change: opacity;
+}
+
+.hero__scroll-chevron + .hero__scroll-chevron {
+  margin-top: calc(var(--chevron) * -0.38);
+}
+
 .hero__type {
   position: absolute;
   top: 6vh;
@@ -207,6 +245,13 @@
 }
 
 @media (max-width: 640px) {
+  /* .hero__stack fica em bottom: 3vh aqui, folga bem menor que os 4vh do desktop */
+  .hero__scroll {
+    /* aqui a âncora é o .hero__stack (bottom: 3vh), não a navbar */
+    --chevron: 6px;
+    bottom: 1.5vh;
+  }
+
   .hero__type {
     max-width: 70vw;
     min-height: 4.65em;

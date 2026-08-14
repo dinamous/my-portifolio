@@ -75,6 +75,10 @@ export default function Hero() {
     const scan = document.getElementById("hero-scan")!;
     const heroBg = document.getElementById("hero-bg")!;
     const heroType = document.getElementById("hero-type")!;
+    const scrollHint = document.getElementById("hero-scroll")!;
+    const scrollChevrons = Array.from(
+      document.querySelectorAll<HTMLElement>("#hero-scroll .hero__scroll-chevron"),
+    );
 
     const loader = document.getElementById("hero-loader")!;
     const loaderBar = document.getElementById("hero-loader-bar")!;
@@ -89,6 +93,27 @@ export default function Hero() {
 
     const reduceMotion = prefersReducedMotion();
 
+    // ponytail: o loop mexe só em opacity dos chevrons — o rotate(45deg) deles é
+    // CSS e o fade de entrada/saída é do container, então nada se sobrescreve
+    let scrollLoop: ReturnType<typeof gsap.to> | undefined;
+    const startScrollHint = () => {
+      if (reduceMotion) {
+        gsap.set(scrollHint, { autoAlpha: 1 });
+        gsap.set(scrollChevrons, { opacity: 0.55 });
+        return;
+      }
+      gsap.to(scrollHint, { autoAlpha: 1, duration: 0.6, ease: "power2.out" });
+      scrollLoop = gsap.to(scrollChevrons, {
+        opacity: 0.8,
+        duration: 0.45,
+        stagger: 0.16,
+        repeat: -1,
+        yoyo: true,
+        repeatDelay: 0.4,
+        ease: "power1.inOut",
+      });
+    };
+
     function runEntrance() {
       if (reduceMotion) {
         gsap.set([...word1Letters, ...word2Letters], { y: 0, opacity: 1 });
@@ -98,6 +123,7 @@ export default function Hero() {
         gsap.set(heroBg, { autoAlpha: 1 });
         gsap.set(heroType, { autoAlpha: 1 });
         startTextType(heroType, heroTypePhrases);
+        startScrollHint();
         enableSectionStack();
       } else {
         const isColumn = getComputedStyle(row).flexDirection === "column";
@@ -151,7 +177,14 @@ export default function Hero() {
           .call(() => startTextType(heroType, heroTypePhrases))
           .call(() => window.dispatchEvent(new CustomEvent("hero:reveal-nav")), [], "+=0.15");
 
-        window.addEventListener("navbar:revealed", enableSectionStack, { once: true });
+        window.addEventListener(
+          "navbar:revealed",
+          () => {
+            enableSectionStack();
+            startScrollHint();
+          },
+          { once: true },
+        );
       }
     }
 
@@ -204,6 +237,8 @@ export default function Hero() {
       // at the bottom, reading as depth rather than a gap
       gsap.set(heroBg, { scale: 1 - exitT * 0.15, opacity: 1 - exitT * 0.5 });
       gsap.set(row, { y: -exitT * 50, scale: 1 - exitT * 0.15, opacity: 1 - exitT * 0.6 });
+      // some no primeiro toque de scroll — já cumpriu a função de avisar que dá pra rolar
+      gsap.set(scrollHint, { autoAlpha: 1 - gsap.utils.clamp(0, 1, p * 5) });
 
       // clip-path finishes closing (and the overlay is already fully black) by CLIP_CLOSE_T,
       // leaving the rest of the range for a subtle spin of that already-clipped bar — transform
@@ -274,6 +309,7 @@ export default function Hero() {
       heroSection.removeEventListener("stack:progress", onStackProgress);
       semi.removeEventListener("click", onSemiActivate);
       semi.removeEventListener("keydown", onSemiKeydown);
+      scrollLoop?.kill();
     };
   }, []);
 
@@ -295,6 +331,12 @@ export default function Hero() {
       </div>
 
       <div className="hero__scan" id="hero-scan" aria-hidden="true"></div>
+
+      <div className="hero__scroll" id="hero-scroll" aria-hidden="true">
+        <span className="hero__scroll-chevron"></span>
+        <span className="hero__scroll-chevron"></span>
+        <span className="hero__scroll-chevron"></span>
+      </div>
 
       <div className="hero__type" id="hero-type" aria-hidden="true"></div>
       <p className="sr-only">{heroTypePhrases[0].replace(/\*/g, "")}</p>
