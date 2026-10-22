@@ -1,4 +1,12 @@
+/* escala tipográfica da seção: entre 0.6 e 0.78rem havia sete tamanhos quase
+   iguais — diferença pequena demais pra ler como hierarquia, grande o bastante
+   pra parecer desalinho. Três degraus (~1.12x) + um corpo só. */
 .contact {
+  --fs-micro: 0.62rem; /* mono caixa-alta: labels, canhoto, erro, handle */
+  --fs-meta: 0.7rem; /* chips e links secundários */
+  --fs-action: 0.78rem; /* botão principal e socials */
+  --fs-body: clamp(0.88rem, 1.05vw, 1rem); /* inputs e parágrafos */
+
   background: #030303;
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
@@ -70,7 +78,7 @@
   margin: 0 0 2.2rem;
   max-width: 30rem;
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  font-size: var(--fs-body);
   line-height: 1.6;
   color: rgba(244, 247, 245, 0.62);
   will-change: opacity;
@@ -106,7 +114,7 @@
 
 .contact__channel-term {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.6rem;
+  font-size: var(--fs-micro);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   background: linear-gradient(90deg, var(--accent-stops));
@@ -117,7 +125,7 @@
 
 .contact__channel-value {
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(0.82rem, 1vw, 0.95rem);
+  font-size: var(--fs-body);
   color: rgba(244, 247, 245, 0.86);
 }
 
@@ -140,7 +148,7 @@
   gap: 0.5rem;
   font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-decoration: none;
@@ -153,7 +161,7 @@
 
 .contact__social-handle {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.62rem;
+  font-size: var(--fs-micro);
   letter-spacing: 0.06em;
   text-transform: none;
   color: rgba(244, 247, 245, 0.32);
@@ -186,7 +194,7 @@
   gap: 1rem;
   padding: 0.85rem clamp(1.4rem, 2.6vw, 2.4rem);
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.62rem;
+  font-size: var(--fs-micro);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(244, 247, 245, 0.38);
@@ -257,14 +265,22 @@
 
 .contact__label {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.62rem;
+  font-size: var(--fs-micro);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(244, 247, 245, 0.45);
   will-change: transform;
 }
 
+/* a linha de foco se ancora no campo, não no row: com o erro visível o row
+   cresce e a linha ficava pendurada embaixo do texto de erro */
+.contact__field {
+  position: relative;
+  display: block;
+}
+
 .contact__input {
+  display: block; /* mata o gap de baseline do inline-block sob a linha */
   width: 100%;
   padding: 0.55rem 0;
   border: 0;
@@ -272,12 +288,17 @@
   background: none;
   outline: none;
   font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(0.9rem, 1.1vw, 1rem);
+  font-size: var(--fs-body);
   color: #f4f7f5;
 }
 
-.contact__input:focus-visible {
-  outline: 1px solid rgba(244, 247, 245, 0.65);
+/* :focus-visible sozinho não resolve: campo de texto casa com ele também no
+   clique de mouse (o navegador assume que quem clica num input vai digitar).
+   O anel só sai na navegação por teclado — quem clica já tem a linha em
+   gradiente como retorno. Verde do accent em vez de branco pra não estourar;
+   ~3.3:1 contra o #080a09, o piso do WCAG pra indicador de foco */
+.contact--kbd .contact__input:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--accent-green) 55%, transparent);
   outline-offset: 4px;
 }
 
@@ -290,7 +311,7 @@
   line-height: 1.5;
 }
 
-/* linha de foco desenhada por cima da borda estática */
+/* linha desenhada por cima da borda estática: um traço curto no hover, cheia no foco */
 .contact__line {
   position: absolute;
   left: 0;
@@ -312,7 +333,7 @@
 
 .contact__err {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.62rem;
+  font-size: var(--fs-micro);
   letter-spacing: 0.04em;
   color: #f87171;
 }
@@ -336,7 +357,7 @@
   background: none;
   cursor: pointer;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.66rem;
+  font-size: var(--fs-meta);
   letter-spacing: 0.08em;
   color: rgba(244, 247, 245, 0.6);
   overflow: hidden;
@@ -394,7 +415,7 @@
   position: relative;
   font-family: "Space Grotesk", sans-serif;
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: var(--fs-action);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #f4f7f5;
@@ -402,7 +423,7 @@
 
 .contact__alt {
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   color: rgba(244, 247, 245, 0.42);
   text-decoration: none;
   /* sublinhado como background de 1px: border-bottom não aceita gradiente */
@@ -437,7 +458,7 @@
 .contact__sent-text {
   margin: 0;
   font-family: "Space Grotesk", sans-serif;
-  font-size: 0.88rem;
+  font-size: var(--fs-body);
   line-height: 1.6;
   color: rgba(244, 247, 245, 0.6);
 }
@@ -454,7 +475,7 @@
   background: linear-gradient(90deg, var(--accent-stops)) left bottom / 100% 1px no-repeat;
   cursor: pointer;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.7rem;
+  font-size: var(--fs-meta);
   color: rgba(244, 247, 245, 0.75);
 }
 
@@ -512,6 +533,10 @@
    tinham largura ≤640px pra herdar esse espaçamento */
 @media (max-width: 640px), (max-width: 980px) and (max-height: 750px) {
   .contact {
+    /* o corpo desce um degrau junto com o resto do aperto; os três degraus
+       mono ficam como estão — abaixo de 0.62rem o caixa-alta some */
+    --fs-body: 0.82rem;
+
     padding: min(3vh, 16px) 6vw min(3vh, 16px);
     gap: min(1vh, 8px);
   }
@@ -526,7 +551,6 @@
 
   .contact__sub {
     margin: 0 0 0.6rem;
-    font-size: 0.78rem;
     line-height: 1.4;
   }
 
@@ -549,7 +573,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.72rem;
+    font-size: var(--fs-meta);
   }
 
   .contact__stub {

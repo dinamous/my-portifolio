@@ -151,11 +151,9 @@ export default function Hero() {
           gsap.set(w, { [mainAxis]: wordDeltas[i], scale: 0.8 }),
         );
 
-        // ponytail: mesma medida usada pra entrada e saída (offsetHeight da seção, não
-        // do próprio .hero__scan) — 100vh no CSS pode divergir da altura real da seção
-        // (toolbar dinâmica mobile, scrollbar), e usar duas fontes diferentes deixava
-        // a barra saindo -scanHeight sem cobrir de fato heroSection.offsetHeight, então
-        // uma fatia ficava visível no topo em algumas resoluções.
+        // ponytail: offsetHeight da seção é exatamente a altura do .hero__scan (height:100%
+        // no CSS) — antes o CSS usava 100vh, que diverge da altura real em alguns casos
+        // (toolbar dinâmica mobile, scrollbar) e deixava uma fatia visível no topo no fim.
         const scanHeight = heroSection.offsetHeight;
         gsap.set(scan, { y: scanHeight });
 
@@ -173,7 +171,14 @@ export default function Hero() {
           )
           .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
           .addLabel("scan", "-=0.35")
-          .to(scan, { y: -scanHeight, duration: 2.4, ease: "power2.inOut" }, "scan")
+          .to(scan, {
+            y: -scanHeight,
+            duration: 2.4,
+            ease: "power2.inOut",
+            // a máscara só existe pra essa passada; sai do DOM no fim pra nenhuma
+            // sobra de mix-blend-mode ficar pendurada em cima do hero
+            onComplete: () => scan.remove(),
+          }, "scan")
           // ponytail: tweenar `color` repinta os glifos gigantes do nome a cada frame
           // (13 camadas, até 30rem) — era o principal engasgo em GPU/CPU fraca. Cada
           // letra já é camada própria (will-change no CSS), então `filter` é só
@@ -188,9 +193,6 @@ export default function Hero() {
           )
           .set(words, { color: "#111111" }, "scan+=2.4")
           .set(nameLetters, { clearProps: "filter" }, "scan+=2.4")
-          // a faixa já saiu da tela, mas o mix-blend-mode dela continuaria forçando
-          // composição da seção inteira em todo frame do scroll depois
-          .set(scan, { autoAlpha: 0 }, "scan+=2.4")
           .addLabel("bg", "scan+=0.6")
           // o WebGL do fundo só volta a renderizar quando .hero__bg sai do display:none
           // (ver HeroBackground) — mostrado um pouco antes do fade pra o resize do
@@ -216,19 +218,18 @@ export default function Hero() {
       gsap.set(loader, { autoAlpha: 0 });
       runEntrance();
     } else {
-      // proxy numérico só pra dirigir o contador via onUpdate — a barra em si
-      // anima scaleX direto, sem ler esse valor de volta
+      // um tween só dirige contador e barra: dois tweens paralelos deixavam o do
+      // contador vivo depois do kill() e ele voltava a contar por cima do 100
       const counter = { value: 0 };
-      const progressTween = gsap.to(loaderBar, {
-        scaleX: 0.9,
-        duration: 2.5,
-        ease: "power1.out",
-      });
-      gsap.to(counter, {
+      const setProgress = () => {
+        loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0");
+        gsap.set(loaderBar, { scaleX: counter.value / 100 });
+      };
+      const progressTween = gsap.to(counter, {
         value: 90,
         duration: 2.5,
         ease: "power1.out",
-        onUpdate: () => (loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0")),
+        onUpdate: setProgress,
       });
 
       // ponytail: document.fonts.ready sozinho pode resolver na hora — se o efeito
@@ -245,13 +246,7 @@ export default function Hero() {
         progressTween.kill();
         gsap
           .timeline()
-          .to(loaderBar, { scaleX: 1, duration: 0.3, ease: "power2.out" })
-          .to(counter, {
-            value: 100,
-            duration: 0.3,
-            ease: "power2.out",
-            onUpdate: () => (loaderCount.textContent = String(Math.round(counter.value)).padStart(2, "0")),
-          }, "<")
+          .to(counter, { value: 100, duration: 0.3, ease: "power2.out", onUpdate: setProgress })
           .to(loader, { autoAlpha: 0, duration: 0.4, ease: "power2.out" }, "+=0.15")
           .call(runEntrance);
       });

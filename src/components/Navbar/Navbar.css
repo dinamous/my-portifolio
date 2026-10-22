@@ -45,7 +45,7 @@
   font-family: "Space Grotesk", sans-serif;
   /* ponytail: Space Grotesk caps at 700; 800 rende como faux-bold do navegador */
   font-weight: 800;
-  font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+  font-size: clamp(0.45rem, 1.5vw, 1.05rem);
   letter-spacing: 0.02em;
 }
 
@@ -140,6 +140,11 @@
   .navbar__pages {
     grid-column: 1;
     justify-self: center;
+  }
+
+  .navbar__brand {
+    font-size: 0.05rem;
+    letter-spacing: 0.01em;
   }
 
   /* sem wrap: "Sobre / Trabalhos / Skills / Contato" cabe em uma linha só
