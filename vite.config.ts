@@ -90,6 +90,17 @@ function seoPlugin(): Plugin {
         ].join("\n"),
       );
 
+      // a Vercel serve o 404.html com status 404 de verdade pra qualquer rota que
+      // não bate em arquivo — o bundle é o mesmo, o App decide pela URL. noindex e
+      // sem canonical pra a página de erro não competir com a home no índice.
+      writeFileSync(
+        resolve(dist, "404.html"),
+        html
+          .replace(/<title>[\s\S]*?<\/title>/, "<title>Página não encontrada — Matheus Simões</title>")
+          .replace(/\s*<link rel="canonical" href="[^"]*" \/>/, "")
+          .replace("</head>", '  <meta name="robots" content="noindex" />\n  </head>'),
+      );
+
       writeFileSync(
         resolve(dist, "sitemap.xml"),
         `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls

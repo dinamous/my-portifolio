@@ -54,12 +54,36 @@ export function applyProjectMeta(project: { slug: string; title: string; descrip
   pageview(title);
 }
 
+const NOT_FOUND_TITLE = "Página não encontrada — Matheus Simões";
+
+// só existem duas rotas: a home e /projetos/:slug com slug real. Todo o resto,
+// incluindo slug que não está no projects.json, é 404.
+export function isNotFoundPath() {
+  const { pathname } = window.location;
+  if (pathname === "/" || pathname === "/index.html") return false;
+  const slug = getSlugFromLocation();
+  return !(slug && getProjectBySlug(slug));
+}
+
+// o dist/404.html já sai com isso do build; aqui cobre o dev server e o load
+// pelo index.html, que chegam com o <head> da home
+export function applyNotFoundMeta() {
+  document.title = NOT_FOUND_TITLE;
+  document.querySelector('link[rel="canonical"]')?.remove();
+  if (!document.querySelector('meta[name="robots"]')) {
+    const robots = document.createElement("meta");
+    robots.name = "robots";
+    robots.content = "noindex";
+    document.head.appendChild(robots);
+  }
+}
+
 // o primeiro page_view da visita: `applyProjectMeta` cobre toda troca de rota, mas
 // não roda num load de home. Slug válido na URL fica pra ele mesmo, na montagem do
-// overlay, que é onde o título do projeto existe; slug inválido é apagado da URL e
-// cai na home, então conta como home — com o href quebrado ainda visível no
-// relatório, que é o que denuncia link morto circulando por aí.
+// overlay, que é onde o título do projeto existe; rota inexistente conta como 404,
+// com o href quebrado visível no relatório — é o que denuncia link morto circulando.
 export function trackInitialPageview() {
+  if (isNotFoundPath()) return pageview(NOT_FOUND_TITLE);
   const slug = getSlugFromLocation();
   if (slug && getProjectBySlug(slug)) return;
   pageview(HOME_TITLE);
