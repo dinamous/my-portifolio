@@ -1,0 +1,240 @@
+.notfound {
+  background: #030303;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 7vw;
+  color: #f4f7f5;
+}
+
+/* mesma leitura do .hero__loader-readout: label mono espaçado + número tabular */
+.notfound__head {
+  position: absolute;
+  top: 6vh;
+  left: 7vw;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75em;
+  font-family: "Space Grotesk", sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+}
+
+.notfound__label {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(244, 247, 245, 0.45);
+}
+
+.notfound__count {
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  font-variant-numeric: tabular-nums;
+}
+
+/* wrapper só pra o GSAP: o .gfx-stamp já usa transform pro tilt e o tween
+   sobrescreveria a rotação se mirasse nele direto */
+.notfound__stamp {
+  position: absolute;
+  top: 6vh;
+  right: 7vw;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.4);
+}
+
+.notfound__body {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+}
+
+.notfound__title {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  line-height: 0.9;
+}
+
+.notfound__code {
+  display: inline-flex;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(6rem, 22vw, 20rem);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+
+.notfound__line {
+  display: flex;
+  align-items: baseline;
+  margin-top: -0.12em;
+}
+
+/* Cormorant roda bem menor que a Space Grotesk no mesmo font-size, como no Hero */
+.notfound__serif {
+  display: inline-flex;
+  font-family: "Cormorant Infant", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.6rem, 7vw, 6.4rem);
+  white-space: nowrap;
+}
+
+.notfound__letter-wrap {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+  padding-right: 0.06em;
+  margin-right: -0.06em;
+}
+
+.notfound__letter {
+  display: inline-block;
+  transform: translateY(110%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.notfound__dot {
+  display: inline-block;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 6.4rem);
+  background: linear-gradient(120deg, var(--accent-stops));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  transform: scale(0.4);
+  will-change: transform, opacity;
+}
+
+.notfound__rule {
+  margin: 2rem 0 1.6rem;
+  transform: scaleX(0);
+}
+
+.notfound__sub {
+  margin: 0 0 2.2rem;
+  max-width: 30rem;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.88rem, 1.1vw, 1rem);
+  line-height: 1.6;
+  color: rgba(244, 247, 245, 0.62);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+}
+
+/* mesmo cartão dos canais do Contact, inclusive a borda em gradiente no hover */
+.notfound__cta {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid rgba(244, 247, 245, 0.14);
+  background: #080a09;
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+}
+
+.notfound__cta:hover,
+.notfound__cta:focus-visible {
+  border-color: transparent;
+  outline: none;
+  background:
+    linear-gradient(#080a09, #080a09) padding-box,
+    linear-gradient(120deg, var(--accent-stops)) border-box;
+}
+
+.notfound__cta-term {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--accent-stops));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.notfound__cta-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.82rem, 1vw, 0.95rem);
+  color: rgba(244, 247, 245, 0.86);
+}
+
+.notfound__foot {
+  position: absolute;
+  right: 7vw;
+  bottom: 6vh;
+  left: 7vw;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+}
+
+.notfound__ticks {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.notfound__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75em;
+  margin-top: 0.9rem;
+  min-width: 0;
+}
+
+.notfound__path {
+  overflow: hidden;
+  min-width: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+  color: var(--accent-lime);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .notfound {
+    padding: 0 6vw;
+  }
+
+  .notfound__head,
+  .notfound__stamp {
+    top: 4vh;
+  }
+
+  .notfound__head {
+    left: 6vw;
+  }
+
+  .notfound__stamp {
+    right: 6vw;
+  }
+
+  .notfound__foot {
+    right: 6vw;
+    bottom: 4vh;
+    left: 6vw;
+  }
+
+  .notfound__code {
+    font-size: clamp(5rem, 34vw, 9rem);
+  }
+
+  .notfound__serif,
+  .notfound__dot {
+    font-size: clamp(2.2rem, 11vw, 3.4rem);
+  }
+}

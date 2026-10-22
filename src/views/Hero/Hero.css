@@ -79,6 +79,9 @@
   pointer-events: none;
   z-index: 2;
   transform: translateY(100%);
+  /* camada fixa: sem isso o GSAP promove/rebaixa a faixa no início/fim do tween
+     e cada troca repinta a tela inteira com o blend */
+  will-change: transform;
 }
 
 /* dica de rolagem: mora na faixa entre a navbar (bottom: 4vh) e a borda, por
@@ -168,6 +171,11 @@
   right: 0;
   height: 120%;
   z-index: 0;
+  /* ponytail: display:none (não só opacity/visibility) até o reveal — o Neat só
+     pausa o loop de render via IntersectionObserver, que ignora opacity e
+     visibility. Sem isso o shader rodava em tela cheia durante o loader e
+     toda a entrada do nome, invisível, disputando GPU com ela. */
+  display: none;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;

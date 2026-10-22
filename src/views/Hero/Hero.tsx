@@ -120,7 +120,7 @@ export default function Hero() {
         gsap.set(words, { color: "#111111" });
         gsap.set(semi, { opacity: 1, scale: 1 });
         gsap.set(scan, { autoAlpha: 0 });
-        gsap.set(heroBg, { autoAlpha: 1 });
+        gsap.set(heroBg, { display: "block", autoAlpha: 1 });
         gsap.set(heroType, { autoAlpha: 1 });
         startTextType(heroType, heroTypePhrases);
         startScrollHint();
@@ -157,6 +157,8 @@ export default function Hero() {
         const scanHeight = heroSection.offsetHeight;
         gsap.set(scan, { y: scanHeight });
 
+        const nameLetters = [...word1Letters, ...word2Letters];
+
         gsap
           .timeline({ defaults: { ease: "power3.out" } })
           .to(word1Letters, { y: "0%", opacity: 1, duration: 1.1, stagger: 0.09 }, 0)
@@ -168,6 +170,7 @@ export default function Hero() {
             "+=0.3",
           )
           .to(row, { y: 0, duration: 1.1, ease: "power3.inOut" }, "<")
+          .addLabel("scan", "-=0.35")
           .to(scan, {
             y: -scanHeight,
             duration: 2.4,
@@ -175,9 +178,27 @@ export default function Hero() {
             // a máscara só existe pra essa passada; sai do DOM no fim pra nenhuma
             // sobra de mix-blend-mode ficar pendurada em cima do hero
             onComplete: () => scan.remove(),
-          }, "-=0.35")
-          .to(words, { color: "#111111", duration: 2.4, ease: "power2.inOut" }, "<")
-          .to(heroBg, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "-=1.8")
+          }, "scan")
+          // ponytail: tweenar `color` repinta os glifos gigantes do nome a cada frame
+          // (13 camadas, até 30rem) — era o principal engasgo em GPU/CPU fraca. Cada
+          // letra já é camada própria (will-change no CSS), então `filter` é só
+          // composição. brightness(17/255) em branco dá exatamente #111, por isso a
+          // troca pra `color` no fim não tem salto visível. Vai nas letras e não nas
+          // palavras pra não escurecer o ";", que tem cor própria.
+          .fromTo(
+            nameLetters,
+            { filter: "brightness(1)" },
+            { filter: `brightness(${17 / 255})`, duration: 2.4, ease: "power2.inOut" },
+            "scan",
+          )
+          .set(words, { color: "#111111" }, "scan+=2.4")
+          .set(nameLetters, { clearProps: "filter" }, "scan+=2.4")
+          .addLabel("bg", "scan+=0.6")
+          // o WebGL do fundo só volta a renderizar quando .hero__bg sai do display:none
+          // (ver HeroBackground) — mostrado um pouco antes do fade pra o resize do
+          // canvas já ter acontecido quando ele começa a aparecer
+          .set(heroBg, { display: "block" }, "bg-=0.3")
+          .to(heroBg, { autoAlpha: 1, duration: 0.7, ease: "power2.in" }, "bg")
           .to(heroType, { autoAlpha: 1, duration: 0.6, ease: "power2.out" }, "<")
           .call(() => startTextType(heroType, heroTypePhrases))
           .call(() => window.dispatchEvent(new CustomEvent("hero:reveal-nav")), [], "+=0.15");
@@ -211,7 +232,14 @@ export default function Hero() {
         onUpdate: setProgress,
       });
 
-      const fontsReady = document.fonts.ready;
+      // ponytail: document.fonts.ready sozinho pode resolver na hora — se o efeito
+      // roda antes do primeiro layout, nenhuma fonte está pendente ainda. Aí a
+      // entrada media o nome com a fonte fallback e a troca de fonte no meio da
+      // animação fazia as palavras pularem. Pedir as duas fontes do nome explicitamente.
+      const fontsReady = Promise.all([
+        document.fonts.load('700 1em "Space Grotesk"', "Matheus"),
+        document.fonts.load('italic 500 1em "Cormorant Infant"', "Simões"),
+      ]);
       const safetyTimeout = new Promise<void>((resolve) => setTimeout(resolve, 3000));
 
       Promise.race([fontsReady, safetyTimeout]).then(() => {
